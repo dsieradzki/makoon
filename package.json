@@ -1,0 +1,11 @@
+{
+  "name": "k4prox",
+  "scripts": {
+    "dev": "wails dev",
+    "build": "wails build",
+    "generate": "wails generate module"
+  },
+  "author": {
+    "name": "Damian Sieradzki"
+  }
+}

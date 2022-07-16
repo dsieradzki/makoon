@@ -1,0 +1,29 @@
+{
+  "extends": "@vue/tsconfig/tsconfig.web.json",
+  "include": [
+    "env.d.ts",
+    "src/**/*",
+    "src/**/*.vue",
+    "wailsjs/**/*.js",
+    "wailsjs/**/*.ts",
+    "wailsjs/**/*.d.ts"
+  ],
+  "exclude": [
+    "src/**/__tests__/*"
+  ],
+  "compilerOptions": {
+    "composite": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@wails/*": [
+        "./wailsjs/go/*"
+      ],
+      "@wails-runtime/*": [
+        "./wailsjs/runtime/*"
+      ]
+    }
+  }
+}
