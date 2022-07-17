@@ -2,9 +2,9 @@ package k4p
 
 import (
 	"fmt"
-	"github.com/dsieradzki/K4Prox/internal/proxmox"
-	"github.com/dsieradzki/K4Prox/internal/ssh"
-	"github.com/dsieradzki/K4Prox/internal/utils"
+	"github.com/dsieradzki/k4prox/internal/proxmox"
+	"github.com/dsieradzki/k4prox/internal/ssh"
+	"github.com/dsieradzki/k4prox/internal/utils"
 )
 
 func (k *Service) CreateVirtualMachines(provisionRequest Cluster, keyPair ssh.RsaKeyPair) error {

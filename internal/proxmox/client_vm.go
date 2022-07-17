@@ -2,7 +2,7 @@ package proxmox
 
 import (
 	"fmt"
-	"github.com/dsieradzki/K4Prox/internal/collect"
+	"github.com/dsieradzki/k4prox/internal/collect"
 	"strconv"
 )
 

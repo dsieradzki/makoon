@@ -1,9 +1,9 @@
 package k4p
 
 import (
-	"github.com/dsieradzki/K4Prox/internal/event"
-	"github.com/dsieradzki/K4Prox/internal/proxmox"
-	"github.com/dsieradzki/K4Prox/internal/ssh"
+	"github.com/dsieradzki/k4prox/internal/event"
+	"github.com/dsieradzki/k4prox/internal/proxmox"
+	"github.com/dsieradzki/k4prox/internal/ssh"
 )
 
 const k4pToysDir = "/var/k4p"

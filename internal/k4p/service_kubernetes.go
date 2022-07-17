@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/dsieradzki/K4Prox/internal/collect"
-	"github.com/dsieradzki/K4Prox/internal/ssh"
+	"github.com/dsieradzki/k4prox/internal/collect"
+	"github.com/dsieradzki/k4prox/internal/ssh"
 	"math"
 	"strings"
 )
