@@ -10,10 +10,9 @@
  - [:camera: Screenshots](#screenshots)
 
 ## :grey_question: What is this?
-K4Prox is a desktop application for managing the Kubernetes cluster in Proxmox VE.
-(At this moment supports only provisioning and is tested on version Proxmox 7.2-7)
-
-The app completely automates creating a high available multi-node Kubernetes cluster.
+**K4Prox** is a desktop application, for managing Kubernetes installations in Proxmox VE.
+The application automates creating a high available multi-node Kubernetes cluster
+*(tested on Proxmox 7.2-7)*.
 
 **What does the K4Prox under the hood?**
 - Generates the best possible default project for your environment
@@ -27,30 +26,34 @@ The app completely automates creating a high available multi-node Kubernetes clu
 - Installs MicroK8s using snap
 - Configure MicroK8s via SSH (installing addons, joining nodes to the cluster)
 
-**Used technologies:**
+**Supported platforms:**
+ - Linux
+ - macOS
+ - Windows (Windows 10 and below requires Microsoft Edge WebView2, automatic installation is provided by Wails)
 
-- [Wails](https://wails.io/) V2 beta
+**Used technologies:**
+- [Wails V2 beta](https://wails.io/) 
 - Go 1.18
 - Vue 3 (Pinia, PrimeVue, Tailwind)
 
 ## :pushpin: Plans for the future
 
-Project was created in spare time to test [Wails](https://wails.io/) library in practice, for my another application,
+Project was created in spare time to test [Wails V2 beta](https://wails.io/) library in practice, for my another application,
 also I missed tools for creating Kubernetes cluster on Proxmox so decided take advantage of this situation,
-and I wrote my own. I hope it will be useful to someone.
+and I wrote my own. I hope it will be useful to someone, but keep in mind, project is in early stage of development.
 
 Basically, development of the project depends on interest of community, feel free to report bugs and features.
 
 **Planned features:**
 - Project validation before deploying the cluster
-  * collision with used VMID
-  * resource availability on Proxmox
-  * collision with used IPs for VMs (based on ping, so without guarantee, due to fact that network devices can have disabled ICMP)
+  * checking already used VMIDs
+  * checking resource availability on Proxmox
+  * checking used IPs for VMs (based on ping, so without guarantee, due to fact that network devices can have disabled ICMP)
 - Post deploy management
-  * Add a new node to the existing cluster
-  * Delete a node from the cluster
-  * Upgrade Kubernetes
-  * Change VM resources (CPU, Memory)
+  * add a new node to the existing cluster
+  * delete a node from the cluster
+  * upgrade Kubernetes
+  * change VM resources (CPU, Memory)
 
 - Support more MicroK8s addons in the cluster planner
 - Install additional apps using Helm
