@@ -1,0 +1,32 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        build: [
+          { name: K4Prox_linux_amd64, platform: linux/amd64, os: ubuntu-latest },
+          { name: K4Prox_windows_amd64.exe, platform: windows/amd64, os: windows-latest },
+          { name: K4Prox, platform: darwin/universal, os: macos-latest }
+        ]
+    runs-on: ${{ matrix.build.os }}
+    if: "!contains(github.event.head_commit.message, 'chore(release):')"
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Wails Build Action
+      uses: dsieradzki/wails-build-action@main
+      with:
+        build-name: ${{ matrix.build.name }}
+        build-platform: ${{ matrix.build.platform }}
+        go-version: 1.18.3
+        package: false # only build app and run tests
