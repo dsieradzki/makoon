@@ -1,4 +1,4 @@
-module k4prox
+module github.com/dsieradzki/K4Prox
 
 go 1.18
 

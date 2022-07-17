@@ -1,8 +1,8 @@
 package tasklog
 
 import (
+	"github.com/dsieradzki/K4Prox/internal/collect"
 	"github.com/google/uuid"
-	"k4prox/internal/collect"
 	"time"
 )
 

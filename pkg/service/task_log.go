@@ -1,8 +1,8 @@
 package service
 
 import (
-	"k4prox/internal/event"
-	"k4prox/internal/tasklog"
+	"github.com/dsieradzki/K4Prox/internal/event"
+	"github.com/dsieradzki/K4Prox/internal/tasklog"
 )
 
 func NewTaskLogService(eventCollector *event.Collector, taskLogReader *tasklog.Reader) *TaskLogService {

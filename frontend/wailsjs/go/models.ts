@@ -1,3 +1,26 @@
+export namespace proxmox {
+	
+	export class Network {
+	    iface: string;
+	    address: string;
+	    gateway: string;
+	    cidr: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Network(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.iface = source["iface"];
+	        this.address = source["address"];
+	        this.gateway = source["gateway"];
+	        this.cidr = source["cidr"];
+	    }
+	}
+
+}
+
 export namespace service {
 	
 	export class ProjectData {
@@ -237,29 +260,6 @@ export namespace tasklog {
 		    }
 		    return a;
 		}
-	}
-
-}
-
-export namespace proxmox {
-	
-	export class Network {
-	    iface: string;
-	    address: string;
-	    gateway: string;
-	    cidr: string;
-	
-	    static createFrom(source: any = {}) {
-	        return new Network(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.iface = source["iface"];
-	        this.address = source["address"];
-	        this.gateway = source["gateway"];
-	        this.cidr = source["cidr"];
-	    }
 	}
 
 }

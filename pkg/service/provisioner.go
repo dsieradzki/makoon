@@ -1,11 +1,11 @@
 package service
 
 import (
-	"k4prox/internal/collect"
-	"k4prox/internal/event"
-	"k4prox/internal/k4p"
-	"k4prox/internal/proxmox"
-	"k4prox/internal/ssh"
+	"github.com/dsieradzki/K4Prox/internal/collect"
+	"github.com/dsieradzki/K4Prox/internal/event"
+	"github.com/dsieradzki/K4Prox/internal/k4p"
+	"github.com/dsieradzki/K4Prox/internal/proxmox"
+	"github.com/dsieradzki/K4Prox/internal/ssh"
 	"sort"
 )
 

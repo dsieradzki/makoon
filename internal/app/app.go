@@ -2,7 +2,7 @@ package app
 
 import (
 	"context"
-	"k4prox/pkg/service"
+	"github.com/dsieradzki/K4Prox/pkg/service"
 )
 
 // App struct

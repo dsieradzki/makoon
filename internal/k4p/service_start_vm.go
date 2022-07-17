@@ -1,9 +1,9 @@
 package k4p
 
 import (
+	"github.com/dsieradzki/K4Prox/internal/ssh"
+	"github.com/dsieradzki/K4Prox/internal/utils"
 	log "github.com/sirupsen/logrus"
-	"k4prox/internal/ssh"
-	"k4prox/internal/utils"
 	"sync"
 	"time"
 )

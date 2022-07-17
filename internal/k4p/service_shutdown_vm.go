@@ -2,9 +2,9 @@ package k4p
 
 import (
 	"errors"
+	"github.com/dsieradzki/K4Prox/internal/proxmox"
+	"github.com/dsieradzki/K4Prox/internal/utils"
 	log "github.com/sirupsen/logrus"
-	"k4prox/internal/proxmox"
-	"k4prox/internal/utils"
 	"sync"
 	"time"
 )

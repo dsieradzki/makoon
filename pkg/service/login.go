@@ -1,8 +1,8 @@
 package service
 
 import (
-	"k4prox/internal/proxmox"
-	"k4prox/internal/ssh"
+	"github.com/dsieradzki/K4Prox/internal/proxmox"
+	"github.com/dsieradzki/K4Prox/internal/ssh"
 )
 
 func NewLoginService(api *proxmox.Client, ssh *ssh.Client) *LoginService {
