@@ -2,16 +2,16 @@ package main
 
 import (
 	"embed"
+	"github.com/dsieradzki/K4Prox/internal/app"
+	"github.com/dsieradzki/K4Prox/internal/collect"
+	"github.com/dsieradzki/K4Prox/internal/event"
+	"github.com/dsieradzki/K4Prox/internal/proxmox"
+	"github.com/dsieradzki/K4Prox/internal/ssh"
+	"github.com/dsieradzki/K4Prox/internal/tasklog"
+	"github.com/dsieradzki/K4Prox/pkg/service"
 	log "github.com/sirupsen/logrus"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
-	"k4prox/internal/app"
-	"k4prox/internal/collect"
-	"k4prox/internal/event"
-	"k4prox/internal/proxmox"
-	"k4prox/internal/ssh"
-	"k4prox/internal/tasklog"
-	"k4prox/pkg/service"
 )
 
 //go:embed frontend/dist

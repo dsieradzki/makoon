@@ -3,8 +3,8 @@ package proxmox
 import (
 	"errors"
 	"fmt"
+	"github.com/dsieradzki/K4Prox/internal/utils"
 	log "github.com/sirupsen/logrus"
-	"k4prox/internal/utils"
 	"net/http"
 )
 
