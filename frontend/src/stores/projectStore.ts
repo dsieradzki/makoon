@@ -1,6 +1,7 @@
 import {defineStore} from 'pinia'
 import type {k4p, service} from "@wails/models";
 import {LoadProject, SaveProject} from "@wails/service/ProjectService";
+import {repackWailsPromise} from "@/utils/promise";
 
 const Master = "master";
 const Worker = "worker";
@@ -104,32 +105,28 @@ export const useProjectStore = defineStore({
     },
     actions: {
         loadProject() {
-            LoadProject()
+            repackWailsPromise(LoadProject())
                 .then(response => {
-                    if (!(response instanceof Error)) {
-                        this.project = response as service.ProjectData;
-                        this.defaultMasterNode = {
-                            ...this.project.cluster.nodes.filter((e: k4p.KubernetesNode) => e.nodeType == Master).sort(vmIdAsc)[0] || {
-                                vmid: 999,
-                                cores: 2,
-                                memory: 2048,
-                                name: "microk8s-master-1",
-                                storagePool: "",
-                                ipAddress: "",
-                                nodeType: Master
-                            }
+                    this.project = response;
+                    this.defaultMasterNode = {
+                        ...this.project.cluster.nodes.filter((e: k4p.KubernetesNode) => e.nodeType == Master).sort(vmIdAsc)[0] || {
+                            vmid: 999,
+                            cores: 2,
+                            memory: 2048,
+                            name: "microk8s-master-1",
+                            storagePool: "",
+                            ipAddress: "",
+                            nodeType: Master
                         }
-                    } else {
-                        console.error(response as Error)
                     }
 
                 })
-                .catch(console.log)
+                .catch(console.error)
         },
         saveProject() {
-            SaveProject(this.project)
+            repackWailsPromise(SaveProject(this.project))
                 .then(() => {
-                    console.log("project saved")
+                    console.log("project was saved")
                 })
                 .catch(console.error)
         },

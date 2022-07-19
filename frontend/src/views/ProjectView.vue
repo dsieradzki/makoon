@@ -6,7 +6,8 @@
     </div>
     <div></div>
     <div class="mt-14 w-full max-w-[400px] flex justify-center">
-      <Block :not-active="generatingProject || openingProject"  @click="newProject" class="mr-10 flex justify-center items-center w-[200px] h-[200px]">
+      <Block :not-active="generatingProject || openingProject" @click="newProject"
+             class="mr-10 flex justify-center items-center w-[200px] h-[200px]">
         <div v-if="!generatingProject" class="flex flex-col items-center justify-center">
           <i class="pi pi-file text-stone-400" style="font-size: 5rem"></i>
           <span class="mt-5 text-center">Generate Project</span>
@@ -16,7 +17,8 @@
           <span class="mt-5 text-center">Generating project...</span>
         </div>
       </Block>
-      <Block :not-active="generatingProject || openingProject" @click="openProject" class="flex justify-center items-center w-[200px] h-[200px]">
+      <Block :not-active="generatingProject || openingProject" @click="openProject"
+             class="flex justify-center items-center w-[200px] h-[200px]">
         <div v-if="!openingProject" class="flex flex-col items-center justify-center">
           <i class="pi pi-folder-open text-stone-400" style="font-size: 5rem"></i>
           <span class="mt-5 text-center">Open Project</span>
@@ -37,6 +39,7 @@ import {useRouter} from "vue-router";
 import {OpenProjectDialog, SaveProjectDialog} from "@wails/service/ProjectService";
 import {ref} from "vue";
 import ProgressSpinner from 'primevue/progressspinner';
+import {repackWailsPromise} from "@/utils/promise";
 
 const router = useRouter();
 const generatingProject = ref(false)
@@ -47,10 +50,10 @@ const newProject = function () {
     return
   }
   generatingProject.value = true;
-  SaveProjectDialog()
+  repackWailsPromise(SaveProjectDialog())
       .then(clusterIsAlreadyCreated => {
         generatingProject.value = false;
-        if (typeof clusterIsAlreadyCreated === 'boolean' && clusterIsAlreadyCreated) {
+        if (clusterIsAlreadyCreated) {
           router.push({name: "summary"})
         } else {
           router.push({name: "planner"})
@@ -67,10 +70,10 @@ const openProject = function () {
     return
   }
   openingProject.value = true;
-  OpenProjectDialog()
+  repackWailsPromise(OpenProjectDialog())
       .then(clusterIsAlreadyCreated => {
         openingProject.value = false;
-        if (typeof clusterIsAlreadyCreated === 'boolean' && clusterIsAlreadyCreated) {
+        if (clusterIsAlreadyCreated) {
           router.push({name: "summary"})
         } else {
           router.push({name: "planner"})

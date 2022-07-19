@@ -6,7 +6,7 @@ import (
 	"github.com/dsieradzki/k4prox/internal/ssh"
 )
 
-const k4pToysDir = "/var/k4p"
+const k4pDataDir = "/var/k4p"
 const linuxCloudImageFileName = "jammy-server-cloudimg-amd64.img"
 const linuxCloudImage = "https://cloud-images.ubuntu.com/jammy/current/" + linuxCloudImageFileName
 
@@ -35,8 +35,8 @@ func (k *Service) ClearEvents() int {
 }
 
 func (k *Service) SetupEnvironmentOnProxmox() error {
-	eventSession := k.eventCollector.Startf("Prepare [%s] data directory on Proxmox", k4pToysDir)
-	result, err := k.proxmoxSsh.Executef("mkdir %s -p", k4pToysDir)
+	eventSession := k.eventCollector.Startf("Prepare [%s] data directory on Proxmox", k4pDataDir)
+	result, err := k.proxmoxSsh.Executef("mkdir %s -p", k4pDataDir)
 	if err != nil {
 		eventSession.ReportError(err)
 		return err
@@ -50,7 +50,7 @@ func (k *Service) SetupEnvironmentOnProxmox() error {
 	//
 	//
 	eventSession = k.eventCollector.Start("Check availability of linux cloud image")
-	result, err = k.proxmoxSsh.Executef("test -e %s", k4pToysDir+"/"+linuxCloudImageFileName)
+	result, err = k.proxmoxSsh.Executef("test -e %s", k4pDataDir+"/"+linuxCloudImageFileName)
 	if err != nil {
 		eventSession.ReportError(err)
 		return err
@@ -69,8 +69,8 @@ func (k *Service) SetupEnvironmentOnProxmox() error {
 	//
 	//
 	if shouldDownloadLinuxImage {
-		eventSession = k.eventCollector.Startf("Download linux cloud image to [%s]", k4pToysDir)
-		result, err = k.proxmoxSsh.Executef("wget -q %s -P %s", linuxCloudImage, k4pToysDir)
+		eventSession = k.eventCollector.Startf("Download linux cloud image to [%s]", k4pDataDir)
+		result, err = k.proxmoxSsh.Executef("wget -q %s -P %s", linuxCloudImage, k4pDataDir)
 		if err != nil {
 			eventSession.ReportError(err)
 			return err

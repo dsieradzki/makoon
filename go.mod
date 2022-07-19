@@ -7,8 +7,8 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/onsi/ginkgo/v2 v2.1.4
 	github.com/onsi/gomega v1.19.0
-	github.com/sirupsen/logrus v1.8.1
-	github.com/wailsapp/wails/v2 v2.0.0-beta.38
+	github.com/sirupsen/logrus v1.9.0
+	github.com/wailsapp/wails/v2 v2.0.0-beta.39
 	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d
 )
 
@@ -38,4 +38,5 @@ require (
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/xerrors v0.0.0-20220609144429-65e65417b02f // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

@@ -39,7 +39,7 @@ func (k *Service) createVirtualMachine(pr Cluster, node KubernetesNode, keyPair 
 	//
 	eventSession = k.eventCollector.Startf("[VM%d] Import disk", node.Vmid)
 	importDiskResult, err := k.proxmoxSsh.Executef(
-		"qm importdisk %d %s %s", node.Vmid, k4pToysDir+"/"+linuxCloudImageFileName, node.StoragePool)
+		"qm importdisk %d %s %s", node.Vmid, k4pDataDir+"/"+linuxCloudImageFileName, node.StoragePool)
 
 	if err != nil {
 		eventSession.ReportError(err)

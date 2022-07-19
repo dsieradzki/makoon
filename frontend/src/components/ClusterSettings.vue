@@ -94,6 +94,7 @@ import {onMounted, ref} from "vue";
 import type {k4p} from "@wails/models";
 import Dropdown from 'primevue/dropdown';
 import {GetNetworkBridges} from "@wails/service/ProvisionerService";
+import {repackWailsPromise} from "@/utils/promise";
 
 const emits = defineEmits<{
   (e: "deployCluster", pr: k4p.ProvisionRequest): void
@@ -110,13 +111,11 @@ const installFeatures = ref(true);
 const networks = ref<string[]>([]);
 
 onMounted(() => {
-  GetNetworkBridges().then((resp) => {
-    if (!(resp instanceof Error)) {
-      networks.value = resp;
-    } else {
-      console.error(resp as Error);
-    }
-  })
+  repackWailsPromise(GetNetworkBridges())
+      .then((resp) => {
+        networks.value = resp;
+      })
+      .catch(console.error)
 })
 
 const deployCluster = function () {

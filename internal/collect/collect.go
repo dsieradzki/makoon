@@ -12,6 +12,12 @@ func Filter[T any](c []T, ff func(T) bool) []T {
 	return result
 }
 
+func Not[T comparable](v T) func(T) bool {
+	return func(t T) bool {
+		return v != t
+	}
+}
+
 /*
 	Sorting without side effect and using generic types
 	Consume more memory in comparison to standard sorting
