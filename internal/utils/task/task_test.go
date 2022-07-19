@@ -28,7 +28,7 @@ var _ = Describe("Task Executor", func() {
 			executor.AddTask(context.Background(), alwaysTrueTask)
 			executor.Wait()
 			It("returns value", func() {
-				Expect(executor.Results()).Should(HaveLen(4))
+				Expect(executor.Results().Values).Should(HaveLen(4))
 			})
 		})
 	})
