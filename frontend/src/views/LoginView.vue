@@ -4,16 +4,16 @@
       <div class="text-9xl">K<span class="text-blue-500">4</span>Prox</div>
       <div class="flex justify-between">
         <div>Kubernetes Manager for Proxmox</div>
-        <div class="font-bold">v{{version}}</div>
+        <div class="font-bold">v{{ version }}</div>
       </div>
     </div>
     <div></div>
     <div class="mt-14 w-full max-w-[400px]">
       <div class="text-lg font-bold">Proxmox host:</div>
-     <div class="flex items-center">
-       <InputText @keydown.enter="login" class="w-[330px]" v-model="host" placeholder="192.168.1.10"></InputText>
-       <div class="ml-1">:8006, :22</div>
-     </div>
+      <div class="flex items-center">
+        <InputText @keydown.enter="login" class="w-[330px]" v-model="host" placeholder="192.168.1.10"></InputText>
+        <div class="ml-1">:8006, :22</div>
+      </div>
     </div>
 
     <div class="mt-3 w-full max-w-[400px]">
@@ -51,6 +51,9 @@ import {ref} from "vue";
 
 import {Login} from "@wails/service/LoginService";
 import {useRouter} from "vue-router";
+import {repackWailsPromise} from "@/utils/promise";
+
+// eslint-disable-next-line no-undef
 const version = APP_VERSION;
 
 const router = useRouter();
@@ -66,7 +69,7 @@ const loginState = ref<boolean>(false);
 const loginError = ref<boolean>(false)
 const login = function () {
   loginState.value = true;
-  Login(username.value, password.value, host.value)
+  repackWailsPromise(Login(username.value, password.value, host.value))
       .then(() => {
         loginError.value = false;
         router
@@ -82,6 +85,7 @@ const login = function () {
         loginState.value = false;
         loginError.value = true;
       });
+
 }
 
 </script>

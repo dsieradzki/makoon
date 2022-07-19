@@ -4,8 +4,8 @@ import {k4p} from '../models';
 
 export function CreateCluster(arg1:k4p.ProvisionRequest):Promise<Error>;
 
-export function GetNetworkBridges():Promise<Array<string>|Error>;
+export function GetNetworkBridges():Promise<Array<string>>;
 
-export function GetStorage():Promise<Array<string>|Error>;
+export function GetStorage():Promise<Array<string>>;
 
 export function SetupEnvironmentOnProxmox():Promise<Error>;

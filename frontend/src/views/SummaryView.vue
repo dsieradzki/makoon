@@ -37,22 +37,33 @@
 
 <script setup lang="ts">
 import Block from "@/components/Block.vue";
-import {SaveKubeConfigDialog, SaveSshAuthorizationKeyDialog, SaveSshPrivateKeyDialog} from "@wails/service/ProjectService";
+import {
+  SaveKubeConfigDialog,
+  SaveSshAuthorizationKeyDialog,
+  SaveSshPrivateKeyDialog
+} from "@wails/service/ProjectService";
+import {repackWailsPromise} from "@/utils/promise";
 
 const onSaveKubeConfig = function () {
-  SaveKubeConfigDialog().then(() => {
-    console.log("Saved");
-  })
+  repackWailsPromise(SaveKubeConfigDialog())
+      .then(() => {
+        console.log("Saved");
+      })
+      .catch(console.error)
 }
 const onSaveSshPrivateKey = function () {
-  SaveSshPrivateKeyDialog().then(() => {
-    console.log("Saved");
-  })
+  repackWailsPromise(SaveSshPrivateKeyDialog())
+      .then(() => {
+        console.log("Saved");
+      })
+      .catch(console.error)
 }
 const onSaveSshAuthorizationKey = function () {
-  SaveSshAuthorizationKeyDialog().then(() => {
-    console.log("Saved");
-  })
+  repackWailsPromise(SaveSshAuthorizationKeyDialog())
+      .then(() => {
+        console.log("Saved");
+      })
+      .catch(console.error)
 }
 
 </script>

@@ -58,7 +58,7 @@ func (p *ProvisionerService) CreateCluster(provisionRequest k4p.ProvisionRequest
 			return err
 		}
 
-		err = p.k4p.UpdateVmOs(project.Cluster, project.SshKey)
+		err = p.k4p.UpdateVmsOs(project.Cluster, project.SshKey)
 		if err != nil {
 			return err
 		}
@@ -74,7 +74,7 @@ func (p *ProvisionerService) CreateCluster(provisionRequest k4p.ProvisionRequest
 		}
 	}
 	if provisionRequest.Stages.InstallKubernetes {
-		err = p.k4p.InstallKubernetes(project.Cluster, project.SshKey)
+		err = p.k4p.InstallKubernetesOnNodes(project.Cluster, project.SshKey)
 		if err != nil {
 			return err
 		}

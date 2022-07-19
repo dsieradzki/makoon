@@ -52,15 +52,27 @@ func (p *Client) endpoint(e string) string {
 	return fmt.Sprintf("https://%s:%d/api2/json%s", p.proxmoxHost, p.proxmoxPort, e)
 }
 
-func (p *Client) Get(api string, resp interface{}) error {
+func (p *Client) Getf(resp interface{}, api string, params ...any) error {
+	return p.Get(resp, fmt.Sprintf(api, params...))
+}
+
+func (p *Client) Get(resp interface{}, api string) error {
 	return request(GET, ApplicationJson, p.endpoint(api), p.proxmoxHeaders(), p.proxmoxCookies(), nil, resp)
 }
 
-func (p *Client) Post(api string, body interface{}, resp interface{}) error {
+func (p *Client) Postf(body interface{}, resp interface{}, api string, params ...any) error {
+	return p.Post(body, resp, fmt.Sprintf(api, params...))
+}
+
+func (p *Client) Post(body interface{}, resp interface{}, api string) error {
 	return request(POST, ApplicationJson, p.endpoint(api), p.proxmoxHeaders(), p.proxmoxCookies(), body, resp)
 }
 
-func (p *Client) Put(api string, body interface{}, resp interface{}) error {
+func (p *Client) Putf(body interface{}, resp interface{}, api string, params ...any) error {
+	return p.Put(body, resp, fmt.Sprintf(api, params...))
+}
+
+func (p *Client) Put(body interface{}, resp interface{}, api string) error {
 	return request(PUT, ApplicationJson, p.endpoint(api), p.proxmoxHeaders(), p.proxmoxCookies(), body, resp)
 }
 
@@ -87,7 +99,7 @@ func (p *Client) DetermineProxmoxNodeName() (string, error) {
 		Data []node `json:"data"`
 	}
 	var nodesData nodeData
-	err := p.Get(fmt.Sprintf("/nodes"), &nodesData)
+	err := p.Get(&nodesData, "/nodes")
 	if err != nil {
 		return "", err
 	}

@@ -9,6 +9,7 @@ import (
 	"github.com/dsieradzki/k4prox/internal/proxmox"
 	"github.com/dsieradzki/k4prox/internal/ssh"
 	"github.com/dsieradzki/k4prox/internal/utils"
+	"github.com/dsieradzki/k4prox/internal/utils/task"
 	"github.com/goccy/go-yaml"
 	log "github.com/sirupsen/logrus"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -156,8 +157,10 @@ func (p *ProjectService) SaveSshPrivateKeyDialog() error {
 		return err
 	}
 	defer file.Close()
-	_, err = file.Write(project.SshKey.PrivateKey)
-	return err
+	if _, err = file.Write(project.SshKey.PrivateKey); err != nil {
+		return err
+	}
+	return file.Sync()
 }
 
 func (p *ProjectService) SaveSshAuthorizationKeyDialog() error {
@@ -180,8 +183,10 @@ func (p *ProjectService) SaveSshAuthorizationKeyDialog() error {
 		return err
 	}
 	defer file.Close()
-	_, err = file.Write(project.SshKey.PublicKey)
-	return err
+	if _, err = file.Write(project.SshKey.PublicKey); err != nil {
+		return err
+	}
+	return file.Sync()
 }
 
 func (p *ProjectService) LoadProject() (ProjectData, error) {
@@ -222,22 +227,22 @@ func (p *ProjectService) SaveProject(project ProjectData) error {
 }
 
 func (p *ProjectService) generateDefaultProject(fileName string) error {
-	defaultStorage, err := p.GetDefaultStorage()
+	defaultStorage, err := p.getDefaultStorage()
 	if err != nil {
 		return err
 	}
 
-	defaultNetwork, err := p.GetDefaultNetwork()
+	defaultNetwork, err := p.getDefaultNetwork()
 	if err != nil {
 		return err
 	}
 
-	defaultVmId, err := p.GetDefaultVmId()
+	defaultVmId, err := p.getDefaultVmId()
 	if err != nil {
 		return err
 	}
 
-	networkPartAddress, firstFreeHostPartIp, err := p.GetFirstAddressFromFreePool()
+	networkPartAddress, firstFreeHostPartIp, err := p.getFirstAddressFromFreePool()
 	var ingressLB, metallbIpRange, firstNodeIP, secondNodeIP, thirdNodeIP string
 	if err != nil {
 		ingressLB, metallbIpRange, firstNodeIP, secondNodeIP, thirdNodeIP = "", "", "", "", ""
@@ -313,7 +318,7 @@ func (p *ProjectService) generateDefaultProject(fileName string) error {
 	return saveProject(fileName, defaultProject)
 
 }
-func (p *ProjectService) GetDefaultStorage() (string, error) {
+func (p *ProjectService) getDefaultStorage() (string, error) {
 	storages, err := p.proxmoxClient.GetStorage()
 	if err != nil {
 		return "", err
@@ -329,7 +334,7 @@ func (p *ProjectService) GetDefaultStorage() (string, error) {
 	return "", errors.New("cannot find any storage")
 }
 
-func (p *ProjectService) GetDefaultNetwork() (proxmox.Network, error) {
+func (p *ProjectService) getDefaultNetwork() (proxmox.Network, error) {
 	proxmoxNodeName, err := p.proxmoxClient.DetermineProxmoxNodeName()
 	if err != nil {
 		return proxmox.Network{}, err
@@ -347,7 +352,7 @@ func (p *ProjectService) GetDefaultNetwork() (proxmox.Network, error) {
 	return proxmox.Network{}, nil
 }
 
-func (p *ProjectService) GetDefaultVmId() (uint32, error) {
+func (p *ProjectService) getDefaultVmId() (uint32, error) {
 	vmIds, err := p.proxmoxClient.GetAllUsedVMIds()
 	if err != nil {
 		return 0, err
@@ -358,8 +363,8 @@ func (p *ProjectService) GetDefaultVmId() (uint32, error) {
 	return findStartIdForFreeIdWindow(vmIds, maxNumberOfKubeNodeProposal), nil
 }
 
-func (p *ProjectService) GetFirstAddressFromFreePool() (string, int, error) {
-	defaultNetwork, err := p.GetDefaultNetwork()
+func (p *ProjectService) getFirstAddressFromFreePool() (string, int, error) {
+	defaultNetwork, err := p.getDefaultNetwork()
 	if err != nil {
 		return "", 0, err
 	}
@@ -394,10 +399,10 @@ func findIpRangeForNetwork(net proxmox.Network) (string, int, error) {
 	return "", 0, nil
 }
 
-func pingHostRange(networkPart string, lIP int, hIP int) utils.Result[bool] {
+func pingHostRange(networkPart string, lIP int, hIP int) task.Result[bool] {
 	log.Debugf("Check ip from %s.%d to %s.%d", networkPart, lIP, networkPart, hIP-1)
 
-	var results []utils.Result[bool]
+	var results []task.Result[bool]
 	//noinspection ALL
 	if system_runtime.GOOS == "linux" {
 		log.Warn("due to errors in exec.Comand on Linux check will be fired in single goroutine")
@@ -407,18 +412,18 @@ func pingHostRange(networkPart string, lIP int, hIP int) utils.Result[bool] {
 			log.Debugf("Ping [%s] host to check IP reservation. Host available: [%t]", ipToCheck, available)
 			// Optimize single thread checking
 			if available {
-				return utils.Result[bool]{
+				return task.Result[bool]{
 					Value: available,
 					Error: err,
 				}
 			}
-			results = append(results, utils.Result[bool]{
+			results = append(results, task.Result[bool]{
 				Value: available,
 				Error: err,
 			})
 		}
 	} else {
-		taskExecutor := utils.NewTaskExecutor[bool]()
+		taskExecutor := task.NewTaskExecutor[bool]()
 		for i := lIP; i < hIP; i++ {
 			taskExecutor.
 				AddTask(
@@ -431,17 +436,17 @@ func pingHostRange(networkPart string, lIP int, hIP int) utils.Result[bool] {
 					})
 		}
 		taskExecutor.Wait()
-		results = taskExecutor.Results()
+		results = taskExecutor.Results().Values
 	}
 	return collect.Reduce(
 		results,
-		utils.Result[bool]{Value: false, Error: nil},
-		func(acc utils.Result[bool], next utils.Result[bool]) utils.Result[bool] {
+		task.Result[bool]{Value: false, Error: nil},
+		func(acc task.Result[bool], next task.Result[bool]) task.Result[bool] {
 			err := acc.Error
 			if next.Error != nil {
 				err = next.Error
 			}
-			return utils.Result[bool]{
+			return task.Result[bool]{
 				Value: acc.Value || next.Value,
 				Error: err,
 			}

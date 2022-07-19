@@ -43,10 +43,12 @@
         <div class="mt-10 flex flex-col items-center">
           <div class="flex justify-center items-center">
             <div class="mr-5">
-              <Button @click="onUpdate" icon="pi pi-save" class="p-button-rounded p-button-primary p-button-lg largeButton" title="Save">
+              <Button @click="onUpdate" icon="pi pi-save"
+                      class="p-button-rounded p-button-primary p-button-lg largeButton" title="Save">
               </Button>
             </div>
-            <Button @click="onDelete" icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-outlined"></Button>
+            <Button @click="onDelete" icon="pi pi-trash"
+                    class="p-button-rounded p-button-danger p-button-outlined"></Button>
           </div>
 
         </div>
@@ -71,6 +73,7 @@ import {GetStorage} from "@wails/service/ProvisionerService";
 import Dropdown from 'primevue/dropdown';
 import {useProjectStore} from "@/stores/projectStore";
 import {usePropertiesPanelStore} from "@/stores/propertiesPanelStore";
+import {repackWailsPromise} from "@/utils/promise";
 
 const projectStore = useProjectStore();
 const propertiesPanelStore = usePropertiesPanelStore();
@@ -84,13 +87,11 @@ propertiesPanelStore.$subscribe(fillPropertiesPanel);
 
 onMounted(() => {
   fillPropertiesPanel();
-  GetStorage().then((resp) => {
-    if (!(resp instanceof Error)) {
-      storageNames.value = resp;
-    } else {
-      console.error(resp as Error);
-    }
-  })
+  repackWailsPromise(GetStorage())
+      .then((resp) => {
+        storageNames.value = resp;
+      })
+      .catch(console.error)
 });
 
 const nodeName = ref<string>();

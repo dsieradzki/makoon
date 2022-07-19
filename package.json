@@ -3,7 +3,8 @@
   "scripts": {
     "dev": "wails dev",
     "build": "wails build",
-    "generate": "wails generate module"
+    "generate": "wails generate module",
+    "update:dependencies:backend": "go get -u all"
   },
   "author": {
     "name": "Damian Sieradzki"
