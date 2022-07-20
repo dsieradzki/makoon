@@ -99,6 +99,11 @@ func (g *Generator) GenerateDefaultProject(fileName string) error {
 					Args:                       "",
 					KubernetesObjectDefinition: "",
 				},
+				{
+					Name:                       "helm3",
+					Args:                       "",
+					KubernetesObjectDefinition: "",
+				},
 			},
 			NodeDiskSize: 32,
 			Nodes: []k4p.KubernetesNode{
