@@ -1,7 +1,7 @@
 import {defineStore} from 'pinia'
-import type {k4p, service} from "@wails/models";
-import {LoadProject, SaveProject} from "@wails/service/ProjectService";
 import {repackWailsPromise} from "@/utils/promise";
+import type {k4p, project} from "@wails/models";
+import {LoadProject, SaveProject} from "@wails/project/Service";
 
 const Master = "master";
 const Worker = "worker";
@@ -27,11 +27,15 @@ export const FEATURE_DEFINITIONS: FeatureDefinition[] = [
     {
         name: "metallb",
         title: "MetalLB load balancer"
+    },
+    {
+        name: "openebs",
+        title: "OpenEBS storage"
     }
 ]
 
 interface State {
-    project: service.ProjectData
+    project: project.ProjectData
     defaultMasterNode: k4p.KubernetesNode
 }
 
@@ -80,7 +84,7 @@ export const useProjectStore = defineStore({
                 nodes: [] as k4p.KubernetesNode[],
                 features: [] as k4p.Feature[]
             } as k4p.Cluster
-        } as service.ProjectData,
+        } as project.ProjectData,
         defaultMasterNode: {} as k4p.KubernetesNode
     }),
     getters: {

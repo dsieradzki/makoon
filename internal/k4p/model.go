@@ -45,6 +45,7 @@ type ProvisionRequest struct {
 
 type ProvisionStage struct {
 	CreateVirtualMachines bool `json:"createVirtualMachines"`
+	SetupVirtualMachines  bool `json:"setupVirtualMachines"`
 	InstallKubernetes     bool `json:"installKubernetes"`
 	JoinNodesToCluster    bool `json:"joinNodesToCluster"`
 	InstallFeatures       bool `json:"installFeatures"`

@@ -6,11 +6,12 @@ import (
 	"github.com/dsieradzki/k4prox/internal/k4p"
 	"github.com/dsieradzki/k4prox/internal/proxmox"
 	"github.com/dsieradzki/k4prox/internal/ssh"
+	"github.com/dsieradzki/k4prox/pkg/service/project"
 	"sort"
 )
 
 func NewProvisionerService(
-	projectService *ProjectService,
+	projectService *project.Service,
 	proxmoxClient *proxmox.Client,
 	sshClient *ssh.Client,
 	eventCollector *event.Collector) *ProvisionerService {
@@ -24,7 +25,7 @@ func NewProvisionerService(
 type ProvisionerService struct {
 	k4p           *k4p.Service
 	proxmoxClient *proxmox.Client
-	project       *ProjectService
+	project       *project.Service
 }
 
 func (p *ProvisionerService) SetupEnvironmentOnProxmox() error {
@@ -32,68 +33,76 @@ func (p *ProvisionerService) SetupEnvironmentOnProxmox() error {
 }
 
 func (p *ProvisionerService) CreateCluster(provisionRequest k4p.ProvisionRequest) error {
-	project, err := p.project.LoadProject()
+	projectData, err := p.project.LoadProject()
 	if err != nil {
 		return err
 	}
-	if project.SshKey.Empty() {
+	if projectData.SshKey.Empty() {
 		rsaKeyPair, err := ssh.GenerateRsaKeyPair()
 		if err != nil {
 			return err
 		}
-		project.SshKey = rsaKeyPair
-		err = p.project.SaveProject(project)
+		projectData.SshKey = rsaKeyPair
+		err = p.project.SaveProject(projectData)
 		if err != nil {
 			return err
 		}
 	}
 	if provisionRequest.Stages.CreateVirtualMachines {
-		err = p.k4p.CreateVirtualMachines(project.Cluster, project.SshKey)
+		err = p.k4p.CreateVirtualMachines(projectData.Cluster, projectData.SshKey)
 		if err != nil {
 			return err
 		}
 
-		err = p.k4p.StartVirtualMachines(project.Cluster, project.SshKey)
+		err = p.k4p.StartVirtualMachines(projectData.Cluster, projectData.SshKey)
 		if err != nil {
 			return err
 		}
 
-		err = p.k4p.UpdateVmsOs(project.Cluster, project.SshKey)
+		err = p.k4p.UpdateVmsOs(projectData.Cluster, projectData.SshKey)
 		if err != nil {
 			return err
 		}
 
-		err = p.k4p.ShutdownVirtualMachines(project.Cluster)
+		err = p.k4p.ShutdownVirtualMachines(projectData.Cluster)
 		if err != nil {
 			return err
 		}
 
-		err = p.k4p.StartVirtualMachines(project.Cluster, project.SshKey)
+		err = p.k4p.StartVirtualMachines(projectData.Cluster, projectData.SshKey)
 		if err != nil {
 			return err
 		}
 	}
+
+	if provisionRequest.Stages.SetupVirtualMachines {
+		err = p.k4p.SetupVmsOs(projectData.Cluster, projectData.SshKey)
+		if err != nil {
+			return err
+		}
+	}
+
 	if provisionRequest.Stages.InstallKubernetes {
-		err = p.k4p.InstallKubernetesOnNodes(project.Cluster, project.SshKey)
+		err = p.k4p.InstallKubernetesOnNodes(projectData.Cluster, projectData.SshKey)
 		if err != nil {
 			return err
 		}
 	}
 	if provisionRequest.Stages.JoinNodesToCluster {
-		err = p.k4p.JoinNodesToCluster(project.Cluster, project.SshKey)
+		err = p.k4p.JoinNodesToCluster(projectData.Cluster, projectData.SshKey)
 		if err != nil {
 			return err
 		}
 	}
 	if provisionRequest.Stages.InstallFeatures {
-		err = p.k4p.InstallFeatures(project.Cluster, project.SshKey)
+		err = p.k4p.InstallFeatures(projectData.Cluster, projectData.SshKey)
 		if err != nil {
 			return err
 		}
 	}
 
 	if provisionRequest.Stages.InstallKubernetes {
-		kubeConfigContent, err := p.k4p.GetKubeConfigFromCluster(project.Cluster, project.SshKey)
+		kubeConfigContent, err := p.k4p.GetKubeConfigFromCluster(projectData.Cluster, projectData.SshKey)
 		if err != nil {
 			return err
 		}
