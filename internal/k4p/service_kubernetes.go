@@ -146,6 +146,16 @@ func (k *Service) InstallFeatures(provisionRequest Cluster, keyPair ssh.RsaKeyPa
 
 	eventSession := k.eventCollector.StartWithDetails("Enable features", details)
 
+	executionResult, err := sshMasterNode.Execute("sudo microk8s enable community")
+	if err != nil {
+		eventSession.ReportError(err)
+		return err
+	}
+	if executionResult.IsError() {
+		eventSession.ReportError(executionResult.Error())
+		return err
+	}
+
 	for _, feature := range provisionRequest.Features {
 		featureCommand := feature.Name
 

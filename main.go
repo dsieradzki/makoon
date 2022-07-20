@@ -9,6 +9,7 @@ import (
 	"github.com/dsieradzki/k4prox/internal/ssh"
 	"github.com/dsieradzki/k4prox/internal/tasklog"
 	"github.com/dsieradzki/k4prox/pkg/service"
+	"github.com/dsieradzki/k4prox/pkg/service/project"
 	log "github.com/sirupsen/logrus"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -38,7 +39,7 @@ func main() {
 
 	// SERVICES
 	loginService := service.NewLoginService(proxmoxClient, proxmoxSsh)
-	projectService := service.NewProjectService(proxmoxClient)
+	projectService := project.NewProjectService(proxmoxClient)
 	provisionerService := service.NewProvisionerService(projectService, proxmoxClient, proxmoxSsh, eventCollector)
 	taskLogService := service.NewTaskLogService(eventCollector, taskLogReader)
 

@@ -36,7 +36,7 @@
 <script setup lang="ts">
 import Block from "@/components/Block.vue";
 import {useRouter} from "vue-router";
-import {OpenProjectDialog, SaveProjectDialog} from "@wails/service/ProjectService";
+import {OpenProjectDialog, SaveProjectDialog} from "@wails/project/Service";
 import {ref} from "vue";
 import ProgressSpinner from 'primevue/progressspinner';
 import {repackWailsPromise} from "@/utils/promise";

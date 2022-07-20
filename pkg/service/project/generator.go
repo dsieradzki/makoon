@@ -1,4 +1,4 @@
-package service
+package project
 
 import (
 	"context"
@@ -10,13 +10,9 @@ import (
 	"github.com/dsieradzki/k4prox/internal/ssh"
 	"github.com/dsieradzki/k4prox/internal/utils"
 	"github.com/dsieradzki/k4prox/internal/utils/task"
-	"github.com/goccy/go-yaml"
 	log "github.com/sirupsen/logrus"
-	"github.com/wailsapp/wails/v2/pkg/runtime"
-	"os"
 	"os/exec"
-	system_runtime "runtime"
-	"sort"
+	systemruntime "runtime"
 	"strings"
 )
 
@@ -44,205 +40,27 @@ spec:
       targetPort: 443
 `
 
-var k4proxFilters = []runtime.FileFilter{
-	{
-		DisplayName: "K4Prox Yaml (*.yaml, *.yml)",
-		Pattern:     "*.yml;*.yaml",
-	},
-}
-
-const maxNumberOfKubeNodeProposal = 20
-
-type ProjectData struct {
-	KubeConfig string         `json:"kubeConfig" yaml:"kubeConfig"`
-	SshKey     ssh.RsaKeyPair `json:"sshKey" yaml:"sshKey"`
-	Cluster    k4p.Cluster    `json:"cluster" yaml:"cluster"`
-}
-
-func NewProjectService(proxmoxClient *proxmox.Client) *ProjectService {
-	return &ProjectService{
-		proxmoxClient: proxmoxClient,
-	}
-}
-
-type ProjectService struct {
-	ctx           context.Context
-	projectFile   string
+type Generator struct {
 	proxmoxClient *proxmox.Client
 }
 
-func (p *ProjectService) SetContext(ctx context.Context) {
-	p.ctx = ctx
-}
-
-func (p *ProjectService) OpenProjectDialog() (bool, error) {
-	projectFileName, err := runtime.OpenFileDialog(p.ctx, runtime.OpenDialogOptions{
-		DefaultDirectory: getHomeDir(),
-		Title:            "Open K4Prox project file",
-		Filters:          k4proxFilters,
-	})
-	if err != nil {
-		return false, err
-	}
-	if len(projectFileName) == 0 {
-		return false, errors.New("file not specified")
-	}
-	p.projectFile = projectFileName
-	project, err := p.LoadProject()
-	return len(project.KubeConfig) > 0, err
-
-}
-
-func (p *ProjectService) SaveProjectDialog() (bool, error) {
-	projectFileName, err := runtime.SaveFileDialog(p.ctx, runtime.SaveDialogOptions{
-		DefaultDirectory: getHomeDir(),
-		DefaultFilename:  "kubernetes-cluster-1.yaml",
-		Title:            "Save K4Prox project file",
-		Filters:          k4proxFilters,
-	})
-	if err != nil {
-		return false, err
-	}
-	if len(projectFileName) == 0 {
-		return false, errors.New("file not specified")
-	}
-
-	err = p.generateDefaultProject(projectFileName)
-	p.projectFile = projectFileName
-	return false, err
-}
-
-func (p *ProjectService) SaveKubeConfigDialog() error {
-	kubeConfigFileName, err := runtime.SaveFileDialog(p.ctx, runtime.SaveDialogOptions{
-		DefaultDirectory: getHomeDir(),
-		DefaultFilename:  "config",
-		Title:            "Save Kubernetes config",
-		Filters:          k4proxFilters,
-	})
+func (g *Generator) GenerateDefaultProject(fileName string) error {
+	defaultStorage, err := g.getDefaultStorage()
 	if err != nil {
 		return err
 	}
 
-	project, err := p.LoadProject()
+	defaultNetwork, err := g.getDefaultNetwork()
 	if err != nil {
 		return err
 	}
 
-	file, err := os.Create(kubeConfigFileName)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-	_, err = file.Write([]byte(project.KubeConfig))
-	return err
-}
-
-func (p *ProjectService) SaveSshPrivateKeyDialog() error {
-	kubeConfigFileName, err := runtime.SaveFileDialog(p.ctx, runtime.SaveDialogOptions{
-		DefaultDirectory: getHomeDir(),
-		DefaultFilename:  "cluster.pem",
-		Title:            "Save SSH private key",
-	})
+	defaultVmId, err := g.getDefaultVmId()
 	if err != nil {
 		return err
 	}
 
-	project, err := p.LoadProject()
-	if err != nil {
-		return err
-	}
-
-	file, err := os.Create(kubeConfigFileName)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-	if _, err = file.Write(project.SshKey.PrivateKey); err != nil {
-		return err
-	}
-	return file.Sync()
-}
-
-func (p *ProjectService) SaveSshAuthorizationKeyDialog() error {
-	kubeConfigFileName, err := runtime.SaveFileDialog(p.ctx, runtime.SaveDialogOptions{
-		DefaultDirectory: getHomeDir(),
-		DefaultFilename:  "cluster.txt",
-		Title:            "Save SSH authorization key",
-	})
-	if err != nil {
-		return err
-	}
-
-	project, err := p.LoadProject()
-	if err != nil {
-		return err
-	}
-
-	file, err := os.Create(kubeConfigFileName)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-	if _, err = file.Write(project.SshKey.PublicKey); err != nil {
-		return err
-	}
-	return file.Sync()
-}
-
-func (p *ProjectService) LoadProject() (ProjectData, error) {
-	projectFileData, err := os.ReadFile(p.projectFile)
-	if err != nil {
-		return ProjectData{}, err
-	}
-
-	var project ProjectData
-	err = yaml.Unmarshal(projectFileData, &project)
-	if err != nil {
-		log.WithError(err).Error("cannot read projects")
-	}
-	return project, err
-}
-
-func (p *ProjectService) SaveProject(project ProjectData) error {
-	currentProject, err := p.LoadProject()
-	if err != nil {
-		return err
-	}
-	// Safe project saving, to prevent override ssh and kubeconfig
-	currentProject.Cluster = project.Cluster
-	if len(currentProject.KubeConfig) == 0 {
-		currentProject.KubeConfig = project.KubeConfig
-	}
-
-	if currentProject.SshKey.Empty() {
-		currentProject.SshKey.PrivateKey = project.SshKey.PrivateKey
-		currentProject.SshKey.PublicKey = project.SshKey.PublicKey
-	}
-
-	sort.Slice(currentProject.Cluster.Nodes, func(i, j int) bool {
-		return currentProject.Cluster.Nodes[i].Vmid < currentProject.Cluster.Nodes[j].Vmid
-	})
-
-	return saveProject(p.projectFile, currentProject)
-}
-
-func (p *ProjectService) generateDefaultProject(fileName string) error {
-	defaultStorage, err := p.getDefaultStorage()
-	if err != nil {
-		return err
-	}
-
-	defaultNetwork, err := p.getDefaultNetwork()
-	if err != nil {
-		return err
-	}
-
-	defaultVmId, err := p.getDefaultVmId()
-	if err != nil {
-		return err
-	}
-
-	networkPartAddress, firstFreeHostPartIp, err := p.getFirstAddressFromFreePool()
+	networkPartAddress, firstFreeHostPartIp, err := g.getFirstAddressFromFreePool()
 	var ingressLB, metallbIpRange, firstNodeIP, secondNodeIP, thirdNodeIP string
 	if err != nil {
 		ingressLB, metallbIpRange, firstNodeIP, secondNodeIP, thirdNodeIP = "", "", "", "", ""
@@ -274,6 +92,11 @@ func (p *ProjectService) generateDefaultProject(fileName string) error {
 				{
 					Name:                       "metallb",
 					Args:                       metallbIpRange,
+					KubernetesObjectDefinition: "",
+				},
+				{
+					Name:                       "openebs",
+					Args:                       "",
 					KubernetesObjectDefinition: "",
 				},
 			},
@@ -318,8 +141,9 @@ func (p *ProjectService) generateDefaultProject(fileName string) error {
 	return saveProject(fileName, defaultProject)
 
 }
-func (p *ProjectService) getDefaultStorage() (string, error) {
-	storages, err := p.proxmoxClient.GetStorage()
+
+func (g *Generator) getDefaultStorage() (string, error) {
+	storages, err := g.proxmoxClient.GetStorage()
 	if err != nil {
 		return "", err
 	}
@@ -334,17 +158,17 @@ func (p *ProjectService) getDefaultStorage() (string, error) {
 	return "", errors.New("cannot find any storage")
 }
 
-func (p *ProjectService) getDefaultNetwork() (proxmox.Network, error) {
-	proxmoxNodeName, err := p.proxmoxClient.DetermineProxmoxNodeName()
+func (g *Generator) getDefaultNetwork() (proxmox.Network, error) {
+	proxmoxNodeName, err := g.proxmoxClient.DetermineProxmoxNodeName()
 	if err != nil {
 		return proxmox.Network{}, err
 	}
-	networks, err := p.proxmoxClient.GetNetworkBridges(proxmoxNodeName)
+	networks, err := g.proxmoxClient.GetNetworkBridges(proxmoxNodeName)
 	if err != nil {
 		return proxmox.Network{}, err
 	}
 	for _, network := range networks {
-		if network.Address == p.proxmoxClient.GetProxmoxHost() {
+		if network.Address == g.proxmoxClient.GetProxmoxHost() {
 			return network, nil
 		}
 	}
@@ -352,8 +176,8 @@ func (p *ProjectService) getDefaultNetwork() (proxmox.Network, error) {
 	return proxmox.Network{}, nil
 }
 
-func (p *ProjectService) getDefaultVmId() (uint32, error) {
-	vmIds, err := p.proxmoxClient.GetAllUsedVMIds()
+func (g *Generator) getDefaultVmId() (uint32, error) {
+	vmIds, err := g.proxmoxClient.GetAllUsedVMIds()
 	if err != nil {
 		return 0, err
 	}
@@ -363,8 +187,8 @@ func (p *ProjectService) getDefaultVmId() (uint32, error) {
 	return findStartIdForFreeIdWindow(vmIds, maxNumberOfKubeNodeProposal), nil
 }
 
-func (p *ProjectService) getFirstAddressFromFreePool() (string, int, error) {
-	defaultNetwork, err := p.getDefaultNetwork()
+func (g *Generator) getFirstAddressFromFreePool() (string, int, error) {
+	defaultNetwork, err := g.getDefaultNetwork()
 	if err != nil {
 		return "", 0, err
 	}
@@ -404,7 +228,7 @@ func pingHostRange(networkPart string, lIP int, hIP int) task.Result[bool] {
 
 	var results []task.Result[bool]
 	//noinspection ALL
-	if system_runtime.GOOS == "linux" {
+	if systemruntime.GOOS == "linux" {
 		log.Warn("due to errors in exec.Comand on Linux check will be fired in single goroutine")
 		for i := lIP; i < hIP; i++ {
 			ipToCheck := fmt.Sprintf("%s.%d", networkPart, i)
@@ -474,28 +298,4 @@ func findStartIdForFreeIdWindow(usedIds []uint32, slotSize uint32) uint32 {
 	}
 
 	return 0 // There is practically no possible to not find unused range in that big proxmox set
-}
-
-func saveProject(fileName string, defaultProject ProjectData) error {
-	projectData, err := yaml.Marshal(&defaultProject)
-	if err != nil {
-		log.WithError(err).Error("cannot save projects")
-		return err
-	}
-	file, err := os.Create(fileName)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	_, err = file.Write(projectData)
-	return err
-}
-
-func getHomeDir() string {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return ""
-	}
-	return home
 }

@@ -41,7 +41,7 @@ import {
   SaveKubeConfigDialog,
   SaveSshAuthorizationKeyDialog,
   SaveSshPrivateKeyDialog
-} from "@wails/service/ProjectService";
+} from "@wails/project/Service";
 import {repackWailsPromise} from "@/utils/promise";
 
 const onSaveKubeConfig = function () {

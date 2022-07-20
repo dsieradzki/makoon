@@ -61,6 +61,10 @@
             Create Virtual Machines
           </div>
           <div class="mt-1">
+            <Checkbox :binary="true" v-model="setupVm"/>
+            Setup Virtual Machines
+          </div>
+          <div class="mt-1">
             <Checkbox :binary="true" v-model="installKubernetes"/>
             Install Kubernetes
           </div>
@@ -103,6 +107,7 @@ const emits = defineEmits<{
 const store = useProjectStore();
 const showAdvanced = ref(false);
 const createVm = ref(true);
+const setupVm = ref(true);
 const installKubernetes = ref(true);
 const joinNodes = ref(true);
 const installFeatures = ref(true);
@@ -122,6 +127,7 @@ const deployCluster = function () {
   emits('deployCluster', {
     stages: {
       createVirtualMachines: createVm.value,
+      setupVirtualMachines: setupVm.value,
       installKubernetes: installKubernetes.value,
       joinNodesToCluster: joinNodes.value,
       installFeatures: installFeatures.value

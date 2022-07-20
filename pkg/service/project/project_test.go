@@ -1,4 +1,4 @@
-package service
+package project
 
 import (
 	. "github.com/onsi/ginkgo/v2"
