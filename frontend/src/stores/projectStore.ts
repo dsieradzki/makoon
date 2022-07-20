@@ -21,6 +21,10 @@ export const FEATURE_DEFINITIONS: FeatureDefinition[] = [
         title: "Core DNS",
     },
     {
+        name: "helm3",
+        title: "Helm 3"
+    },
+    {
         name: "ingress",
         title: "Ingress controller",
     },
