@@ -5,11 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/dsieradzki/k4prox/internal/collect"
 	"github.com/dsieradzki/k4prox/internal/ssh"
 	"github.com/dsieradzki/k4prox/internal/utils/task"
 	"math"
-	"strings"
 )
 
 func (k *Service) InstallKubernetesOnNodes(provisionRequest Cluster, keyPair ssh.RsaKeyPair) error {
@@ -132,77 +130,6 @@ func (k *Service) JoinNodesToCluster(provisionRequest Cluster, keyPair ssh.RsaKe
 		}
 		eventSession.Done()
 	}
-	return nil
-}
-
-func (k *Service) InstallFeatures(provisionRequest Cluster, keyPair ssh.RsaKeyPair) error {
-	firstMasterNode, _ := findFirstMasterNode(provisionRequest.Nodes)
-	sshMasterNode := ssh.NewSshClientKey(provisionRequest.NodeUsername, keyPair, firstMasterNode.IpAddress)
-
-	featureNameList := collect.Map(provisionRequest.Features, func(f Feature) string { return f.Name })
-
-	featureList := strings.Join(featureNameList, ", ")
-	details := fmt.Sprintf("Features: %s", featureList)
-
-	eventSession := k.eventCollector.StartWithDetails("Enable features", details)
-
-	executionResult, err := sshMasterNode.Execute("sudo microk8s enable community")
-	if err != nil {
-		eventSession.ReportError(err)
-		return err
-	}
-	if executionResult.IsError() {
-		eventSession.ReportError(executionResult.Error())
-		return err
-	}
-
-	for _, feature := range provisionRequest.Features {
-		featureCommand := feature.Name
-
-		if len(feature.Args) > 0 {
-			featureCommand = featureCommand + feature.Args
-		}
-		executionResult, err := sshMasterNode.Executef("sudo microk8s enable %s", featureCommand)
-		if err != nil {
-			eventSession.ReportError(err)
-			return err
-		}
-		if executionResult.IsError() {
-			eventSession.ReportError(executionResult.Error())
-			return err
-		}
-
-		if len(feature.KubernetesObjectDefinition) > 0 {
-			executionResult, err = sshMasterNode.Executef("echo \"%s\" > /tmp/%s.yaml", feature.KubernetesObjectDefinition, feature.Name)
-			if err != nil {
-				eventSession.ReportError(err)
-				return err
-			}
-			if executionResult.IsError() {
-				eventSession.ReportError(executionResult.Error())
-				return err
-			}
-			executionResult, err = sshMasterNode.Executef("sudo microk8s.kubectl apply -f /tmp/%s.yaml", feature.Name)
-			if err != nil {
-				eventSession.ReportError(err)
-				return err
-			}
-			if executionResult.IsError() {
-				eventSession.ReportError(executionResult.Error())
-				return err
-			}
-			executionResult, err = sshMasterNode.Executef("sudo rm /tmp/%s.yaml", feature.Name)
-			if err != nil {
-				eventSession.ReportError(err)
-				return err
-			}
-			if executionResult.IsError() {
-				eventSession.ReportError(executionResult.Error())
-				return err
-			}
-		}
-	}
-	eventSession.Done()
 	return nil
 }
 

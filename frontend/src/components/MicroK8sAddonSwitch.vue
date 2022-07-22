@@ -21,12 +21,12 @@ const props = defineProps<{
 }>();
 
 const onEnable = function (): void {
-  projectStore.enableFeature(props.featureName);
+  projectStore.enableMicroK8SAddon(props.featureName);
 }
 const onDisable = function (): void {
-  projectStore.disableFeature(props.featureName);
+  projectStore.disableMicroK8SAddon(props.featureName);
 }
 const isFeatureEnabled = computed((): boolean => {
-  return !!projectStore.features.find(e => e.name === props.featureName);
+  return !!projectStore.microK8sAddons.find(e => e.name === props.featureName);
 })
 </script>

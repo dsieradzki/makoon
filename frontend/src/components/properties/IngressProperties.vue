@@ -36,8 +36,8 @@
           </div>
         </div>
         <div class="mt-5 flex flex-col items-center justify-center">
-          <FeatureSwitch :feature-name="featureName">
-          </FeatureSwitch>
+          <MicroK8sAddonSwitch :feature-name="featureName">
+          </MicroK8sAddonSwitch>
         </div>
       </div>
     </div>
@@ -53,12 +53,11 @@
 <script lang="ts" setup>
 import Button from "primevue/button";
 import {usePropertiesPanelStore} from "@/stores/propertiesPanelStore";
-import FeatureSwitch from "@/components/FeatureSwitch.vue";
+import MicroK8sAddonSwitch from "@/components/MicroK8sAddonSwitch.vue";
 import {computed, onMounted, ref} from "vue";
 import {useProjectStore} from "@/stores/projectStore";
 import InputText from "primevue/inputtext";
 import Checkbox from 'primevue/checkbox';
-import type {k4p} from "@wails/models";
 
 const LOAD_BALANCER_SERVICE_TEMPLATE = `
 apiVersion: v1
@@ -93,12 +92,12 @@ const useLB = ref<boolean>(false);
 const ip = ref<string>("");
 
 onMounted(() => {
-  const feature = projectStore.features.find(e => e.name === featureName);
+  const feature = projectStore.microK8sAddons.find(e => e.name === featureName);
   if (!feature) {
     return
   }
 
-  const lbLine = feature.kubernetesObjectDefinition
+  const lbLine = feature.additionalK8SResources[0]
       .split('\n')
       .find(e => e.indexOf("loadBalancerIP:") != -1)
   if (!lbLine) {
@@ -115,7 +114,7 @@ const onClose = function (): void {
 }
 
 const isFeatureEnabled = computed((): boolean => {
-  return !!projectStore.features.find(e => e.name === featureName);
+  return !!projectStore.microK8sAddons.find(e => e.name === featureName);
 })
 
 const isFormValid = computed((): boolean => {
@@ -126,12 +125,12 @@ const isFormValid = computed((): boolean => {
 });
 
 const isLBFeatureEnabled = computed(() => {
-  return !!projectStore.features.find(e => e.name === lbFeatureName);
+  return !!projectStore.microK8sAddons.find(e => e.name === lbFeatureName);
 });
 
 const onUseLBChange = function () {
   if (useLB.value && isLBFeatureEnabled) {
-    const lbFeature = projectStore.features.find((e) => e.name === lbFeatureName);
+    const lbFeature = projectStore.microK8sAddons.find((e) => e.name === lbFeatureName);
     if (!lbFeature) {
       ip.value = "";
       return
@@ -143,15 +142,15 @@ const onUseLBChange = function () {
 }
 
 const valuesAreNotSaved = computed((): boolean => {
-  const feature = projectStore.features.find(e => e.name === featureName);
+  const feature = projectStore.microK8sAddons.find(e => e.name === featureName);
   if (!feature) {
     return false
   }
-  return feature.kubernetesObjectDefinition !== parseTemplate();
+  return feature.additionalK8SResources[0] !== parseTemplate();
 });
 
 const onUpdate = function (): void {
-  projectStore.updateFeatureKubernetesObjectDefinition(featureName, parseTemplate());
+  projectStore.updateMicroK8SAddonAdditionalK8SResources(featureName, parseTemplate());
 }
 
 const parseTemplate = function (): string {

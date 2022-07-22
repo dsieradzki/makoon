@@ -22,19 +22,29 @@ type Network struct {
 	Bridge     string `json:"bridge" yaml:"bridge"`
 }
 
-type Feature struct {
-	Name                       string `json:"name"`
-	Args                       string `json:"args"`
-	KubernetesObjectDefinition string `json:"kubernetesObjectDefinition"`
+type HelmApp struct {
+	ChartName              string            `json:"chartName" yaml:"chartName"`
+	Repository             string            `json:"repository" yaml:"repository"`
+	ReleaseName            string            `json:"releaseName" yaml:"releaseName"`
+	Namespace              string            `json:"namespace" yaml:"namespace"`
+	Parameters             map[string]string `json:"parameters" yaml:"parameters"`
+	AdditionalK8sResources []string          `json:"additionalK8SResources" yaml:"additionalK8SResources"`
+	ValueFileContent       string            `json:"valueFileContent" yaml:"valueFileContent"`
+}
+type MicroK8sAddon struct {
+	Name                   string   `json:"name" yaml:"name"`
+	Args                   string   `json:"args" yaml:"args"`
+	AdditionalK8sResources []string `json:"additionalK8SResources" yaml:"additionalK8SResources"`
 }
 
 type Cluster struct {
-	NodeUsername string           `json:"nodeUsername" yaml:"nodeUsername"`
-	NodePassword string           `json:"nodePassword" yaml:"nodePassword"`
-	Features     []Feature        `json:"features" yaml:"features"`
-	NodeDiskSize uint16           `json:"nodeDiskSize" yaml:"nodeDiskSize"`
-	Nodes        []KubernetesNode `json:"nodes" yaml:"nodes"`
-	Network      Network          `json:"network" yaml:"network"`
+	NodeUsername   string           `json:"nodeUsername" yaml:"nodeUsername"`
+	NodePassword   string           `json:"nodePassword" yaml:"nodePassword"`
+	MicroK8sAddons []MicroK8sAddon  `json:"microK8SAddons" yaml:"microK8SAddons"`
+	HelmApps       []HelmApp        `json:"helmApps" yaml:"helmApps"`
+	NodeDiskSize   uint16           `json:"nodeDiskSize" yaml:"nodeDiskSize"`
+	Nodes          []KubernetesNode `json:"nodes" yaml:"nodes"`
+	Network        Network          `json:"network" yaml:"network"`
 }
 
 type ProvisionRequest struct {

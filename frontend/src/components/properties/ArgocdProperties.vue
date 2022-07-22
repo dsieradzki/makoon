@@ -1,10 +1,10 @@
 <template>
   <div class="flex flex-col w-full h-full items-center">
     <div class="grow">
-      <div class="text-3xl text-center font-bold mt-5">CoreDNS</div>
+      <div class="text-3xl text-center font-bold mt-5">Argo CD</div>
       <div class="p-10">
         <div>
-          Deploys CoreDNS. This add-on may be required by others
+          Deploys Argo CD, the declarative, GitOps continuous delivery tool for Kubernetes.
         </div>
         <div class="mt-10 flex flex-col items-center">
           <div class="flex justify-center">

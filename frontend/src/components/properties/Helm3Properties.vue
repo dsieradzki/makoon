@@ -9,8 +9,8 @@
         <div class="mt-10 flex flex-col items-center">
           <div class="flex justify-center">
             <div class="mr-2">
-              <FeatureSwitch feature-name="helm3">
-              </FeatureSwitch>
+              <MicroK8sAddonSwitch feature-name="helm3">
+              </MicroK8sAddonSwitch>
             </div>
           </div>
 
@@ -29,7 +29,7 @@
 <script lang="ts" setup>
 import Button from "primevue/button";
 import {usePropertiesPanelStore} from "@/stores/propertiesPanelStore";
-import FeatureSwitch from "@/components/FeatureSwitch.vue";
+import MicroK8sAddonSwitch from "@/components/MicroK8sAddonSwitch.vue";
 
 const propertiesPanelStore = usePropertiesPanelStore();
 

@@ -31,26 +31,42 @@
       </Block>
     </div>
 
-    <div class="font-bold text-2xl px-5 pt-10 pb-5">Enabled Features</div>
+    <div class="font-bold text-2xl px-5 pt-10 pb-5">Addons</div>
     <div class="flex items-center pb-5">
       <Block
-          v-for="feature in enabledFeatures"
-          :key="feature.name"
+          v-for="addon in enabledMicroK8sAddons"
+          :key="addon.name"
           class="mr-5"
-          :selected="isSelected(feature.name, feature.name.charAt(0).toUpperCase()+feature.name.slice(1)+'Properties')"
-          @select="()=>{onSelectBlock(feature.name, feature.name.charAt(0).toUpperCase()+feature.name.slice(1)+'Properties')}"
-          :title="feature.title"></Block>
-    </div>
-    <div class="font-bold text-2xl px-5 pt-10 pb-5">Available Features</div>
-    <div class="flex items-center pb-5">
+          :selected="isSelected(addon.name, addon.name.charAt(0).toUpperCase()+addon.name.slice(1)+'Properties')"
+          @select="()=>{onSelectBlock(addon.name, addon.name.charAt(0).toUpperCase()+addon.name.slice(1)+'Properties')}"
+          :title="addon.title"></Block>
       <Block
-          v-for="feature in availableFeatures"
-          :key="feature.name"
+          v-for="addon in availableMicroK8sAddons"
+          :key="addon.name"
           :not-active="true"
           class="mr-5"
-          :selected="isSelected(feature.name, feature.name.charAt(0).toUpperCase()+feature.name.slice(1)+'Properties')"
-          @select="()=>{onSelectBlock(feature.name, feature.name.charAt(0).toUpperCase()+feature.name.slice(1)+'Properties')}"
-          :title="feature.title"></Block>
+          :selected="isSelected(addon.name, addon.name.charAt(0).toUpperCase()+addon.name.slice(1)+'Properties')"
+          @select="()=>{onSelectBlock(addon.name, addon.name.charAt(0).toUpperCase()+addon.name.slice(1)+'Properties')}"
+          :title="addon.title"></Block>
+    </div>
+
+    <div class="font-bold text-2xl px-5 pt-10 pb-5">Helm apps</div>
+    <div class="flex items-center pb-5">
+      <Block
+          v-for="app in enabledHelmApps"
+          :key="app.name"
+          class="mr-5"
+          :selected="isSelected(app.name, app.name.charAt(0).toUpperCase()+app.name.slice(1)+'Properties')"
+          @select="()=>{onSelectBlock(app.name, app.name.charAt(0).toUpperCase()+app.name.slice(1)+'Properties')}"
+          :title="app.title"></Block>
+      <Block
+          v-for="app in availableHelmApps"
+          :key="app.name"
+          :not-active="true"
+          class="mr-5"
+          :selected="isSelected(app.name, app.name.charAt(0).toUpperCase()+app.name.slice(1)+'Properties')"
+          @select="()=>{onSelectBlock(app.name, app.name.charAt(0).toUpperCase()+app.name.slice(1)+'Properties')}"
+          :title="app.title"></Block>
     </div>
   </div>
 </template>
@@ -58,7 +74,7 @@
 import Block from "@/components/Block.vue";
 import KubeNode from "@/components/KubeNode.vue";
 import type {FeatureDefinition} from "@/stores/projectStore";
-import {FEATURE_DEFINITIONS, useProjectStore} from "@/stores/projectStore";
+import {ADDON_DEFINITIONS, HELM_APP_DEFINITIONS, useProjectStore} from "@/stores/projectStore";
 import {usePropertiesPanelStore} from "@/stores/propertiesPanelStore";
 import {computed} from "vue";
 
@@ -73,11 +89,19 @@ const isSelected = function (id: string, panelKey: string): boolean {
   return propertiesPanelStore.propertiesId === id && propertiesPanelStore.propertiesPanelKey === panelKey
 }
 
-const enabledFeatures = computed((): FeatureDefinition[] => {
-  return FEATURE_DEFINITIONS.filter(e => store.features.find(i => i.name === e.name));
+const enabledMicroK8sAddons = computed((): FeatureDefinition[] => {
+  return ADDON_DEFINITIONS.filter(e => store.microK8sAddons.find(i => i.name === e.name));
 });
-const availableFeatures = computed((): FeatureDefinition[] => {
-  return FEATURE_DEFINITIONS.filter(e => !store.features.find(i => i.name === e.name));
+const availableMicroK8sAddons = computed((): FeatureDefinition[] => {
+  return ADDON_DEFINITIONS.filter(e => !store.microK8sAddons.find(i => i.name === e.name));
+});
+
+const enabledHelmApps = computed((): FeatureDefinition[] => {
+  return HELM_APP_DEFINITIONS.filter(e => store.helmApps.find(i => i.chartName === e.name));
+});
+
+const availableHelmApps = computed((): FeatureDefinition[] => {
+  return HELM_APP_DEFINITIONS.filter(e => !store.helmApps.find(i => i.chartName === e.name));
 });
 
 </script>

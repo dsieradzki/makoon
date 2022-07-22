@@ -78,31 +78,33 @@ func (g *Generator) GenerateDefaultProject(fileName string) error {
 		Cluster: k4p.Cluster{
 			NodeUsername: "k4prox",
 			NodePassword: "k4prox",
-			Features: []k4p.Feature{
+			MicroK8sAddons: []k4p.MicroK8sAddon{
 				{
-					Name:                       "dns",
-					Args:                       "",
-					KubernetesObjectDefinition: "",
+					Name:                   "dns",
+					Args:                   "",
+					AdditionalK8sResources: nil,
 				},
 				{
-					Name:                       "ingress",
-					Args:                       "",
-					KubernetesObjectDefinition: strings.ReplaceAll(defaultIngressLb, "{{LB_IP}}", ingressLB),
+					Name:                   "helm3",
+					Args:                   "",
+					AdditionalK8sResources: nil,
 				},
 				{
-					Name:                       "metallb",
-					Args:                       metallbIpRange,
-					KubernetesObjectDefinition: "",
+					Name: "ingress",
+					Args: "",
+					AdditionalK8sResources: []string{
+						strings.ReplaceAll(defaultIngressLb, "{{LB_IP}}", ingressLB),
+					},
 				},
 				{
-					Name:                       "openebs",
-					Args:                       "",
-					KubernetesObjectDefinition: "",
+					Name:                   "metallb",
+					Args:                   metallbIpRange,
+					AdditionalK8sResources: nil,
 				},
 				{
-					Name:                       "helm3",
-					Args:                       "",
-					KubernetesObjectDefinition: "",
+					Name:                   "openebs",
+					Args:                   "",
+					AdditionalK8sResources: nil,
 				},
 			},
 			NodeDiskSize: 32,

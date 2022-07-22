@@ -40,6 +40,14 @@ func Map[TI any, TO any](c []TI, mf func(TI) TO) []TO {
 	return result
 }
 
+func MapMap[KTI comparable, VTI any, TO any](c map[KTI]VTI, mf func(KTI, VTI) TO) []TO {
+	var result []TO
+	for k, v := range c {
+		result = append(result, mf(k, v))
+	}
+	return result
+}
+
 func Reduce[TI any, TO any](c []TI, init TO, rf func(acc TO, next TI) TO) TO {
 	var acc = init
 
