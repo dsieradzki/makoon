@@ -14,7 +14,7 @@
             <div class="text-stone-400 mb-1">IP address range</div>
             <div v-if="isFeatureEnabled && valuesAreNotSaved" class="ml-2">
               <Button @click="onUpdate" :disabled="!isFormValid"
-                      class="p-button-rounded p-button-sm p-button-success" :class="$style.updateButton">
+                      class="p-button-rounded p-button-sm p-button-success updateButton">
                 Update
               </Button>
             </div>
@@ -110,9 +110,4 @@ const onClose = function (): void {
 
 </script>
 <style module>
-.updateButton {
-  padding: 0 !important;
-  display: flex;
-  justify-content: center;
-}
 </style>

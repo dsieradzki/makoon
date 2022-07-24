@@ -107,7 +107,7 @@ const onUpdate = function (): void {
   const oldNode = {...getNode()};
   const nodeToUpdate = createUpdatedNode();
   projectStore.updateNode(nodeToUpdate, oldNode);
-  propertiesPanelStore.selectPanel(nodeToUpdate.vmid.toString(), propertiesPanelStore.propertiesPanelKey || "") // Brake method contract or keep ugly default value or something else?
+  propertiesPanelStore.selectPanel(propertiesPanelStore.propertiesPanelKey || "", nodeToUpdate.vmid.toString()) // Brake method contract or keep ugly default value or something else?
 }
 
 const onDelete = function (): void {

@@ -31,7 +31,7 @@ type RsaKeyPair struct {
 	PublicKey  CryptoBytes `json:"publicKey" yaml:"publicKey"`
 }
 
-func (r *RsaKeyPair) Empty() bool {
+func (r RsaKeyPair) Empty() bool {
 	return len(r.PrivateKey) == 0 && len(r.PublicKey) == 0
 }
 

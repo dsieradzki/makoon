@@ -94,8 +94,26 @@ func (p *ProvisionerService) CreateCluster(provisionRequest k4p.ProvisionRequest
 			return err
 		}
 	}
-	if provisionRequest.Stages.InstallFeatures {
-		err = p.k4p.InstallFeatures(projectData.Cluster, projectData.SshKey)
+	if provisionRequest.Stages.InstallAddons {
+		err = p.k4p.InstallAddons(projectData.Cluster, projectData.SshKey)
+		if err != nil {
+			return err
+		}
+	}
+	if provisionRequest.Stages.InstallHelpApps {
+		err = p.k4p.InstallHelmApps(projectData.Cluster, projectData.SshKey)
+		if err != nil {
+			return err
+		}
+	}
+	if provisionRequest.Stages.InstallCustomHelmApps {
+		err = p.k4p.InstallCustomHelmApps(projectData.Cluster, projectData.SshKey)
+		if err != nil {
+			return err
+		}
+	}
+	if provisionRequest.Stages.InstallCustomK8sResources {
+		err = p.k4p.InstallAdditionalK8sResources(projectData.Cluster, projectData.SshKey)
 		if err != nil {
 			return err
 		}

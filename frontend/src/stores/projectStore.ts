@@ -99,6 +99,8 @@ export const useProjectStore = defineStore({
                 nodes: [] as k4p.KubernetesNode[],
                 microK8SAddons: [] as k4p.MicroK8sAddon[],
                 helmApps: [] as k4p.HelmApp[],
+                customHelmApps: [] as k4p.HelmApp[],
+                customK8SResources: [] as k4p.CustomK8sResource[]
             } as k4p.Cluster
         } as project.ProjectData,
         defaultMasterNode: {} as k4p.KubernetesNode
@@ -124,6 +126,12 @@ export const useProjectStore = defineStore({
         },
         helmApps: (state: State): k4p.HelmApp[] => {
             return state.project.cluster.helmApps;
+        },
+        customHelmApps: (state: State): k4p.HelmApp[] => {
+            return state.project.cluster.customHelmApps;
+        },
+        customK8SResources: (state: State): k4p.CustomK8sResource[] => {
+            return state.project.cluster.customK8SResources;
         }
     },
     actions: {
@@ -214,6 +222,39 @@ export const useProjectStore = defineStore({
         },
         disableMicroK8SAddon(name: string) {
             this.project.cluster.microK8SAddons = this.project.cluster.microK8SAddons.filter((e: k4p.MicroK8sAddon) => e.name !== name);
-        }
+        },
+
+
+        enableHelmApp(app: k4p.HelmApp) {
+            this.project.cluster.helmApps.push(app);
+        },
+        updateHelmApp(app: k4p.HelmApp) {
+            const index = this.project.cluster.helmApps.findIndex((e: k4p.HelmApp) => e.releaseName == app.releaseName);
+            this.project.cluster.helmApps[index] = app;
+        },
+        disableHelmApp(releaseName: string) {
+            this.project.cluster.helmApps = this.project.cluster.helmApps.filter((e: k4p.HelmApp) => e.releaseName !== releaseName);
+        },
+
+        addCustomHelmApp(app: k4p.HelmApp) {
+            this.project.cluster.customHelmApps.push(app);
+        },
+        updateCustomHelmApp(old: k4p.HelmApp, newApp: k4p.HelmApp) {
+            const index = this.project.cluster.customHelmApps.findIndex((e: k4p.HelmApp) => e.releaseName == old.releaseName);
+            this.project.cluster.customHelmApps[index] = newApp;
+        },
+        deleteCustomHelmApp(releaseName: string) {
+            this.project.cluster.customHelmApps = this.project.cluster.customHelmApps.filter((e: k4p.HelmApp) => e.releaseName !== releaseName);
+        },
+        addCustomK8SResources(cks: k4p.CustomK8sResource) {
+            this.project.cluster.customK8SResources.push(cks);
+        },
+        updateCustomK8SResources(oldCkr: k4p.CustomK8sResource, newCkr: k4p.CustomK8sResource) {
+            const index = this.project.cluster.customK8SResources.findIndex((e: k4p.CustomK8sResource) => e.name == oldCkr.name);
+            this.project.cluster.customK8SResources[index] = newCkr;
+        },
+        deleteCustomK8SResources(name: string) {
+            this.project.cluster.customK8SResources = this.project.cluster.customK8SResources.filter((e: k4p.CustomK8sResource) => e.name !== name);
+        },
     }
 })

@@ -73,8 +73,20 @@
             Join nodes to Cluster
           </div>
           <div class="mt-1">
-            <Checkbox :binary="true" v-model="installFeatures"/>
-            Install Features
+            <Checkbox :binary="true" v-model="installAddons"/>
+            Install Addons
+          </div>
+          <div class="mt-1">
+            <Checkbox :binary="true" v-model="installHelpApps"/>
+            Install Helm Apps
+          </div>
+          <div class="mt-1">
+            <Checkbox :binary="true" v-model="installCustomHelmApps"/>
+            Install custom Helm Apps
+          </div>
+          <div class="mt-1">
+            <Checkbox :binary="true" v-model="installCustomK8SResources"/>
+            Install custom Kubernetes Resources
           </div>
         </div>
       </div>
@@ -110,7 +122,10 @@ const createVm = ref(true);
 const setupVm = ref(true);
 const installKubernetes = ref(true);
 const joinNodes = ref(true);
-const installFeatures = ref(true);
+const installAddons = ref(true);
+const installHelpApps = ref(true);
+const installCustomHelmApps = ref(true);
+const installCustomK8SResources = ref(true);
 
 
 const networks = ref<string[]>([]);
@@ -130,7 +145,10 @@ const deployCluster = function () {
       setupVirtualMachines: setupVm.value,
       installKubernetes: installKubernetes.value,
       joinNodesToCluster: joinNodes.value,
-      installFeatures: installFeatures.value
+      installAddons: installAddons.value,
+      installHelpApps: installHelpApps.value,
+      installCustomHelmApps: installCustomHelmApps.value,
+      installCustomK8SResources: installCustomK8SResources.value
     }
   } as k4p.ProvisionRequest);
 }

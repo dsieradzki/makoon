@@ -8,7 +8,7 @@ require (
 	github.com/onsi/ginkgo/v2 v2.1.4
 	github.com/onsi/gomega v1.19.0
 	github.com/sirupsen/logrus v1.9.0
-	github.com/wailsapp/wails/v2 v2.0.0-beta.39.2
+	github.com/wailsapp/wails/v2 v2.0.0-beta.38
 	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d
 )
 

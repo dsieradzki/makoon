@@ -1,8 +1,8 @@
 <template>
-  <Button :disabled="disabled" v-if="!isFeatureEnabled" @click="onEnable">
+  <Button :disabled="disabled" v-if="!isAppEnabled" @click="onEnable">
     Enable
   </Button>
-  <Button v-if="isFeatureEnabled" @click="onDisable">
+  <Button v-if="isAppEnabled" @click="onDisable">
     Disable
   </Button>
 </template>
@@ -11,21 +11,22 @@
 import {computed} from "vue";
 import {useProjectStore} from "@/stores/projectStore";
 import Button from "primevue/button";
+import type {k4p} from "@wails/models";
 
 const projectStore = useProjectStore();
 
 const props = defineProps<{
-  featureName: string;
+  app: k4p.HelmApp;
   disabled?: boolean
 }>();
 
 const onEnable = function (): void {
-  projectStore.enableMicroK8SAddon(props.featureName);
+  projectStore.enableHelmApp(props.app);
 }
 const onDisable = function (): void {
-  projectStore.disableMicroK8SAddon(props.featureName);
+  projectStore.disableHelmApp(props.app.chartName);
 }
-const isFeatureEnabled = computed((): boolean => {
-  return !!projectStore.microK8sAddons.find(e => e.name === props.featureName);
+const isAppEnabled = computed((): boolean => {
+  return !!projectStore.helmApps.find(e => e.chartName === props.app.chartName);
 })
 </script>

@@ -1,44 +1,3 @@
-export namespace project {
-	
-	export class ProjectData {
-	    kubeConfig: string;
-	    // Go type: ssh.RsaKeyPair
-	    sshKey: any;
-	    // Go type: k4p.Cluster
-	    cluster: any;
-	
-	    static createFrom(source: any = {}) {
-	        return new ProjectData(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.kubeConfig = source["kubeConfig"];
-	        this.sshKey = this.convertValues(source["sshKey"], null);
-	        this.cluster = this.convertValues(source["cluster"], null);
-	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
-	}
-
-}
-
 export namespace k4p {
 	
 	export class Network {
@@ -81,6 +40,20 @@ export namespace k4p {
 	        this.ipAddress = source["ipAddress"];
 	        this.storagePool = source["storagePool"];
 	        this.nodeType = source["nodeType"];
+	    }
+	}
+	export class CustomK8sResource {
+	    name: string;
+	    content: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new CustomK8sResource(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.content = source["content"];
 	    }
 	}
 	export class HelmApp {
@@ -128,6 +101,8 @@ export namespace k4p {
 	    nodePassword: string;
 	    microK8SAddons: MicroK8sAddon[];
 	    helmApps: HelmApp[];
+	    customHelmApps: HelmApp[];
+	    customK8SResources: CustomK8sResource[];
 	    nodeDiskSize: number;
 	    nodes: KubernetesNode[];
 	    // Go type: Network
@@ -143,6 +118,8 @@ export namespace k4p {
 	        this.nodePassword = source["nodePassword"];
 	        this.microK8SAddons = this.convertValues(source["microK8SAddons"], MicroK8sAddon);
 	        this.helmApps = this.convertValues(source["helmApps"], HelmApp);
+	        this.customHelmApps = this.convertValues(source["customHelmApps"], HelmApp);
+	        this.customK8SResources = this.convertValues(source["customK8SResources"], CustomK8sResource);
 	        this.nodeDiskSize = source["nodeDiskSize"];
 	        this.nodes = this.convertValues(source["nodes"], KubernetesNode);
 	        this.network = this.convertValues(source["network"], null);
@@ -171,7 +148,10 @@ export namespace k4p {
 	    setupVirtualMachines: boolean;
 	    installKubernetes: boolean;
 	    joinNodesToCluster: boolean;
-	    installFeatures: boolean;
+	    installAddons: boolean;
+	    installHelpApps: boolean;
+	    installCustomHelmApps: boolean;
+	    installCustomK8SResources: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new ProvisionStage(source);
@@ -183,7 +163,10 @@ export namespace k4p {
 	        this.setupVirtualMachines = source["setupVirtualMachines"];
 	        this.installKubernetes = source["installKubernetes"];
 	        this.joinNodesToCluster = source["joinNodesToCluster"];
-	        this.installFeatures = source["installFeatures"];
+	        this.installAddons = source["installAddons"];
+	        this.installHelpApps = source["installHelpApps"];
+	        this.installCustomHelmApps = source["installCustomHelmApps"];
+	        this.installCustomK8SResources = source["installCustomK8SResources"];
 	    }
 	}
 	export class ProvisionRequest {
@@ -246,6 +229,47 @@ export namespace tasklog {
 	        this.name = source["name"];
 	        this.details = source["details"];
 	        this.state = source["state"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+
+}
+
+export namespace project {
+	
+	export class ProjectData {
+	    kubeConfig: string;
+	    // Go type: ssh.RsaKeyPair
+	    sshKey: any;
+	    // Go type: k4p.Cluster
+	    cluster: any;
+	
+	    static createFrom(source: any = {}) {
+	        return new ProjectData(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.kubeConfig = source["kubeConfig"];
+	        this.sshKey = this.convertValues(source["sshKey"], null);
+	        this.cluster = this.convertValues(source["cluster"], null);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

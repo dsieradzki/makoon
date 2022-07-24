@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/ssh"
-	"time"
 )
 
 func NewSshClient() *Client {
@@ -60,7 +60,6 @@ func (p *Client) Execute(command string) (ExecutionResult, error) {
 			Auth: []ssh.AuthMethod{
 				ssh.PublicKeys(signer),
 			},
-			Timeout:         10 * time.Minute,
 			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 		}
 	}
@@ -69,14 +68,21 @@ func (p *Client) Execute(command string) (ExecutionResult, error) {
 	if err != nil {
 		return ExecutionResult{}, err
 	}
-	defer conn.Close()
-
 	// Session
 	session, err := conn.NewSession()
 	if err != nil {
 		return ExecutionResult{}, err
 	}
-	defer session.Close()
+	defer func() {
+		err := session.Close()
+		if err != nil {
+			log.WithError(err).Error("cannot close session")
+		}
+		err = conn.Close()
+		if err != nil {
+			log.WithError(err).Error("cannot close connection")
+		}
+	}()
 
 	//Run command
 	var buffOut bytes.Buffer
@@ -118,14 +124,14 @@ type ExecutionResult struct {
 	error  *ExecutionError
 }
 
-func (r *ExecutionResult) Error() error {
+func (r ExecutionResult) Error() error {
 	if r.error != nil {
 		return r.error.ToError()
 	}
 	return nil
 }
 
-func (r *ExecutionResult) Code() int {
+func (r ExecutionResult) Code() int {
 	if r.error != nil {
 		return r.error.Code
 	}

@@ -10,14 +10,14 @@ import (
 	"math"
 )
 
-func (k *Service) InstallKubernetesOnNodes(provisionRequest Cluster, keyPair ssh.RsaKeyPair) error {
+func (k *Service) InstallKubernetesOnNodes(cluster Cluster, keyPair ssh.RsaKeyPair) error {
 	executor := task.NewTaskExecutor[any]()
-	for _, node := range provisionRequest.Nodes {
+	for _, node := range cluster.Nodes {
 		executor.AddTask(
 			context.WithValue(context.Background(), "NODE", node),
 			func(c context.Context) (any, error) {
 				nodeToInstall := c.Value("NODE").(KubernetesNode)
-				return nil, k.installKubernetesOnNode(provisionRequest, nodeToInstall, keyPair)
+				return nil, k.installKubernetesOnNode(cluster, nodeToInstall, keyPair)
 			})
 	}
 	executor.Wait()

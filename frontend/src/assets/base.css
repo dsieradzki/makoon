@@ -98,3 +98,9 @@ input::placeholder {
   width: 60px !important;
   height: 60px !important;
 }
+
+.updateButton {
+  padding: 0 !important;
+  display: flex;
+  justify-content: center;
+}
