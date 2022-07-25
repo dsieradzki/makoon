@@ -94,7 +94,7 @@ const defaultApp = {
     "configs.secret.argocdServerAdminPassword": "",
     "server.service.servicePortHttp": "3000",
     "server.service.servicePortHttps": "3443",
-    "server.service.labels": '"metallb.universe.tf/allow-shared-ip"=management'
+    'server.service.labels."metallb.universe.tf/allow-shared-ip"': "management"
   },
   additionalK8SResources: [],
   valueFileContent: "",
