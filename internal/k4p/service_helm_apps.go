@@ -79,7 +79,7 @@ func (k *Service) installHelmApp(feature HelmApp, sshMasterNode *ssh.Client) err
 	}
 
 	params := collect.MapMap(feature.Parameters, func(k string, v string) string {
-		return fmt.Sprintf("--set %s=%s", k, v)
+		return fmt.Sprintf("--set %s='%s'", k, v)
 	})
 
 	executionResult, err = sshMasterNode.Executef("sudo microk8s.helm3 upgrade --install --create-namespace -n%s %s %s %s %s",

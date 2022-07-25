@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col w-full h-full items-center">
-    <div class="grow">
+    <div class="grow w-full">
       <div class="text-3xl text-center font-bold mt-5">OpenEBS</div>
       <div class="p-10">
         <div>

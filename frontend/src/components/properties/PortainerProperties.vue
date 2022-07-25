@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col w-full h-full items-center">
-    <div class="grow">
+    <div class="grow w-full">
       <div class="text-3xl text-center font-bold mt-5">Portainer</div>
       <div class="p-10">
         <div>
@@ -112,13 +112,13 @@ metadata:
   annotations:
     meta.helm.sh/release-name: portainer
     meta.helm.sh/release-namespace: portainer
+    metallb.universe.tf/allow-shared-ip: "management"
   labels:
     app.kubernetes.io/instance: portainer
     app.kubernetes.io/name: portainer
     app.kubernetes.io/version: ce-latest-ee-2.14.1
     helm.sh/chart: portainer-1.0.32
     io.portainer.kubernetes.application.stack: portainer
-    metallb.universe.tf/allow-shared-ip: "management"
   name: portainer-lb-service
   namespace: portainer
 spec:

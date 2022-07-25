@@ -1,8 +1,8 @@
 <template>
   <div class="flex flex-col w-full h-full items-center">
-    <div class="grow">
+    <div class="grow w-full">
       <div class="text-3xl text-center font-bold mt-5">Metrics Server</div>
-      <div class="p-10">
+      <div class="p-5">
         <div>
           Metrics Server is a scalable, efficient source of container resource metrics for Kubernetes built-in autoscaling pipelines.
         </div>

@@ -44,7 +44,7 @@ export const ADDON_DEFINITIONS: FeatureDefinition[] = [
 
 export const HELM_APP_DEFINITIONS: FeatureDefinition[] = [
     {
-        name: "argo-cd",
+        name: "argocd",
         title: "Argo CD",
     },
     {

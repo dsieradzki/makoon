@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col w-full h-full items-center">
-    <div class="grow">
+    <div class="grow w-full">
       <div class="text-3xl text-center font-bold mt-5">Argo CD</div>
       <div class="p-10">
         <div>
@@ -60,7 +60,7 @@
     </div>
 
 
-    <div class="pb-10">
+    <div class="pb-10 mt-5">
       <Button @click="onClose"
               icon="pi pi-times"
               class="p-button-rounded p-button-primary p-button-outlined" title="Close"></Button>
@@ -80,12 +80,13 @@ import {EncodeUsingBCrypt} from "@wails/service/PasswordEncoder";
 
 const propertiesPanelStore = usePropertiesPanelStore();
 const projectStore = useProjectStore();
-const appName = "argo-cd"
+const appName = "argocd"
 const loadBalancerIPParamName = "server.service.loadBalancerIP";
 const passwordParamName = "configs.secret.argocdServerAdminPassword";
+
 const defaultApp = {
   chartName: "argo-cd",
-  namespace: "argo-cd",
+  namespace: "argocd",
   releaseName: appName,
   repository: "https://argoproj.github.io/argo-helm",
   parameters: {
@@ -94,7 +95,7 @@ const defaultApp = {
     "configs.secret.argocdServerAdminPassword": "",
     "server.service.servicePortHttp": "3000",
     "server.service.servicePortHttps": "3443",
-    'server.service.labels."metallb.universe.tf/allow-shared-ip"': "management"
+    "server.service.annotations.\"metallb\\.universe\\.tf/allow-shared-ip\"": "management"
   },
   additionalK8SResources: [],
   valueFileContent: "",

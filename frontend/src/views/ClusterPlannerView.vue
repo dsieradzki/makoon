@@ -28,14 +28,14 @@
 
       <div v-if="!deployInProgress" class="flex h-full">
         <ClusterSettings @deployCluster="deployCluster"
-                         class="overflow-y-auto  overflow-x-visible border-r-4 border-stone-800 min-w-[350px]"></ClusterSettings>
+                         class="overflow-y-auto  overflow-x-visible border-r-4 border-stone-800 min-w-[500px]"></ClusterSettings>
         <div class="grow">
           <div class="flex h-full">
             <ClusterContent class="grow overflow-y-auto overflow-x-visible"></ClusterContent>
             <div v-if="propertiesPanelStore.anySelected" class="relative">
-              <div class="absolute left-[-355px] h-full">
+              <div class="absolute left-[-500px] h-full">
                 <PropertiesPanel
-                    class="overflow-y-auto h-full border-l-4 border-stone-800 min-w-[350px]"></PropertiesPanel>
+                    class="overflow-y-auto h-full border-l-4 border-stone-800 min-w-[495px]"></PropertiesPanel>
               </div>
             </div>
           </div>

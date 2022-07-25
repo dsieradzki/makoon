@@ -1,8 +1,8 @@
 <template>
   <div class="flex flex-col w-full h-full items-center">
-    <div class="grow">
+    <div class="grow w-full">
       <div class="text-3xl text-center font-bold mt-5">Custom Resource</div>
-      <div>
+      <div class="p-10">
         <div class="mt-3">
           <div class="border-t-2 border-stone-500 text-xl mt-10 mb-3 flex pt-2 mb-5">
             <div>
@@ -24,7 +24,7 @@
           <div class="flex flex-col mb-2">
             <div class="mr-1">Content:</div>
             <div class="">
-              <TextArea class="w-full p-inputtext-sm" v-model="content"></TextArea>
+              <TextArea class="w-full p-inputtext-sm font-mono" v-model="content" rows="10"></TextArea>
             </div>
           </div>
         </div>
