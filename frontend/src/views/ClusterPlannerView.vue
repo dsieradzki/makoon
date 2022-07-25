@@ -65,7 +65,6 @@ import ProgressSpinner from 'primevue/progressspinner';
 import {useTaskLogStore} from "@/stores/eventStore";
 import {ClearTaskLog} from "@wails/service/TaskLogService";
 import {usePropertiesPanelStore} from "@/stores/propertiesPanelStore";
-import {repackWailsPromise} from "@/utils/promise";
 
 const projectStore = useProjectStore();
 const taskLogStore = useTaskLogStore();
@@ -81,25 +80,18 @@ projectStore.$subscribe(() => {
 })
 
 const propertiesPanelStore = usePropertiesPanelStore();
-const deployCluster = function (pr: k4p.ProvisionRequest): void {
+
+const deployCluster = async function (pr: k4p.ProvisionRequest) {
   deployInProgress.value = true;
-  ClearTaskLog().then(() => {
-    repackWailsPromise(SetupEnvironmentOnProxmox())
-        .then(() => {
-          repackWailsPromise(CreateCluster(pr))
-              .then(() => {
-                deployInProgress.value = false;
-                console.log("Cluster created");
-                router.push({name: "summary"})
-              })
-              .catch(() => {
-                deployInProgress.value = false;
-              })
-        })
-        .catch(() => {
-          deployInProgress.value = false;
-        });
-  });
+  try {
+    await ClearTaskLog();
+    await SetupEnvironmentOnProxmox();
+    await CreateCluster(pr);
+    console.log("Cluster created");
+    await router.push({name: "summary"})
+  } finally {
+    deployInProgress.value = false;
+  }
 }
 </script>
 <style>

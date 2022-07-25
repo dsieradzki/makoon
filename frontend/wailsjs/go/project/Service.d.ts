@@ -3,18 +3,18 @@
 import {project} from '../models';
 import {context} from '../models';
 
+export function LoadProject():Promise<project.ProjectData>;
+
+export function OpenProjectDialog():Promise<boolean>;
+
 export function SaveKubeConfigDialog():Promise<Error>;
 
 export function SaveProject(arg1:project.ProjectData):Promise<Error>;
 
-export function SaveProjectDialog():Promise<boolean|Error>;
+export function SaveProjectDialog():Promise<boolean>;
 
 export function SaveSshAuthorizationKeyDialog():Promise<Error>;
 
 export function SaveSshPrivateKeyDialog():Promise<Error>;
 
 export function SetContext(arg1:context.Context):void;
-
-export function LoadProject():Promise<project.ProjectData|Error>;
-
-export function OpenProjectDialog():Promise<boolean|Error>;

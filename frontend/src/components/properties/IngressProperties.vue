@@ -58,6 +58,7 @@ import {computed, onMounted, ref} from "vue";
 import {useProjectStore} from "@/stores/projectStore";
 import InputText from "primevue/inputtext";
 import Checkbox from 'primevue/checkbox';
+import type {k4p} from "@wails/models";
 
 const LOAD_BALANCER_SERVICE_TEMPLATE = `
 apiVersion: v1
@@ -97,18 +98,24 @@ onMounted(() => {
     return
   }
 
-  const lbLine = feature.additionalK8SResources[0]
-      .split('\n')
-      .find(e => e.indexOf("loadBalancerIP:") != -1)
-  if (!lbLine) {
-    return;
-  }
-  ip.value = lbLine.substring(lbLine.indexOf(":") + 1).trim();
+  ip.value = extractLbIp(feature);
   if (ip.value.length > 0) {
     useLB.value = true;
   }
 });
 
+const extractLbIp = function (feature: k4p.MicroK8sAddon): string {
+  if (feature.additionalK8SResources.length == 0) {
+    return "";
+  }
+  const lbLine = feature.additionalK8SResources[0]
+      .split('\n')
+      .find(e => e.indexOf("loadBalancerIP:") != -1)
+  if (!lbLine) {
+    return "";
+  }
+  return lbLine.substring(lbLine.indexOf(":") + 1).trim();
+}
 const onClose = function (): void {
   propertiesPanelStore.deselect();
 }

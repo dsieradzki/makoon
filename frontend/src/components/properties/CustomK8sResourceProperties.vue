@@ -2,10 +2,12 @@
   <div class="flex flex-col w-full h-full items-center">
     <div class="grow">
       <div class="text-3xl text-center font-bold mt-5">Custom Resource</div>
-      <div class="p-10">
+      <div>
         <div class="mt-3">
-          <div class="flex">
-            <div class="text-stone-400 mb-1">Properties</div>
+          <div class="border-t-2 border-stone-500 text-xl mt-10 mb-3 flex pt-2 mb-5">
+            <div>
+              Properties
+            </div>
             <div v-if="valuesAreNotSaved" class="ml-2">
               <Button @click="onUpdate" :disabled="!isFormValid"
                       class="p-button-rounded p-button-sm p-button-success updateButton">
@@ -13,37 +15,33 @@
               </Button>
             </div>
           </div>
-          <table>
-            <tr>
-              <td>
-                <div class="mr-1">Name:</div>
-              </td>
-              <td>
-                <InputText class="w-full p-inputtext-sm" v-model="name"></InputText>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <div class="mr-1">Content:</div>
-              </td>
-              <td>
-                <TextArea class="w-full p-inputtext-sm" v-model="content"></TextArea>
-              </td>
-            </tr>
-          </table>
+          <div class="flex flex-col mb-2">
+            <div class="mr-1">Name:</div>
+            <div class="">
+              <InputText class="w-full p-inputtext-sm" v-model="name"></InputText>
+            </div>
+          </div>
+          <div class="flex flex-col mb-2">
+            <div class="mr-1">Content:</div>
+            <div class="">
+              <TextArea class="w-full p-inputtext-sm" v-model="content"></TextArea>
+            </div>
+          </div>
         </div>
         <div class="mt-10 flex flex-col items-center">
           <div class="flex justify-center items-center">
-            <div class="mr-5">
-              <Button @click="onUpdate" icon="pi pi-save"
-                      class="p-button-rounded p-button-primary p-button-lg largeButton" title="Save">
-              </Button>
+            <Button v-if="isNew" :disabled="!isFormValid" @click="onUpdate" icon="pi pi-save"
+                    class="p-button-rounded p-button-primary p-button-lg largeButton" title="Save">
+            </Button>
+
+            <div v-if="!isNew">
+              <Button @click="onDelete" icon="pi pi-trash"
+                      class="p-button-rounded p-button-danger p-button-outlined"></Button>
             </div>
-            <Button @click="onDelete" icon="pi pi-trash"
-                    class="p-button-rounded p-button-danger p-button-outlined"></Button>
           </div>
 
         </div>
+
       </div>
     </div>
 
@@ -69,18 +67,28 @@ const projectStore = useProjectStore();
 
 const ckr = ref<k4p.CustomK8sResource>({} as k4p.CustomK8sResource);
 
+propertiesPanelStore.$subscribe(fillProperties);
+
 onMounted(() => {
+  fillProperties();
+});
+
+function fillProperties() {
   const resFromStore = projectStore.customK8SResources.find(e => e.name === propertiesPanelStore.propertiesId);
   if (resFromStore) {
     ckr.value = resFromStore;
+  } else {
+    ckr.value = {} as k4p.CustomK8sResource;
   }
-});
+  name.value = ckr.value.name || "";
+  content.value = ckr.value.content || ""
+}
 
 const name = ref<string>("");
 const content = ref<string>("");
 
 const isFormValid = computed((): boolean => {
-  return name.value.trim().length > 0;
+  return name.value.trim().length > 0 && content.value.trim().length > 0;
 });
 
 const valuesAreNotSaved = computed((): boolean => {
@@ -96,11 +104,12 @@ const onUpdate = function (): void {
     name: name.value,
     content: content.value
   };
-  if (isNew()) {
+  if (isNew.value) {
     projectStore.addCustomK8SResources(ckrToSave);
   } else {
     projectStore.updateCustomK8SResources(ckr.value, ckrToSave);
   }
+  propertiesPanelStore.selectPanel("CustomK8sResourceProperties", name.value);
 }
 
 const onClose = function (): void {
@@ -110,9 +119,9 @@ const onDelete = function (): void {
   projectStore.deleteCustomK8SResources(ckr.value.name);
   propertiesPanelStore.deselect();
 }
-const isNew = function (): boolean {
-  return !!projectStore.customK8SResources.find(e => e.name === ckr.value.name);
-}
+const isNew = computed((): boolean => {
+  return !projectStore.customK8SResources.find(e => e.name === ckr.value.name);
+});
 </script>
 <style>
 

@@ -25,6 +25,10 @@ export const ADDON_DEFINITIONS: FeatureDefinition[] = [
         title: "Helm 3"
     },
     {
+        name: "metrics-server",
+        title: "Metrics Server"
+    },
+    {
         name: "ingress",
         title: "Ingress controller",
     },
@@ -40,7 +44,7 @@ export const ADDON_DEFINITIONS: FeatureDefinition[] = [
 
 export const HELM_APP_DEFINITIONS: FeatureDefinition[] = [
     {
-        name: "argocd",
+        name: "argo-cd",
         title: "Argo CD",
     },
     {

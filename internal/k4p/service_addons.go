@@ -16,7 +16,7 @@ func (k *Service) InstallAddons(provisionRequest Cluster, keyPair ssh.RsaKeyPair
 	}
 	if executionResult.IsError() {
 		eventSession.ReportError(executionResult.Error())
-		return err
+		return executionResult.Error()
 	}
 	eventSession.Done()
 
@@ -30,7 +30,7 @@ func (k *Service) InstallAddons(provisionRequest Cluster, keyPair ssh.RsaKeyPair
 
 		err = k.installAdditionalK8sResources(feature.Name, feature.AdditionalK8sResources, sshMasterNode)
 		if err != nil {
-			eventSession.ReportError(executionResult.Error())
+			eventSession.ReportError(err)
 			return err
 		}
 		eventSession.Done()
@@ -49,7 +49,7 @@ func (k *Service) enableAddon(feature MicroK8sAddon, sshMasterNode *ssh.Client) 
 		return err
 	}
 	if executionResult.IsError() {
-		return err
+		return executionResult.Error()
 	}
 	return nil
 }

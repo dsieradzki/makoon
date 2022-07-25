@@ -53,7 +53,7 @@
       <div class="mt-5 flex flex-col justify-center">
         <div>
           <InputSwitch v-model="showAdvanced"/>
-          <span class="ml-2">Advanced</span>
+          <span class="ml-2">Manual steps selection</span>
         </div>
         <div v-if="showAdvanced" class="flex flex-col">
           <div class="mt-1">

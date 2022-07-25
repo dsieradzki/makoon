@@ -90,6 +90,11 @@ func (g *Generator) GenerateDefaultProject(fileName string) error {
 					AdditionalK8sResources: nil,
 				},
 				{
+					Name:                   "metrics-server",
+					Args:                   "",
+					AdditionalK8sResources: nil,
+				},
+				{
 					Name: "ingress",
 					Args: "",
 					AdditionalK8sResources: []string{

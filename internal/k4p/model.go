@@ -30,6 +30,7 @@ type HelmApp struct {
 	Parameters             map[string]string `json:"parameters" yaml:"parameters"`
 	AdditionalK8sResources []string          `json:"additionalK8SResources" yaml:"additionalK8SResources"`
 	ValueFileContent       string            `json:"valueFileContent" yaml:"valueFileContent"`
+	ProjectParams          map[string]string `json:"projectParams" yaml:"projectParams"`
 }
 type MicroK8sAddon struct {
 	Name                   string   `json:"name" yaml:"name"`

@@ -2,10 +2,12 @@
   <div class="flex flex-col w-full h-full items-center">
     <div class="grow">
       <div class="text-3xl text-center font-bold mt-5">Custom Helm app</div>
-      <div class="p-10">
+      <div>
         <div class="mt-3">
-          <div class="flex">
-            <div class="text-stone-400 mb-1">Properties</div>
+          <div class="border-t-2 border-stone-500 text-xl mt-10 mb-3 flex pt-2 mb-5">
+            <div>
+              Properties
+            </div>
             <div v-if="valuesAreNotSaved" class="ml-2">
               <Button @click="onUpdate" :disabled="!isFormValid"
                       class="p-button-rounded p-button-sm p-button-success updateButton">
@@ -13,58 +15,47 @@
               </Button>
             </div>
           </div>
-          <table>
-            <tr>
-              <td>
-                <div class="mr-1">Release name:</div>
-              </td>
-              <td>
-                <InputText class="w-full p-inputtext-sm" v-model="releaseName"></InputText>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <div class="mr-1">Chart name:</div>
-              </td>
-              <td>
-                <InputText class="w-full p-inputtext-sm" v-model="chartName"></InputText>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <div class="mr-1">Repository:</div>
-              </td>
-              <td>
-                <InputText class="w-full p-inputtext-sm" v-model="repository"></InputText>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <div class="mr-1">Namespace:</div>
-              </td>
-              <td>
-                <InputText class="w-full p-inputtext-sm" v-model="namespace"></InputText>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <div class="mr-1">Values:</div>
-              </td>
-              <td>
-                <TextArea class="w-full p-inputtext-sm" v-model="valuesFileContent"></TextArea>
-              </td>
-            </tr>
-          </table>
+          <div class="flex flex-col mb-2">
+            <div class="mr-1">Release name:</div>
+            <div class="">
+              <InputText class="w-full p-inputtext-sm" v-model="releaseName"></InputText>
+            </div>
+          </div>
+          <div class="flex flex-col mb-2">
+            <div class="mr-1">Chart name:</div>
+            <div class="">
+              <InputText class="w-full p-inputtext-sm" v-model="chartName"></InputText>
+            </div>
+          </div>
+          <div class="flex flex-col mb-2">
+            <div class="mr-1">Repository:</div>
+            <div class="">
+              <InputText class="w-full p-inputtext-sm" v-model="repository"></InputText>
+            </div>
+          </div>
+          <div class="flex flex-col mb-2">
+            <div class="mr-1">Namespace:</div>
+            <div class="">
+              <InputText class="w-full p-inputtext-sm" v-model="namespace"></InputText>
+            </div>
+          </div>
+          <div class="flex flex-col mb-2">
+            <div class="mr-1">Values:</div>
+            <div class="">
+              <TextArea class="w-full p-inputtext-sm" v-model="valuesFileContent"></TextArea>
+            </div>
+          </div>
         </div>
         <div class="mt-10 flex flex-col items-center">
           <div class="flex justify-center items-center">
-            <div class="mr-5">
-              <Button @click="onUpdate" icon="pi pi-save"
-                      class="p-button-rounded p-button-primary p-button-lg largeButton" title="Save">
-              </Button>
+            <Button v-if="isNew" :disabled="!isFormValid" @click="onUpdate" icon="pi pi-save"
+                    class="p-button-rounded p-button-primary p-button-lg largeButton" title="Save">
+            </Button>
+
+            <div v-if="!isNew">
+              <Button @click="onDelete" icon="pi pi-trash"
+                      class="p-button-rounded p-button-danger p-button-outlined"></Button>
             </div>
-            <Button @click="onDelete" icon="pi pi-trash"
-                    class="p-button-rounded p-button-danger p-button-outlined"></Button>
           </div>
 
         </div>
@@ -93,12 +84,25 @@ const projectStore = useProjectStore();
 
 const cha = ref<k4p.HelmApp>({} as k4p.HelmApp);
 
+propertiesPanelStore.$subscribe(fillProperties);
+
 onMounted(() => {
+  fillProperties();
+});
+
+function fillProperties() {
   const appFromStore = projectStore.customHelmApps.find(e => e.releaseName === propertiesPanelStore.propertiesId);
   if (appFromStore) {
     cha.value = appFromStore;
+  } else {
+    cha.value = {} as k4p.HelmApp;
   }
-});
+  releaseName.value = cha.value.releaseName || "";
+  chartName.value = cha.value.chartName || "";
+  repository.value = cha.value.repository || "";
+  namespace.value = cha.value.namespace || "";
+  valuesFileContent.value = cha.value.valueFileContent || "";
+}
 
 const releaseName = ref<string>("");
 const chartName = ref<string>("");
@@ -133,12 +137,12 @@ const onUpdate = function (): void {
     namespace: namespace.value,
     valueFileContent: valuesFileContent.value
   } as k4p.HelmApp;
-
-  if (isNew()) {
+  if (isNew.value) {
     projectStore.addCustomHelmApp(appToSave);
   } else {
     projectStore.updateCustomHelmApp(cha.value, appToSave);
   }
+  propertiesPanelStore.selectPanel("CustomHelmAppProperties", releaseName.value);
 }
 
 const onClose = function (): void {
@@ -148,9 +152,10 @@ const onDelete = function (): void {
   projectStore.deleteCustomHelmApp(cha.value.releaseName);
   propertiesPanelStore.deselect();
 }
-const isNew = function (): boolean {
-  return !!projectStore.customHelmApps.find(e => e.releaseName === cha.value.releaseName);
-}
+const isNew = computed((): boolean => {
+  return !projectStore.customHelmApps.find(e => e.releaseName === cha.value.releaseName);
+})
+
 </script>
 <style>
 

@@ -29,21 +29,21 @@ func (k *Service) installAdditionalK8sResources(featureName string, resources []
 				return err
 			}
 			if executionResult.IsError() {
-				return err
+				return executionResult.Error()
 			}
 			executionResult, err = sshMasterNode.Executef("sudo microk8s.kubectl apply -f /tmp/%s-%d.yaml", featureName, idx)
 			if err != nil {
 				return err
 			}
 			if executionResult.IsError() {
-				return err
+				return executionResult.Error()
 			}
 			executionResult, err = sshMasterNode.Executef("sudo rm /tmp/%s-%d.yaml", featureName, idx)
 			if err != nil {
 				return err
 			}
 			if executionResult.IsError() {
-				return err
+				return executionResult.Error()
 			}
 		}
 

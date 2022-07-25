@@ -37,16 +37,16 @@
           v-for="addon in enabledMicroK8sAddons"
           :key="addon.name"
           class="mr-5"
-          :selected="isSelected(featurePanelName(app.name), addon.name)"
-          @select="()=>{onSelectBlock(featurePanelName(app.name), addon.name)}"
+          :selected="isSelected(featurePanelName(addon.name), addon.name)"
+          @select="()=>{onSelectBlock(featurePanelName(addon.name), addon.name)}"
           :title="addon.title"></Block>
       <Block
           v-for="addon in availableMicroK8sAddons"
           :key="addon.name"
           :not-active="true"
           class="mr-5"
-          :selected="isSelected(featurePanelName(app.name), addon.name)"
-          @select="()=>{onSelectBlock(featurePanelName(app.name), addon.name)}"
+          :selected="isSelected(featurePanelName(addon.name), addon.name)"
+          @select="()=>{onSelectBlock(featurePanelName(addon.name), addon.name)}"
           :title="addon.title"></Block>
     </div>
 
@@ -75,10 +75,10 @@
           v-for="app in store.customHelmApps"
           :key="app.releaseName"
           class="mr-5"
-          :selected="isSelected('CustomHelmApp', app.releaseName)"
-          @select="()=>{onSelectBlock('CustomHelmApp', app.releaseName)}"
+          :selected="isSelected('CustomHelmAppProperties', app.releaseName)"
+          @select="()=>{onSelectBlock('CustomHelmAppProperties', app.releaseName)}"
           :title="app.releaseName"></Block>
-      <Block class="flex justify-center items-center w-[200px] h-[200px]"
+      <Block class="flex justify-center items-center w-[72px] h-[72px]"
              @click="addCustomHelmApp">
         <i class="pi pi-plus text-stone-400"></i>
       </Block>
@@ -90,10 +90,10 @@
           v-for="app in store.customK8SResources"
           :key="app.name"
           class="mr-5"
-          :selected="isSelected('CustomK8sResource', app.name)"
-          @select="()=>{onSelectBlock('CustomK8sResource', app.name)}"
+          :selected="isSelected('CustomK8sResourceProperties', app.name)"
+          @select="()=>{onSelectBlock('CustomK8sResourceProperties', app.name)}"
           :title="app.name"></Block>
-      <Block class="flex justify-center items-center w-[200px] h-[200px]"
+      <Block class="flex justify-center items-center w-[72px] h-[72px]"
              @click="addCustomK8sResource">
         <i class="pi pi-plus text-stone-400"></i>
       </Block>
@@ -124,25 +124,25 @@ const isSelected = function (panelKey: string, id: string): boolean {
 
 
 const enabledMicroK8sAddons = computed((): FeatureDefinition[] => {
-  return ADDON_DEFINITIONS.filter(e => store.microK8sAddons.find(i => i.name === e.name));
+  return ADDON_DEFINITIONS.filter(e => !!store.microK8sAddons.find(i => i.name === e.name));
 });
 const availableMicroK8sAddons = computed((): FeatureDefinition[] => {
   return ADDON_DEFINITIONS.filter(e => !store.microK8sAddons.find(i => i.name === e.name));
 });
 
 const enabledHelmApps = computed((): FeatureDefinition[] => {
-  return HELM_APP_DEFINITIONS.filter(e => store.helmApps.find(i => i.chartName === e.name));
+  return HELM_APP_DEFINITIONS.filter(e => !!store.helmApps.find(i => i.releaseName === e.name));
 });
 
 const availableHelmApps = computed((): FeatureDefinition[] => {
-  return HELM_APP_DEFINITIONS.filter(e => !store.helmApps.find(i => i.chartName === e.name));
+  return HELM_APP_DEFINITIONS.filter(e => !store.helmApps.find(i => i.releaseName === e.name));
 });
 
 const addCustomHelmApp = function () {
-  propertiesPanelStore.selectPanel("CustomHelmApp");
+  propertiesPanelStore.selectPanel("CustomHelmAppProperties");
 }
 const addCustomK8sResource = function () {
-  propertiesPanelStore.selectPanel("CustomHelmApp");
+  propertiesPanelStore.selectPanel("CustomK8sResourceProperties");
 }
 </script>
 <style module>

@@ -55,7 +55,7 @@ func (k *Service) installHelmApp(feature HelmApp, sshMasterNode *ssh.Client) err
 		return err
 	}
 	if executionResult.IsError() {
-		return err
+		return executionResult.Error()
 	}
 
 	executionResult, err = sshMasterNode.Execute("sudo microk8s.helm3 repo update")
@@ -63,7 +63,7 @@ func (k *Service) installHelmApp(feature HelmApp, sshMasterNode *ssh.Client) err
 		return err
 	}
 	if executionResult.IsError() {
-		return err
+		return executionResult.Error()
 	}
 
 	valuesFileCmd := ""
@@ -73,7 +73,7 @@ func (k *Service) installHelmApp(feature HelmApp, sshMasterNode *ssh.Client) err
 			return err
 		}
 		if executionResult.IsError() {
-			return err
+			return executionResult.Error()
 		}
 		valuesFileCmd = fmt.Sprintf("-f /tmp/%s.yaml", feature.ChartName)
 	}
@@ -88,7 +88,7 @@ func (k *Service) installHelmApp(feature HelmApp, sshMasterNode *ssh.Client) err
 		return err
 	}
 	if executionResult.IsError() {
-		return err
+		return executionResult.Error()
 	}
 
 	if len(feature.ValueFileContent) > 0 {
@@ -97,7 +97,7 @@ func (k *Service) installHelmApp(feature HelmApp, sshMasterNode *ssh.Client) err
 			return err
 		}
 		if executionResult.IsError() {
-			return err
+			return executionResult.Error()
 		}
 	}
 
