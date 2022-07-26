@@ -29,4 +29,5 @@ jobs:
         build-name: ${{ matrix.build.name }}
         build-platform: ${{ matrix.build.platform }}
         go-version: 1.18.3
+        windows-nsis-installer: false
         package: false # only build app and run tests
