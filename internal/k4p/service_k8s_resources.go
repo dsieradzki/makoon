@@ -3,6 +3,7 @@ package k4p
 import (
 	"github.com/dsieradzki/k4prox/internal/collect"
 	"github.com/dsieradzki/k4prox/internal/ssh"
+	"strings"
 )
 
 func (k *Service) InstallAdditionalK8sResources(provisionRequest Cluster, keyPair ssh.RsaKeyPair) error {
@@ -24,7 +25,8 @@ func (k *Service) InstallAdditionalK8sResources(provisionRequest Cluster, keyPai
 func (k *Service) installAdditionalK8sResources(featureName string, resources []string, sshMasterNode *ssh.Client) error {
 	for idx, content := range resources {
 		if len(content) > 0 {
-			executionResult, err := sshMasterNode.Executef("echo \"%s\" > /tmp/%s-%d.yaml", content, featureName, idx)
+			escapedContent := strings.ReplaceAll(content, `"`, `\"`)
+			executionResult, err := sshMasterNode.Executef("echo \"%s\" > /tmp/%s-%d.yaml", escapedContent, featureName, idx)
 			if err != nil {
 				return err
 			}
