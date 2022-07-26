@@ -1,15 +1,15 @@
 <template>
   <div class="flex flex-col w-full h-full items-center">
     <div class="grow w-full">
-      <div class="text-3xl text-center font-bold mt-5">CoreDNS</div>
-      <div class="p-10">
+      <div class="text-3xl text-center font-bold mt-5">Metrics Server</div>
+      <div class="p-5">
         <div>
-          Deploys CoreDNS. This add-on may be required by others
+          Metrics Server is a scalable, efficient source of container resource metrics for Kubernetes built-in autoscaling pipelines.
         </div>
         <div class="mt-10 flex flex-col items-center">
           <div class="flex justify-center">
             <div class="mr-2">
-              <MicroK8sAddonSwitch feature-name="dns">
+              <MicroK8sAddonSwitch feature-name="metrics-server">
               </MicroK8sAddonSwitch>
             </div>
           </div>

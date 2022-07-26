@@ -94,28 +94,49 @@ func (p *ProvisionerService) CreateCluster(provisionRequest k4p.ProvisionRequest
 			return err
 		}
 	}
-	if provisionRequest.Stages.InstallFeatures {
-		err = p.k4p.InstallFeatures(projectData.Cluster, projectData.SshKey)
-		if err != nil {
-			return err
-		}
-	}
 
 	if provisionRequest.Stages.InstallKubernetes {
 		kubeConfigContent, err := p.k4p.GetKubeConfigFromCluster(projectData.Cluster, projectData.SshKey)
 		if err != nil {
 			return err
 		}
-		projectData, err := p.project.LoadProject()
+		projectDataToUpdate, err := p.project.LoadProject()
 		if err != nil {
 			return err
 		}
-		projectData.KubeConfig = kubeConfigContent
-		err = p.project.SaveProject(projectData)
+		projectDataToUpdate.KubeConfig = kubeConfigContent
+		projectData = projectDataToUpdate
+		err = p.project.SaveProject(projectDataToUpdate)
 		if err != nil {
 			return err
 		}
 	}
+
+	if provisionRequest.Stages.InstallAddons {
+		err = p.k4p.InstallAddons(projectData.Cluster, projectData.SshKey)
+		if err != nil {
+			return err
+		}
+	}
+	if provisionRequest.Stages.InstallHelpApps {
+		err = p.k4p.InstallHelmApps(projectData.Cluster, projectData.SshKey)
+		if err != nil {
+			return err
+		}
+	}
+	if provisionRequest.Stages.InstallCustomHelmApps {
+		err = p.k4p.InstallCustomHelmApps(projectData.Cluster, projectData.SshKey)
+		if err != nil {
+			return err
+		}
+	}
+	if provisionRequest.Stages.InstallCustomK8sResources {
+		err = p.k4p.InstallAdditionalK8sResources(projectData.Cluster, projectData.SshKey)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 

@@ -26,7 +26,7 @@
 
     <div class="mt-3 w-full max-w-[400px]">
       <div class="text-lg font-bold">Proxmox password:</div>
-      <Password @keydown.enter="login" class="w-full" inputClass="w-full" v-model="password"></Password>
+      <Password @keydown.enter="login" class="w-full" inputClass="w-full" v-model="password" :feedback="false" toggle-mask></Password>
     </div>
 
     <div v-if="loginError" class="mt-6 text-red-600 font-bold">

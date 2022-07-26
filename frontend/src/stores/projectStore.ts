@@ -15,7 +15,7 @@ export interface FeatureDefinition {
     title: string;
 }
 
-export const FEATURE_DEFINITIONS: FeatureDefinition[] = [
+export const ADDON_DEFINITIONS: FeatureDefinition[] = [
     {
         name: "dns",
         title: "Core DNS",
@@ -23,6 +23,10 @@ export const FEATURE_DEFINITIONS: FeatureDefinition[] = [
     {
         name: "helm3",
         title: "Helm 3"
+    },
+    {
+        name: "metrics-server",
+        title: "Metrics Server"
     },
     {
         name: "ingress",
@@ -37,6 +41,17 @@ export const FEATURE_DEFINITIONS: FeatureDefinition[] = [
         title: "OpenEBS storage"
     }
 ]
+
+export const HELM_APP_DEFINITIONS: FeatureDefinition[] = [
+    {
+        name: "argocd",
+        title: "Argo CD",
+    },
+    {
+        name: "portainer",
+        title: "Portainer"
+    },
+];
 
 interface State {
     project: project.ProjectData
@@ -86,7 +101,10 @@ export const useProjectStore = defineStore({
                     dnsServer: "",
                 },
                 nodes: [] as k4p.KubernetesNode[],
-                features: [] as k4p.Feature[]
+                microK8SAddons: [] as k4p.MicroK8sAddon[],
+                helmApps: [] as k4p.HelmApp[],
+                customHelmApps: [] as k4p.HelmApp[],
+                customK8SResources: [] as k4p.CustomK8sResource[]
             } as k4p.Cluster
         } as project.ProjectData,
         defaultMasterNode: {} as k4p.KubernetesNode
@@ -107,8 +125,17 @@ export const useProjectStore = defineStore({
                 .filter((e: k4p.KubernetesNode) => e.nodeType == Worker)
                 .sort(vmIdAsc)
         },
-        features: (state: State): k4p.Feature[] => {
-            return state.project.cluster.features;
+        microK8sAddons: (state: State): k4p.MicroK8sAddon[] => {
+            return state.project.cluster.microK8SAddons;
+        },
+        helmApps: (state: State): k4p.HelmApp[] => {
+            return state.project.cluster.helmApps;
+        },
+        customHelmApps: (state: State): k4p.HelmApp[] => {
+            return state.project.cluster.customHelmApps;
+        },
+        customK8SResources: (state: State): k4p.CustomK8sResource[] => {
+            return state.project.cluster.customK8SResources;
         }
     },
     actions: {
@@ -182,23 +209,56 @@ export const useProjectStore = defineStore({
         deleteNode(vmId: number) {
             this.project.cluster.nodes = this.project.cluster.nodes.filter((e: k4p.KubernetesNode) => e.vmid !== vmId);
         },
-        enableFeature(name: string, args = "", kubernetesObjectDefinition = "") {
-            this.project.cluster.features.push({
+        enableMicroK8SAddon(name: string, args = "", additionalK8SResources: string[] = []) {
+            this.project.cluster.microK8SAddons.push({
                 name: name,
                 args: args,
-                kubernetesObjectDefinition: kubernetesObjectDefinition
-            } as k4p.Feature);
+                additionalK8SResources: additionalK8SResources
+            } as k4p.MicroK8sAddon);
         },
-        updateFeatureArgs(name: string, args: string) {
-            const idx = this.project.cluster.features.findIndex((e: k4p.Feature) => e.name === name);
-            this.project.cluster.features[idx].args = args
+        updateMicroK8SAddonArgs(name: string, args: string) {
+            const idx = this.project.cluster.microK8SAddons.findIndex((e: k4p.MicroK8sAddon) => e.name === name);
+            this.project.cluster.microK8SAddons[idx].args = args
         },
-        updateFeatureKubernetesObjectDefinition(name: string, kod: string) {
-            const idx = this.project.cluster.features.findIndex((e: k4p.Feature) => e.name === name);
-            this.project.cluster.features[idx].kubernetesObjectDefinition = kod
+        updateMicroK8SAddonAdditionalK8SResources(name: string, kod: string) {
+            const idx = this.project.cluster.microK8SAddons.findIndex((e: k4p.MicroK8sAddon) => e.name === name);
+            this.project.cluster.features[idx].additionalK8SResources = kod
         },
-        disableFeature(name: string) {
-            this.project.cluster.features = this.project.cluster.features.filter((e: k4p.Feature) => e.name !== name);
-        }
+        disableMicroK8SAddon(name: string) {
+            this.project.cluster.microK8SAddons = this.project.cluster.microK8SAddons.filter((e: k4p.MicroK8sAddon) => e.name !== name);
+        },
+
+
+        enableHelmApp(app: k4p.HelmApp) {
+            this.project.cluster.helmApps.push(app);
+        },
+        updateHelmApp(app: k4p.HelmApp) {
+            const index = this.project.cluster.helmApps.findIndex((e: k4p.HelmApp) => e.releaseName == app.releaseName);
+            this.project.cluster.helmApps[index] = app;
+        },
+        disableHelmApp(releaseName: string) {
+            this.project.cluster.helmApps = this.project.cluster.helmApps.filter((e: k4p.HelmApp) => e.releaseName !== releaseName);
+        },
+
+        addCustomHelmApp(app: k4p.HelmApp) {
+            this.project.cluster.customHelmApps.push(app);
+        },
+        updateCustomHelmApp(old: k4p.HelmApp, newApp: k4p.HelmApp) {
+            const index = this.project.cluster.customHelmApps.findIndex((e: k4p.HelmApp) => e.releaseName == old.releaseName);
+            this.project.cluster.customHelmApps[index] = newApp;
+        },
+        deleteCustomHelmApp(releaseName: string) {
+            this.project.cluster.customHelmApps = this.project.cluster.customHelmApps.filter((e: k4p.HelmApp) => e.releaseName !== releaseName);
+        },
+        addCustomK8SResources(cks: k4p.CustomK8sResource) {
+            this.project.cluster.customK8SResources.push(cks);
+        },
+        updateCustomK8SResources(oldCkr: k4p.CustomK8sResource, newCkr: k4p.CustomK8sResource) {
+            const index = this.project.cluster.customK8SResources.findIndex((e: k4p.CustomK8sResource) => e.name == oldCkr.name);
+            this.project.cluster.customK8SResources[index] = newCkr;
+        },
+        deleteCustomK8SResources(name: string) {
+            this.project.cluster.customK8SResources = this.project.cluster.customK8SResources.filter((e: k4p.CustomK8sResource) => e.name !== name);
+        },
     }
 })

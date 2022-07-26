@@ -60,6 +60,7 @@ func main() {
 			loginService,
 			provisionerService,
 			taskLogService,
+			&service.PasswordEncoder{},
 		},
 	})
 

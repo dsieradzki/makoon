@@ -28,14 +28,14 @@
 
       <div v-if="!deployInProgress" class="flex h-full">
         <ClusterSettings @deployCluster="deployCluster"
-                         class="overflow-y-auto  overflow-x-visible border-r-4 border-stone-800 min-w-[350px]"></ClusterSettings>
+                         class="overflow-y-auto  overflow-x-visible border-r-4 border-stone-800 min-w-[500px]"></ClusterSettings>
         <div class="grow">
           <div class="flex h-full">
             <ClusterContent class="grow overflow-y-auto overflow-x-visible"></ClusterContent>
             <div v-if="propertiesPanelStore.anySelected" class="relative">
-              <div class="absolute left-[-355px] h-full">
+              <div class="absolute left-[-500px] h-full">
                 <PropertiesPanel
-                    class="overflow-y-auto h-full border-l-4 border-stone-800 min-w-[350px]"></PropertiesPanel>
+                    class="overflow-y-auto h-full border-l-4 border-stone-800 min-w-[495px]"></PropertiesPanel>
               </div>
             </div>
           </div>
@@ -65,7 +65,6 @@ import ProgressSpinner from 'primevue/progressspinner';
 import {useTaskLogStore} from "@/stores/eventStore";
 import {ClearTaskLog} from "@wails/service/TaskLogService";
 import {usePropertiesPanelStore} from "@/stores/propertiesPanelStore";
-import {repackWailsPromise} from "@/utils/promise";
 
 const projectStore = useProjectStore();
 const taskLogStore = useTaskLogStore();
@@ -81,25 +80,18 @@ projectStore.$subscribe(() => {
 })
 
 const propertiesPanelStore = usePropertiesPanelStore();
-const deployCluster = function (pr: k4p.ProvisionRequest): void {
+
+const deployCluster = async function (pr: k4p.ProvisionRequest) {
   deployInProgress.value = true;
-  ClearTaskLog().then(() => {
-    repackWailsPromise(SetupEnvironmentOnProxmox())
-        .then(() => {
-          repackWailsPromise(CreateCluster(pr))
-              .then(() => {
-                deployInProgress.value = false;
-                console.log("Cluster created");
-                router.push({name: "summary"})
-              })
-              .catch(() => {
-                deployInProgress.value = false;
-              })
-        })
-        .catch(() => {
-          deployInProgress.value = false;
-        });
-  });
+  try {
+    await ClearTaskLog();
+    await SetupEnvironmentOnProxmox();
+    await CreateCluster(pr);
+    console.log("Cluster created");
+    await router.push({name: "summary"})
+  } finally {
+    deployInProgress.value = false;
+  }
 }
 </script>
 <style>

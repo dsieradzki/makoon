@@ -72,8 +72,7 @@ Basically, development of the project depends on interest of community, feel fre
     * upgrade Kubernetes
     * change VM resources (CPU, Memory)
 
-- Support more MicroK8s addons in the cluster planner
-- Install additional apps using Helm
+- Support more MicroK8s addons nad Helm charts
 - Command line app for deploying project
 - Web application
     * opens possibilities for live monitoring and autoscaling

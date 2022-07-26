@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col w-full h-full items-center">
-    <div class="grow">
+    <div class="grow w-full">
       <div class="text-3xl text-center font-bold mt-5">OpenEBS</div>
       <div class="p-10">
         <div>
@@ -9,8 +9,8 @@
         <div class="mt-10 flex flex-col items-center">
           <div class="flex justify-center">
             <div class="mr-2">
-              <FeatureSwitch feature-name="openebs">
-              </FeatureSwitch>
+              <MicroK8sAddonSwitch feature-name="openebs">
+              </MicroK8sAddonSwitch>
             </div>
           </div>
 
@@ -29,7 +29,7 @@
 <script lang="ts" setup>
 import Button from "primevue/button";
 import {usePropertiesPanelStore} from "@/stores/propertiesPanelStore";
-import FeatureSwitch from "@/components/FeatureSwitch.vue";
+import MicroK8sAddonSwitch from "@/components/MicroK8sAddonSwitch.vue";
 
 const propertiesPanelStore = usePropertiesPanelStore();
 

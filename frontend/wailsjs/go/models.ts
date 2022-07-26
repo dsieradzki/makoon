@@ -83,26 +83,69 @@ export namespace k4p {
 	        this.nodeType = source["nodeType"];
 	    }
 	}
-	export class Feature {
+	export class CustomK8sResource {
 	    name: string;
-	    args: string;
-	    kubernetesObjectDefinition: string;
+	    content: string;
 	
 	    static createFrom(source: any = {}) {
-	        return new Feature(source);
+	        return new CustomK8sResource(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.content = source["content"];
+	    }
+	}
+	export class HelmApp {
+	    chartName: string;
+	    repository: string;
+	    releaseName: string;
+	    namespace: string;
+	    parameters: {[key: string]: string};
+	    additionalK8SResources: string[];
+	    valueFileContent: string;
+	    projectParams: {[key: string]: string};
+	
+	    static createFrom(source: any = {}) {
+	        return new HelmApp(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.chartName = source["chartName"];
+	        this.repository = source["repository"];
+	        this.releaseName = source["releaseName"];
+	        this.namespace = source["namespace"];
+	        this.parameters = source["parameters"];
+	        this.additionalK8SResources = source["additionalK8SResources"];
+	        this.valueFileContent = source["valueFileContent"];
+	        this.projectParams = source["projectParams"];
+	    }
+	}
+	export class MicroK8sAddon {
+	    name: string;
+	    args: string;
+	    additionalK8SResources: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new MicroK8sAddon(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.name = source["name"];
 	        this.args = source["args"];
-	        this.kubernetesObjectDefinition = source["kubernetesObjectDefinition"];
+	        this.additionalK8SResources = source["additionalK8SResources"];
 	    }
 	}
 	export class Cluster {
 	    nodeUsername: string;
 	    nodePassword: string;
-	    features: Feature[];
+	    microK8SAddons: MicroK8sAddon[];
+	    helmApps: HelmApp[];
+	    customHelmApps: HelmApp[];
+	    customK8SResources: CustomK8sResource[];
 	    nodeDiskSize: number;
 	    nodes: KubernetesNode[];
 	    // Go type: Network
@@ -116,7 +159,10 @@ export namespace k4p {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.nodeUsername = source["nodeUsername"];
 	        this.nodePassword = source["nodePassword"];
-	        this.features = this.convertValues(source["features"], Feature);
+	        this.microK8SAddons = this.convertValues(source["microK8SAddons"], MicroK8sAddon);
+	        this.helmApps = this.convertValues(source["helmApps"], HelmApp);
+	        this.customHelmApps = this.convertValues(source["customHelmApps"], HelmApp);
+	        this.customK8SResources = this.convertValues(source["customK8SResources"], CustomK8sResource);
 	        this.nodeDiskSize = source["nodeDiskSize"];
 	        this.nodes = this.convertValues(source["nodes"], KubernetesNode);
 	        this.network = this.convertValues(source["network"], null);
@@ -145,7 +191,10 @@ export namespace k4p {
 	    setupVirtualMachines: boolean;
 	    installKubernetes: boolean;
 	    joinNodesToCluster: boolean;
-	    installFeatures: boolean;
+	    installAddons: boolean;
+	    installHelpApps: boolean;
+	    installCustomHelmApps: boolean;
+	    installCustomK8SResources: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new ProvisionStage(source);
@@ -157,7 +206,10 @@ export namespace k4p {
 	        this.setupVirtualMachines = source["setupVirtualMachines"];
 	        this.installKubernetes = source["installKubernetes"];
 	        this.joinNodesToCluster = source["joinNodesToCluster"];
-	        this.installFeatures = source["installFeatures"];
+	        this.installAddons = source["installAddons"];
+	        this.installHelpApps = source["installHelpApps"];
+	        this.installCustomHelmApps = source["installCustomHelmApps"];
+	        this.installCustomK8SResources = source["installCustomK8SResources"];
 	    }
 	}
 	export class ProvisionRequest {

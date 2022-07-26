@@ -24,7 +24,7 @@ export const usePropertiesPanelStore = defineStore({
         },
     },
     actions: {
-        selectPanel(id: string, panelKey: string) {
+        selectPanel(panelKey: string, id = "") {
             this.selectedPropertiesId = id;
             this.selectedPropertiesPanelKey = panelKey;
         },

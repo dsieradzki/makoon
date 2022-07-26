@@ -23,7 +23,7 @@ const props = defineProps<{
 }>();
 
 defineEmits<{
-  (e: 'select'): void
+  select(): void
 }>();
 
 

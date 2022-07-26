@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col w-full h-full items-center">
-    <div class="grow">
+    <div class="grow w-full">
       <div class="text-3xl text-center font-bold mt-5">MetalLB Loadbalancer</div>
       <div class="p-10">
         <div>
@@ -14,7 +14,7 @@
             <div class="text-stone-400 mb-1">IP address range</div>
             <div v-if="isFeatureEnabled && valuesAreNotSaved" class="ml-2">
               <Button @click="onUpdate" :disabled="!isFormValid"
-                      class="p-button-rounded p-button-sm p-button-success" :class="$style.updateButton">
+                      class="p-button-rounded p-button-sm p-button-success updateButton">
                 Update
               </Button>
             </div>
@@ -39,8 +39,8 @@
           </table>
         </div>
         <div class="mt-5 flex flex-col items-center justify-center">
-          <FeatureSwitch :feature-name="featureName" :disabled="!isFormValid">
-          </FeatureSwitch>
+          <MicroK8sAddonSwitch :feature-name="featureName" :disabled="!isFormValid">
+          </MicroK8sAddonSwitch>
         </div>
       </div>
     </div>
@@ -57,7 +57,7 @@
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
 import {usePropertiesPanelStore} from "@/stores/propertiesPanelStore";
-import FeatureSwitch from "@/components/FeatureSwitch.vue";
+import MicroK8sAddonSwitch from "@/components/MicroK8sAddonSwitch.vue";
 import {computed, onMounted, ref} from "vue";
 import {useProjectStore} from "@/stores/projectStore";
 
@@ -66,7 +66,7 @@ const projectStore = useProjectStore();
 const featureName = "metallb";
 
 onMounted(() => {
-  const feature = projectStore.features.find(e => e.name === featureName);
+  const feature = projectStore.microK8sAddons.find(e => e.name === featureName);
   if (!feature || feature.args.length == 0) {
     return
   }
@@ -82,7 +82,7 @@ const ipFrom = ref<string>("");
 const ipTo = ref<string>("");
 
 const isFeatureEnabled = computed((): boolean => {
-  return !!projectStore.features.find(e => e.name === featureName);
+  return !!projectStore.microK8sAddons.find(e => e.name === featureName);
 })
 
 const isFormValid = computed((): boolean => {
@@ -90,7 +90,7 @@ const isFormValid = computed((): boolean => {
 });
 
 const valuesAreNotSaved = computed((): boolean => {
-  const feature = projectStore.features.find(e => e.name === featureName);
+  const feature = projectStore.microK8sAddons.find(e => e.name === featureName);
   if (!feature) {
     return false
   }
@@ -102,7 +102,7 @@ const generateArgs = function () {
 }
 
 const onUpdate = function (): void {
-  projectStore.updateFeatureArgs(featureName, generateArgs());
+  projectStore.updateMicroK8SAddonArgs(featureName, generateArgs());
 }
 const onClose = function (): void {
   propertiesPanelStore.deselect();
@@ -110,9 +110,4 @@ const onClose = function (): void {
 
 </script>
 <style module>
-.updateButton {
-  padding: 0 !important;
-  display: flex;
-  justify-content: center;
-}
 </style>

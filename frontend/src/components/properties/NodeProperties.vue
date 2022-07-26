@@ -1,8 +1,8 @@
 <template>
   <div class="flex flex-col w-full h-full items-center">
-    <div class="grow">
+    <div class="grow w-full">
       <div class="text-3xl text-center font-bold mt-5">Node Properties</div>
-      <div class="p-5">
+      <div class="p-10">
         <div>
           <div class="text-stone-400">VM id</div>
           <InputNumber class="w-full p-inputtext-sm" v-model="vmid" showButtons buttonLayout="horizontal"
@@ -107,7 +107,7 @@ const onUpdate = function (): void {
   const oldNode = {...getNode()};
   const nodeToUpdate = createUpdatedNode();
   projectStore.updateNode(nodeToUpdate, oldNode);
-  propertiesPanelStore.selectPanel(nodeToUpdate.vmid.toString(), propertiesPanelStore.propertiesPanelKey || "") // Brake method contract or keep ugly default value or something else?
+  propertiesPanelStore.selectPanel(propertiesPanelStore.propertiesPanelKey || "", nodeToUpdate.vmid.toString()) // Brake method contract or keep ugly default value or something else?
 }
 
 const onDelete = function (): void {
