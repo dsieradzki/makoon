@@ -1,3 +1,13 @@
+# [0.4.0](https://github.com/dsieradzki/k4prox/compare/v0.3.0...v0.4.0) (2022-07-26)
+
+
+### Features
+
+* support Argo-cd, Portainer, custom helm charts and kubernetes resources ([a6e7f4b](https://github.com/dsieradzki/k4prox/commit/a6e7f4bec9233d667a52c457ba7dff5133885914))
+* support Helm 3 addon ([4c85f63](https://github.com/dsieradzki/k4prox/commit/4c85f631ff7a7867a4659887161095a1e4209ff2))
+
+
+
 # [0.3.0](https://github.com/dsieradzki/k4prox/compare/v0.2.0...v0.3.0) (2022-07-20)
 
 
