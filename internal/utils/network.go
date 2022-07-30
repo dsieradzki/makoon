@@ -10,8 +10,7 @@ const probes = "1"
 const ping = "ping"
 
 func PingHost(ip string) (bool, error) {
-	_, err := exec.LookPath(ping)
-	if err != nil {
+	if !IsCheckIPToolAvailable() {
 		return false, errors.New("no ping program in path")
 	}
 
@@ -26,4 +25,9 @@ func PingHost(ip string) (bool, error) {
 	} else {
 		return true, err
 	}
+}
+
+func IsCheckIPToolAvailable() bool {
+	_, err := exec.LookPath(ping)
+	return err == nil
 }

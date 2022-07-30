@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"github.com/dsieradzki/k4prox/pkg/applogger"
 	"github.com/dsieradzki/k4prox/pkg/service"
 )
 
@@ -26,6 +27,10 @@ func (a *App) Startup(ctx context.Context) {
 }
 func (a *App) Shutdown(ctx context.Context) {
 
+}
+
+func (a *App) LogFileLocation() string {
+	return applogger.PrepareLogFile()
 }
 
 func (a *App) GetContext() context.Context {

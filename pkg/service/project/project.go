@@ -20,7 +20,7 @@ var k4proxFilters = []runtime.FileFilter{
 	},
 }
 
-const maxNumberOfKubeNodeProposal = 20
+const freeIpWindowProposal = 20
 
 type ProjectData struct {
 	KubeConfig string         `json:"kubeConfig" yaml:"kubeConfig"`
@@ -77,12 +77,12 @@ func (p *Service) SaveProjectDialog() (bool, error) {
 		return false, err
 	}
 	if len(projectFileName) == 0 {
-		return false, errors.New("file not specified")
+		return false, nil
 	}
 
 	err = p.projectGenerator.GenerateDefaultProject(projectFileName)
 	p.projectFile = projectFileName
-	return false, err
+	return err == nil, err
 }
 
 func (p *Service) SaveKubeConfigDialog() error {

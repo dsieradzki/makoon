@@ -35,54 +35,51 @@
 </template>
 <script setup lang="ts">
 import Block from "@/components/Block.vue";
-import {useRouter} from "vue-router";
-import {OpenProjectDialog, SaveProjectDialog} from "@wails/project/Service";
-import {ref} from "vue";
+import { useRouter } from "vue-router";
+import { OpenProjectDialog, SaveProjectDialog } from "@wails/project/Service";
+import { ref } from "vue";
 import ProgressSpinner from 'primevue/progressspinner';
-import {repackWailsPromise} from "@/utils/promise";
+import { showError } from "@/utils/errors";
+import { useDialog } from "primevue/usedialog";
 
 const router = useRouter();
 const generatingProject = ref(false)
 const openingProject = ref(false)
+const dialog = useDialog();
 
-const newProject = function () {
+const newProject = async function () {
   if (generatingProject.value || openingProject.value) {
     return
   }
-  generatingProject.value = true;
-  repackWailsPromise(SaveProjectDialog())
-      .then(clusterIsAlreadyCreated => {
-        generatingProject.value = false;
-        if (clusterIsAlreadyCreated) {
-          router.push({name: "summary"})
-        } else {
-          router.push({name: "planner"})
-        }
-      })
-      .catch(err => {
-        generatingProject.value = false;
-        console.error(err)
-      })
+  try {
+    generatingProject.value = true;
+    const isProjectGenerated = await SaveProjectDialog();
+    if (isProjectGenerated) {
+      await router.push({name: "planner"})
+    }
+    generatingProject.value = false;
+  } catch (err) {
+    generatingProject.value = false;
+    showError(dialog, err)
+  }
 }
 
-const openProject = function () {
+const openProject = async function () {
   if (generatingProject.value || openingProject.value) {
     return
   }
-  openingProject.value = true;
-  repackWailsPromise(OpenProjectDialog())
-      .then(clusterIsAlreadyCreated => {
-        openingProject.value = false;
-        if (clusterIsAlreadyCreated) {
-          router.push({name: "summary"})
-        } else {
-          router.push({name: "planner"})
-        }
-      })
-      .catch(e => {
-        openingProject.value = false;
-        console.error(e);
-      })
+  try {
+    openingProject.value = true;
+    const clusterIsAlreadyCreated = await OpenProjectDialog();
+    if (clusterIsAlreadyCreated) {
+      await router.push({name: "summary"})
+    } else {
+      await router.push({name: "planner"})
+    }
+  } catch (err) {
+    openingProject.value = false;
+    showError(dialog, err)
+  }
 }
 
 </script>

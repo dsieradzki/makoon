@@ -64,18 +64,20 @@
   </div>
 </template>
 <script lang="ts" setup>
-import {onMounted, ref} from "vue";
+import { onMounted, ref } from "vue";
 import InputText from "primevue/inputtext";
 import InputNumber from "primevue/inputnumber";
 import Button from "primevue/button";
-import type {k4p} from "@wails/models";
-import {GetStorage} from "@wails/service/ProvisionerService";
+import type { k4p } from "@wails/models";
+import { GetStorage } from "@wails/service/ProvisionerService";
 import Dropdown from 'primevue/dropdown';
-import {useProjectStore} from "@/stores/projectStore";
-import {usePropertiesPanelStore} from "@/stores/propertiesPanelStore";
-import {repackWailsPromise} from "@/utils/promise";
+import { useProjectStore } from "@/stores/projectStore";
+import { usePropertiesPanelStore } from "@/stores/propertiesPanelStore";
+import { showError } from "@/utils/errors";
+import { useDialog } from "primevue/usedialog";
 
 const projectStore = useProjectStore();
+const dialog = useDialog();
 const propertiesPanelStore = usePropertiesPanelStore();
 
 const getNode = function (): k4p.KubernetesNode {
@@ -85,13 +87,13 @@ const getNode = function (): k4p.KubernetesNode {
 
 propertiesPanelStore.$subscribe(fillPropertiesPanel);
 
-onMounted(() => {
-  fillPropertiesPanel();
-  repackWailsPromise(GetStorage())
-      .then((resp) => {
-        storageNames.value = resp;
-      })
-      .catch(console.error)
+onMounted(async () => {
+  try {
+    fillPropertiesPanel();
+    storageNames.value = await GetStorage();
+  } catch (err) {
+    showError(dialog, err);
+  }
 });
 
 const nodeName = ref<string>();

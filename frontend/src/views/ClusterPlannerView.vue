@@ -56,27 +56,41 @@ import TaskLogTable from "@/components/TaskLogTable.vue";
 import ClusterSettings from "@/components/ClusterSettings.vue";
 import ClusterContent from "@/components/ClusterContent.vue";
 import PropertiesPanel from "@/components/PropertiesPanel.vue";
-import type {k4p} from "@wails/models";
-import {onMounted, ref} from "vue";
-import {useProjectStore} from "@/stores/projectStore";
-import {CreateCluster, SetupEnvironmentOnProxmox} from "@wails/service/ProvisionerService";
-import {useRouter} from "vue-router";
+import type { k4p } from "@wails/models";
+import { onMounted, ref } from "vue";
+import { useProjectStore } from "@/stores/projectStore";
+import { CreateCluster, SetupEnvironmentOnProxmox } from "@wails/service/ProvisionerService";
+import { useRouter } from "vue-router";
 import ProgressSpinner from 'primevue/progressspinner';
-import {useTaskLogStore} from "@/stores/eventStore";
-import {ClearTaskLog} from "@wails/service/TaskLogService";
-import {usePropertiesPanelStore} from "@/stores/propertiesPanelStore";
+import { useTaskLogStore } from "@/stores/eventStore";
+import { ClearTaskLog } from "@wails/service/TaskLogService";
+import { usePropertiesPanelStore } from "@/stores/propertiesPanelStore";
+import { LogDebug } from "@wails-runtime/runtime";
+import { showError } from "@/utils/errors";
+import { useDialog } from "primevue/usedialog";
 
 const projectStore = useProjectStore();
 const taskLogStore = useTaskLogStore();
 const router = useRouter();
+const dialog = useDialog();
 const deployInProgress = ref(false);
-onMounted(() => {
-  projectStore.loadProject()
+
+onMounted(async () => {
+  try {
+    await projectStore.loadProject()
+    LogDebug("Project loaded");
+  } catch (err) {
+    showError(dialog, err);
+  }
 });
 
-projectStore.$subscribe(() => {
-  projectStore.saveProject()
-  console.debug("Project saved")
+projectStore.$subscribe(async () => {
+  try {
+    await projectStore.saveProject()
+    LogDebug("Project saved");
+  } catch (err) {
+    showError(dialog, err)
+  }
 })
 
 const propertiesPanelStore = usePropertiesPanelStore();
@@ -87,8 +101,10 @@ const deployCluster = async function (pr: k4p.ProvisionRequest) {
     await ClearTaskLog();
     await SetupEnvironmentOnProxmox();
     await CreateCluster(pr);
-    console.log("Cluster created");
+    LogDebug("Cluster created successfully");
     await router.push({name: "summary"})
+  } catch (err) {
+    showError(dialog, err);
   } finally {
     deployInProgress.value = false;
   }

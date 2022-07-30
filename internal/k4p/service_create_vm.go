@@ -134,7 +134,7 @@ func (k *Service) createVirtualMachine(pr Cluster, node KubernetesNode, keyPair 
 			pr.Network.Gateway),
 		proxmox.CiNameserver: pr.Network.DnsServer,
 		proxmox.CiUser:       pr.NodeUsername,
-		proxmox.CiPassword:   pr.NodeUsername,
+		proxmox.CiPassword:   pr.NodePassword,
 		proxmox.CiSshKeys:    encodedPublicKey,
 	})
 	if err != nil {
