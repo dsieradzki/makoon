@@ -1,29 +1,22 @@
 package utils
 
 import (
+	"errors"
 	"os/exec"
-	"runtime"
 )
 
 const timeout = "1"
 const probes = "1"
+const ping = "ping"
 
 func PingHost(ip string) (bool, error) {
-	probesParamName := ""
-	timeoutParamName := ""
-	//noinspection ALL
-	if runtime.GOOS == "windows" {
-		probesParamName = "-n"
-	} else {
-		probesParamName = "-c"
+	_, err := exec.LookPath(ping)
+	if err != nil {
+		return false, errors.New("no ping program in path")
 	}
-	//noinspection ALL
-	if runtime.GOOS == "darwin" {
-		timeoutParamName = "-W"
-	} else {
-		timeoutParamName = "-w"
-	}
-	cmd := exec.Command("ping", probesParamName, probes, timeoutParamName, timeout, ip)
+
+	cmd := exec.Command("ping", ProbesParamName(), probes, TimeoutParamName(), timeout, ip)
+	cmd.SysProcAttr = GetSysProcAttr()
 	if err := cmd.Run(); err != nil {
 		if exitError, ok := err.(*exec.ExitError); ok {
 			return exitError.ExitCode() == 0, nil
