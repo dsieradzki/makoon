@@ -101,12 +101,14 @@ func (p *Client) DetermineProxmoxNodeName() (string, error) {
 	var nodesData nodeData
 	err := p.Get(&nodesData, "/nodes")
 	if err != nil {
+		log.WithError(err).Error("cannot fetch proxmox nodes")
 		return "", err
 	}
 
 	for _, node := range nodesData.Data {
 		networks, fErr := p.GetNetworkBridges(node.NodeName)
 		if fErr != nil {
+			log.WithError(err).Error("cannot fetch networks for proxmox node")
 			return "", fErr
 		}
 		for _, network := range networks {

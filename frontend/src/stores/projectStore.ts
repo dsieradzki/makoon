@@ -1,7 +1,6 @@
-import {defineStore} from 'pinia'
-import {repackWailsPromise} from "@/utils/promise";
-import type {k4p, project} from "@wails/models";
-import {LoadProject, SaveProject} from "@wails/project/Service";
+import { defineStore } from 'pinia'
+import type { k4p, project } from "@wails/models";
+import { LoadProject, SaveProject } from "@wails/project/Service";
 
 const Master = "master";
 const Worker = "worker";
@@ -139,31 +138,22 @@ export const useProjectStore = defineStore({
         }
     },
     actions: {
-        loadProject() {
-            repackWailsPromise(LoadProject())
-                .then(response => {
-                    this.project = response;
-                    this.defaultMasterNode = {
-                        ...this.project.cluster.nodes.filter((e: k4p.KubernetesNode) => e.nodeType == Master).sort(vmIdAsc)[0] || {
-                            vmid: 999,
-                            cores: 2,
-                            memory: 2048,
-                            name: "microk8s-master-1",
-                            storagePool: "",
-                            ipAddress: "",
-                            nodeType: Master
-                        }
-                    }
-
-                })
-                .catch(console.error)
+        async loadProject() {
+            this.project = await LoadProject();
+            this.defaultMasterNode = {
+                ...this.project.cluster.nodes.filter((e: k4p.KubernetesNode) => e.nodeType == Master).sort(vmIdAsc)[0] || {
+                    vmid: 999,
+                    cores: 2,
+                    memory: 2048,
+                    name: "microk8s-master-1",
+                    storagePool: "",
+                    ipAddress: "",
+                    nodeType: Master
+                }
+            }
         },
-        saveProject() {
-            repackWailsPromise(SaveProject(this.project))
-                .then(() => {
-                    console.log("project was saved")
-                })
-                .catch(console.error)
+        async saveProject() {
+            await SaveProject(this.project);
         },
         addNode(nodeType: string) {
             const latestNodeWithNodeType: k4p.KubernetesNode | null = this.project.cluster
@@ -184,8 +174,8 @@ export const useProjectStore = defineStore({
                     const nodeBaseOnAnotherType = createNextNodeDefinition(
                         anyNode,
                         nodeType == Worker
-                            ? this.project.cluster.nodes.length > 10 ? this.project.cluster.nodes.length : 10
-                            : -10);
+                            ? this.project.cluster.nodes.length > 5 ? this.project.cluster.nodes.length : 5
+                            : -5);
                     nodeBaseOnAnotherType.name = nodeBaseOnAnotherType
                         .name
                         .substring(0, nodeBaseOnAnotherType.name.indexOf("-"))

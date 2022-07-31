@@ -5,8 +5,10 @@
       <div>Kubernetes Manager for Proxmox</div>
     </div>
     <div></div>
-
     <div class="mt-14 w-full max-w-[800px] flex justify-center">
+      <div class="text-amber-600">Project file contains sensitive information, keep it safe.</div>
+    </div>
+    <div class="w-full max-w-[800px] flex justify-center">
       <Block @click="onSaveKubeConfig" class="mr-20 flex justify-center items-center w-[200px] h-[200px]">
         <div class="flex flex-col items-center justify-center">
           <i class="pi pi-cloud text-stone-400" style="font-size: 5rem"></i>
@@ -32,38 +34,46 @@
         Back to cluster planner
       </router-link>
     </div>
+    <div class="mt-10 flex flex-col items-center">
+      <div @click="giveStart" class="cursor-pointer text-xl"><p class="pi pi-star text-blue-500"></p> dsieradzki/k4prox on GitHub</div>
+    </div>
   </main>
 </template>
 
 <script setup lang="ts">
 import Block from "@/components/Block.vue";
-import {
-  SaveKubeConfigDialog,
-  SaveSshAuthorizationKeyDialog,
-  SaveSshPrivateKeyDialog
-} from "@wails/project/Service";
-import {repackWailsPromise} from "@/utils/promise";
+import { SaveKubeConfigDialog, SaveSshAuthorizationKeyDialog, SaveSshPrivateKeyDialog } from "@wails/project/Service";
+import { BrowserOpenURL, LogDebug } from "@wails-runtime/runtime";
+import { showError } from "@/utils/errors";
+import { useDialog } from "primevue/usedialog";
 
-const onSaveKubeConfig = function () {
-  repackWailsPromise(SaveKubeConfigDialog())
-      .then(() => {
-        console.log("Saved");
-      })
-      .catch(console.error)
+const dialog = useDialog();
+const onSaveKubeConfig = async function () {
+  try {
+    await SaveKubeConfigDialog();
+    LogDebug("kube config saved")
+  } catch (err) {
+    showError(dialog, err);
+  }
 }
-const onSaveSshPrivateKey = function () {
-  repackWailsPromise(SaveSshPrivateKeyDialog())
-      .then(() => {
-        console.log("Saved");
-      })
-      .catch(console.error)
-}
-const onSaveSshAuthorizationKey = function () {
-  repackWailsPromise(SaveSshAuthorizationKeyDialog())
-      .then(() => {
-        console.log("Saved");
-      })
-      .catch(console.error)
-}
+const onSaveSshPrivateKey = async function () {
+  try {
+    await SaveSshPrivateKeyDialog();
+    LogDebug("ssh private key saved")
+  } catch (err) {
+    showError(dialog, err);
+  }
 
+}
+const onSaveSshAuthorizationKey = async function () {
+  try {
+    await SaveSshAuthorizationKeyDialog();
+    LogDebug("ssh private key saved")
+  } catch (err) {
+    showError(dialog, err);
+  }
+}
+const giveStart = async function () {
+  BrowserOpenURL("https://github.com/dsieradzki/k4prox")
+}
 </script>

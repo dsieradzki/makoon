@@ -47,11 +47,10 @@
 import InputText from 'primevue/inputtext';
 import Password from 'primevue/password';
 import Button from 'primevue/button';
-import {ref} from "vue";
+import { ref } from "vue";
 
-import {Login} from "@wails/service/LoginService";
-import {useRouter} from "vue-router";
-import {repackWailsPromise} from "@/utils/promise";
+import { Login } from "@wails/service/LoginService";
+import { useRouter } from "vue-router";
 
 // eslint-disable-next-line no-undef
 const version = APP_VERSION;
@@ -67,25 +66,17 @@ const isFormValid = function (): boolean {
 }
 const loginState = ref<boolean>(false);
 const loginError = ref<boolean>(false)
-const login = function () {
-  loginState.value = true;
-  repackWailsPromise(Login(username.value, password.value, host.value))
-      .then(() => {
-        loginError.value = false;
-        router
-            .push({
-              name: "project"
-            })
-            .then(() => {
-              loginState.value = false;
-            });
-      })
-      .catch((err) => {
-        console.error(err);
-        loginState.value = false;
-        loginError.value = true;
-      });
-
+const login = async function () {
+  try {
+    loginState.value = true;
+    await Login(username.value, password.value, host.value);
+    await router.push({name: "project"})
+    loginError.value = false;
+    loginState.value = false;
+  } catch (err) {
+    loginState.value = false;
+    loginError.value = true;
+  }
 }
 
 </script>

@@ -53,14 +53,19 @@ type Network struct {
 	CIDR    string `json:"cidr"`
 }
 
-func (n *Network) GetCIDRSubMask() uint8 {
+func (n Network) GetCIDRSubMask() uint8 {
+	if len(n.CIDR) == 0 {
+		log.Debug("no network settings, default subnet mask will be 0")
+		return 0
+	}
 	sep := strings.Index(n.CIDR, "/")
 	mask := n.CIDR[sep+1 : len(n.CIDR)]
 	maskI, err := strconv.ParseInt(mask, 10, 0)
 	if err != nil {
-		log.Error("cannot parse subnet mask")
+		log.WithError(err).Error("cannot parse subnet mask")
 		return 0
 	}
+	log.Debug("subnet mask found")
 	return uint8(maskI)
 }
 

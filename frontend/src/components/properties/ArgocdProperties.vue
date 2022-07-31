@@ -70,16 +70,19 @@
 <script lang="ts" setup>
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
-import {usePropertiesPanelStore} from "@/stores/propertiesPanelStore";
+import { usePropertiesPanelStore } from "@/stores/propertiesPanelStore";
 import HelmAppSwitch from "@/components/HelmAppSwitch.vue";
-import {computed, onMounted, ref} from "vue";
-import type {k4p} from "@wails/models";
-import {useProjectStore} from "@/stores/projectStore";
-import {findLastLoadBalancerIP} from "@/utils/loadbalancerIp";
-import {EncodeUsingBCrypt} from "@wails/service/PasswordEncoder";
+import { computed, onMounted, ref } from "vue";
+import type { k4p } from "@wails/models";
+import { useProjectStore } from "@/stores/projectStore";
+import { findLastLoadBalancerIP } from "@/utils/loadbalancerIp";
+import { EncodeUsingBCrypt } from "@wails/service/PasswordEncoder";
+import { useDialog } from "primevue/usedialog";
+import { showError } from "@/utils/errors";
 
 const propertiesPanelStore = usePropertiesPanelStore();
 const projectStore = useProjectStore();
+const dialog = useDialog();
 const appName = "argocd"
 const loadBalancerIPParamName = "server.service.loadBalancerIP";
 const passwordParamName = "configs.secret.argocdServerAdminPassword";
@@ -143,16 +146,21 @@ const onEnableApp = async function () {
 }
 
 const prepareApp = async function (): Promise<k4p.HelmApp> {
-  const params = defaultApp.parameters;
-  params[passwordParamName] = await EncodeUsingBCrypt(password.value);
-  params[loadBalancerIPParamName] = lbIP.value;
+  try {
+    const params = defaultApp.parameters;
+    params[passwordParamName] = await EncodeUsingBCrypt(password.value);
+    params[loadBalancerIPParamName] = lbIP.value;
 
-  const projectParams = defaultApp.projectParams
-  projectParams[passwordParamName] = password.value;
-  return {
-    ...defaultApp,
-    parameters: params,
-    projectParams: projectParams
+    const projectParams = defaultApp.projectParams
+    projectParams[passwordParamName] = password.value;
+    return {
+      ...defaultApp,
+      parameters: params,
+      projectParams: projectParams
+    }
+  } catch (err) {
+    showError(dialog, err)
+    throw err
   }
 }
 

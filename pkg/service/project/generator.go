@@ -11,7 +11,6 @@ import (
 	"github.com/dsieradzki/k4prox/internal/utils"
 	"github.com/dsieradzki/k4prox/internal/utils/task"
 	log "github.com/sirupsen/logrus"
-	"os/exec"
 	systemruntime "runtime"
 	"strings"
 )
@@ -63,6 +62,7 @@ func (g *Generator) GenerateDefaultProject(fileName string) error {
 	networkPartAddress, firstFreeHostPartIp, err := g.getFirstAddressFromFreePool()
 	var ingressLB, metallbIpRange, firstNodeIP, secondNodeIP, thirdNodeIP string
 	if err != nil {
+		log.Warn("cannot detect network settings")
 		ingressLB, metallbIpRange, firstNodeIP, secondNodeIP, thirdNodeIP = "", "", "", "", ""
 	} else {
 		ingressLB = fmt.Sprintf("%s.%d", networkPartAddress, firstFreeHostPartIp)
@@ -157,15 +157,20 @@ func (g *Generator) GenerateDefaultProject(fileName string) error {
 func (g *Generator) getDefaultStorage() (string, error) {
 	storages, err := g.proxmoxClient.GetStorage()
 	if err != nil {
+		log.WithError(err).Error("cannot get storages from proxmox")
 		return "", err
 	}
+	log.WithField("count", len(storages)).Debug("found storages")
 	for _, v := range storages {
 		if v.StorageName == "local-lvm" {
+			log.Debug("found local-lvm storage")
 			return v.StorageName, nil
 		}
 	}
 	if len(storages) > 0 {
-		return storages[0].StorageName, nil
+		storageName := storages[0].StorageName
+		log.Warnf("not found local-lvm storage, first of found will be returned [%s]", storageName)
+		return storageName, nil
 	}
 	return "", errors.New("cannot find any storage")
 }
@@ -177,14 +182,16 @@ func (g *Generator) getDefaultNetwork() (proxmox.Network, error) {
 	}
 	networks, err := g.proxmoxClient.GetNetworkBridges(proxmoxNodeName)
 	if err != nil {
+		log.WithError(err).Error("cannot find network bridges, return empty network settings")
 		return proxmox.Network{}, err
 	}
 	for _, network := range networks {
 		if network.Address == g.proxmoxClient.GetProxmoxHost() {
+			log.Debug("found network where proxmox is working on")
 			return network, nil
 		}
 	}
-	log.Warn("cannot find network where proxmox is working on, return empty")
+	log.Warn("cannot find network where proxmox is working on, return empty network")
 	return proxmox.Network{}, nil
 }
 
@@ -196,7 +203,7 @@ func (g *Generator) getDefaultVmId() (uint32, error) {
 	vmIds = collect.Sort(vmIds, func(a uint32, b uint32) bool {
 		return a < b
 	})
-	return findStartIdForFreeIdWindow(vmIds, maxNumberOfKubeNodeProposal), nil
+	return findStartIdForFreeIdWindow(vmIds, freeIpWindowProposal), nil
 }
 
 func (g *Generator) getFirstAddressFromFreePool() (string, int, error) {
@@ -204,7 +211,7 @@ func (g *Generator) getFirstAddressFromFreePool() (string, int, error) {
 	if err != nil {
 		return "", 0, err
 	}
-	if isCheckIPToolAvailable() {
+	if utils.IsCheckIPToolAvailable() {
 		return findIpRangeForNetwork(defaultNetwork)
 	} else {
 		log.Warn("tool for checking IP is not available")
@@ -212,17 +219,15 @@ func (g *Generator) getFirstAddressFromFreePool() (string, int, error) {
 	}
 }
 
-func isCheckIPToolAvailable() bool {
-	_, err := exec.LookPath("ping")
-	return err == nil
-}
-
 func findIpRangeForNetwork(net proxmox.Network) (string, int, error) {
+	if len(net.Gateway) == 0 {
+		return "", 0, errors.New("no gateway")
+	}
 	lastOctetIndex := strings.LastIndex(net.Gateway, ".")
 	networkPart := net.Gateway[0:lastOctetIndex]
 
-	for i := 10; i <= 240; i = i + maxNumberOfKubeNodeProposal {
-		pingResult := pingHostRange(networkPart, i, i+maxNumberOfKubeNodeProposal)
+	for i := 10; i <= 240; i = i + freeIpWindowProposal {
+		pingResult := pingHostRange(networkPart, i, i+freeIpWindowProposal)
 		if pingResult.Error != nil {
 			return "", 0, pingResult.Error
 		}

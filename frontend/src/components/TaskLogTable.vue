@@ -35,13 +35,16 @@
 </template>
 <script lang="ts" setup>
 
-import {onUnmounted} from "vue";
+import { onUnmounted } from "vue";
 import DataTable from "primevue/datatable"
 import Column from "primevue/column"
-import {TaskStatus} from "@/stores/projectStore";
-import {useTaskLogStore} from "@/stores/eventStore";
+import { TaskStatus } from "@/stores/projectStore";
+import { useTaskLogStore } from "@/stores/eventStore";
+import { useDialog } from "primevue/usedialog";
+import { showError } from "@/utils/errors";
 
 const store = useTaskLogStore();
+const dialog = useDialog();
 
 const toHumanReadableEventName = function (name: string): string {
   const withSpaces = name.replace(new RegExp("_", 'g'), " ");
@@ -50,6 +53,9 @@ const toHumanReadableEventName = function (name: string): string {
 
 const readTaskLogInterval = setInterval(() => {
       store.loadTaskLog()
+          .catch(err => {
+            showError(dialog, err);
+          })
     },
     2000);
 

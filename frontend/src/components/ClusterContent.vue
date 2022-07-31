@@ -1,6 +1,12 @@
 <template>
   <div class="flex flex-col p-5">
-    <div class="font-bold text-2xl p-5">Master Nodes</div>
+    <div class="font-bold text-2xl p-5 flex items-center">
+      <span class="mr-2">Master Nodes</span>
+      <span class="text-amber-700 text-sm">
+        <p class="ml-1 pi pi-exclamation-triangle " style="font-size: 1rem"></p>
+        Please verify IP availability on you network. Pinging hosts during project generation not guarantee IP availability
+      </span>
+    </div>
     <div class="flex items-center flex-wrap">
       <KubeNode
           v-for="kNode in store.masterNodes"
@@ -103,10 +109,10 @@
 <script lang="ts" setup>
 import Block from "@/components/Block.vue";
 import KubeNode from "@/components/KubeNode.vue";
-import type {FeatureDefinition} from "@/stores/projectStore";
-import {ADDON_DEFINITIONS, HELM_APP_DEFINITIONS, useProjectStore} from "@/stores/projectStore";
-import {usePropertiesPanelStore} from "@/stores/propertiesPanelStore";
-import {computed} from "vue";
+import type { FeatureDefinition } from "@/stores/projectStore";
+import { ADDON_DEFINITIONS, HELM_APP_DEFINITIONS, useProjectStore } from "@/stores/projectStore";
+import { usePropertiesPanelStore } from "@/stores/propertiesPanelStore";
+import { computed } from "vue";
 
 const propertiesPanelStore = usePropertiesPanelStore();
 

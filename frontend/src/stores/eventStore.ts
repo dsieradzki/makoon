@@ -1,7 +1,6 @@
-import {defineStore} from 'pinia'
-import type {tasklog} from "@wails/models";
-import {GetTaskLog} from "@wails/service/TaskLogService";
-import {LogError} from "@wails-runtime/runtime";
+import { defineStore } from 'pinia'
+import type { tasklog } from "@wails/models";
+import { GetTaskLog } from "@wails/service/TaskLogService";
 
 interface State {
     data: tasklog.Task[]
@@ -21,14 +20,8 @@ export const useTaskLogStore = defineStore({
         }
     },
     actions: {
-        loadTaskLog() {
-            GetTaskLog()
-                .then((response) => {
-                    this.data = response;
-                })
-                .catch((err) => {
-                    LogError(err)
-                })
+        async loadTaskLog() {
+            this.data = await GetTaskLog();
         },
     }
 })
