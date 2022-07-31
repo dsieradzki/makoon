@@ -1,3 +1,17 @@
+# [0.5.0](https://github.com/dsieradzki/k4prox/compare/v0.4.0...v0.5.0) (2022-07-31)
+
+
+### Bug Fixes
+
+* should not showing terminal window during ping on Windows OS ([9ec9fea](https://github.com/dsieradzki/k4prox/commit/9ec9fead556f371c6f15db8bc63d98c1c5cd3fbf))
+
+
+### Features
+
+* error handling and logs collection to file ([0c25f83](https://github.com/dsieradzki/k4prox/commit/0c25f83f7dd54389f384788ffcd7237455c87eda))
+
+
+
 # [0.4.0](https://github.com/dsieradzki/k4prox/compare/v0.3.0...v0.4.0) (2022-07-26)
 
 
