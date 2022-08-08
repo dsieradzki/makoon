@@ -1,3 +1,12 @@
+## [0.5.1](https://github.com/dsieradzki/k4prox/compare/v0.5.0...v0.5.1) (2022-08-08)
+
+
+### Bug Fixes
+
+* sometimes application starts with empty window on macOS ([7f66f2c](https://github.com/dsieradzki/k4prox/commit/7f66f2cf2b40209bf7662f7a567b1c7a4ba6ad43))
+
+
+
 # [0.5.0](https://github.com/dsieradzki/k4prox/compare/v0.4.0...v0.5.0) (2022-07-31)
 
 
@@ -37,15 +46,6 @@
 ### Features
 
 * optimize cluster creation time ([23dfb49](https://github.com/dsieradzki/k4prox/commit/23dfb498b912fffa094c6786842279f9ab36eba0))
-
-
-
-# [0.1.0](https://github.com/dsieradzki/k4prox/compare/b87a14fe29eff3cbba64bbcdd79dee200a005bd6...v0.1.0) (2022-07-17)
-
-
-### Features
-
-* initial commit ([b87a14f](https://github.com/dsieradzki/k4prox/commit/b87a14fe29eff3cbba64bbcdd79dee200a005bd6))
 
 
 
