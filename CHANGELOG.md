@@ -1,3 +1,13 @@
+## [0.5.2](https://github.com/dsieradzki/k4prox/compare/v0.5.1...v0.5.2) (2022-08-22)
+
+
+### Bug Fixes
+
+* additional resources for Microk8s addons are not updated, after modifying addon properties ([a370468](https://github.com/dsieradzki/k4prox/commit/a3704687a775a6396e0a51829963f03e4d7bf6ac))
+* Update dependencies ([59ae06c](https://github.com/dsieradzki/k4prox/commit/59ae06cd781602dc4864c67e14d1cf86c62ca865))
+
+
+
 ## [0.5.1](https://github.com/dsieradzki/k4prox/compare/v0.5.0...v0.5.1) (2022-08-08)
 
 
@@ -37,15 +47,6 @@
 ### Features
 
 * support OpenEBS, storage solution for Kubernetes ([6ab78fd](https://github.com/dsieradzki/k4prox/commit/6ab78fd3edea07c855deef2d10b2f678a80f0bc4))
-
-
-
-# [0.2.0](https://github.com/dsieradzki/k4prox/compare/v0.1.0...v0.2.0) (2022-07-19)
-
-
-### Features
-
-* optimize cluster creation time ([23dfb49](https://github.com/dsieradzki/k4prox/commit/23dfb498b912fffa094c6786842279f9ab36eba0))
 
 
 
