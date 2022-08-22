@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"fmt"
 	"github.com/dsieradzki/k4prox/internal/app"
 	"github.com/dsieradzki/k4prox/internal/collect"
 	"github.com/dsieradzki/k4prox/internal/event"
@@ -57,7 +58,7 @@ func main() {
 	application := app.NewApp([]service.WailsContext{
 		projectService,
 	})
-	// Create application with options
+
 	err = wails.Run(&options.App{
 
 		Title:              "K4Prox",
@@ -80,6 +81,6 @@ func main() {
 	})
 
 	if err != nil {
-		println("Error:", err)
+		fmt.Println("Error: ", err.Error())
 	}
 }
