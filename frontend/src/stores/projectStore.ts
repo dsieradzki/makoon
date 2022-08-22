@@ -88,7 +88,7 @@ export const useProjectStore = defineStore({
     state: (): State => ({
         project: {
             kubeConfig: "",
-            sshKey: [],
+            sshKey: {},
             cluster: {
                 nodeUsername: "",
                 nodePassword: "",
@@ -210,9 +210,9 @@ export const useProjectStore = defineStore({
             const idx = this.project.cluster.microK8SAddons.findIndex((e: k4p.MicroK8sAddon) => e.name === name);
             this.project.cluster.microK8SAddons[idx].args = args
         },
-        updateMicroK8SAddonAdditionalK8SResources(name: string, kod: string) {
+        updateMicroK8SAddonAdditionalK8SResources(name: string, kod: string[]) {
             const idx = this.project.cluster.microK8SAddons.findIndex((e: k4p.MicroK8sAddon) => e.name === name);
-            this.project.cluster.features[idx].additionalK8SResources = kod
+            this.project.cluster.microK8SAddons[idx].additionalK8SResources = kod
         },
         disableMicroK8SAddon(name: string) {
             this.project.cluster.microK8SAddons = this.project.cluster.microK8SAddons.filter((e: k4p.MicroK8sAddon) => e.name !== name);
