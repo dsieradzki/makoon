@@ -157,7 +157,7 @@ const valuesAreNotSaved = computed((): boolean => {
 });
 
 const onUpdate = function (): void {
-  projectStore.updateMicroK8SAddonAdditionalK8SResources(featureName, parseTemplate());
+  projectStore.updateMicroK8SAddonAdditionalK8SResources(featureName, [parseTemplate()]);
 }
 
 const parseTemplate = function (): string {

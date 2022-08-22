@@ -1,3 +1,61 @@
+export namespace project {
+	
+	export class ProjectData {
+	    kubeConfig: string;
+	    sshKey: ssh.RsaKeyPair;
+	    cluster: k4p.Cluster;
+	
+	    static createFrom(source: any = {}) {
+	        return new ProjectData(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.kubeConfig = source["kubeConfig"];
+	        this.sshKey = this.convertValues(source["sshKey"], ssh.RsaKeyPair);
+	        this.cluster = this.convertValues(source["cluster"], k4p.Cluster);
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
+
+}
+
+export namespace ssh {
+	
+	export class RsaKeyPair {
+	    privateKey: number[];
+	    publicKey: number[];
+	
+	    static createFrom(source: any = {}) {
+	        return new RsaKeyPair(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.privateKey = source["privateKey"];
+	        this.publicKey = source["publicKey"];
+	    }
+	}
+
+}
+
 export namespace k4p {
 	
 	export class Network {
@@ -107,8 +165,7 @@ export namespace k4p {
 	    customK8SResources: CustomK8sResource[];
 	    nodeDiskSize: number;
 	    nodes: KubernetesNode[];
-	    // Go type: Network
-	    network: any;
+	    network: Network;
 	
 	    static createFrom(source: any = {}) {
 	        return new Cluster(source);
@@ -124,7 +181,7 @@ export namespace k4p {
 	        this.customK8SResources = this.convertValues(source["customK8SResources"], CustomK8sResource);
 	        this.nodeDiskSize = source["nodeDiskSize"];
 	        this.nodes = this.convertValues(source["nodes"], KubernetesNode);
-	        this.network = this.convertValues(source["network"], null);
+	        this.network = this.convertValues(source["network"], Network);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -145,6 +202,7 @@ export namespace k4p {
 		    return a;
 		}
 	}
+	
 	export class ProvisionStage {
 	    createVirtualMachines: boolean;
 	    setupVirtualMachines: boolean;
@@ -172,10 +230,8 @@ export namespace k4p {
 	    }
 	}
 	export class ProvisionRequest {
-	    // Go type: ProvisionStage
-	    stages: any;
-	    // Go type: Cluster
-	    notUsed: any;
+	    stages: ProvisionStage;
+	    notUsed: Cluster;
 	
 	    static createFrom(source: any = {}) {
 	        return new ProvisionRequest(source);
@@ -183,8 +239,8 @@ export namespace k4p {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.stages = this.convertValues(source["stages"], null);
-	        this.notUsed = this.convertValues(source["notUsed"], null);
+	        this.stages = this.convertValues(source["stages"], ProvisionStage);
+	        this.notUsed = this.convertValues(source["notUsed"], Cluster);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -231,47 +287,6 @@ export namespace tasklog {
 	        this.name = source["name"];
 	        this.details = source["details"];
 	        this.state = source["state"];
-	    }
-	
-		convertValues(a: any, classs: any, asMap: boolean = false): any {
-		    if (!a) {
-		        return a;
-		    }
-		    if (a.slice) {
-		        return (a as any[]).map(elem => this.convertValues(elem, classs));
-		    } else if ("object" === typeof a) {
-		        if (asMap) {
-		            for (const key of Object.keys(a)) {
-		                a[key] = new classs(a[key]);
-		            }
-		            return a;
-		        }
-		        return new classs(a);
-		    }
-		    return a;
-		}
-	}
-
-}
-
-export namespace project {
-	
-	export class ProjectData {
-	    kubeConfig: string;
-	    // Go type: ssh.RsaKeyPair
-	    sshKey: any;
-	    // Go type: k4p.Cluster
-	    cluster: any;
-	
-	    static createFrom(source: any = {}) {
-	        return new ProjectData(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.kubeConfig = source["kubeConfig"];
-	        this.sshKey = this.convertValues(source["sshKey"], null);
-	        this.cluster = this.convertValues(source["cluster"], null);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

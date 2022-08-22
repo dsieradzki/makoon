@@ -80,7 +80,7 @@ const projectStore = useProjectStore();
 const dialog = useDialog();
 const propertiesPanelStore = usePropertiesPanelStore();
 
-const getNode = function (): k4p.KubernetesNode {
+const getNode = function (): k4p.KubernetesNode | undefined {
   return projectStore.project.cluster.nodes.find((e: k4p.KubernetesNode) => e.vmid == Number(propertiesPanelStore.propertiesId));
 }
 
@@ -106,9 +106,13 @@ const storagePool = ref<string>();
 const storageNames = ref<string[]>([]);
 
 const onUpdate = function (): void {
-  const oldNode = {...getNode()};
-  const nodeToUpdate = createUpdatedNode();
-  projectStore.updateNode(nodeToUpdate, oldNode);
+  const oldNode = getNode();
+  if (!oldNode) {
+    return
+  }
+  const copyCurrentNodeState = {...oldNode};
+  const nodeToUpdate = createUpdatedNode(copyCurrentNodeState);
+  projectStore.updateNode(nodeToUpdate, copyCurrentNodeState);
   propertiesPanelStore.selectPanel(propertiesPanelStore.propertiesPanelKey || "", nodeToUpdate.vmid.toString()) // Brake method contract or keep ugly default value or something else?
 }
 
@@ -121,7 +125,7 @@ const onCancel = function (): void {
   propertiesPanelStore.deselect();
 }
 
-const createUpdatedNode = function (): k4p.KubernetesNode {
+const createUpdatedNode = function (node: k4p.KubernetesNode): k4p.KubernetesNode {
   return {
     name: nodeName.value,
     vmid: vmid.value,
@@ -129,7 +133,7 @@ const createUpdatedNode = function (): k4p.KubernetesNode {
     memory: memory.value,
     ipAddress: ipAddress.value,
     storagePool: storagePool.value,
-    nodeType: getNode().nodeType
+    nodeType: node.nodeType
   } as k4p.KubernetesNode;
 }
 
