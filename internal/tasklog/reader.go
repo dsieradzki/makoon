@@ -11,7 +11,7 @@ var (
 	noUUID = uuid.UUID{}
 )
 
-func NewTaskLogReader(eventSource EventSource) *Reader {
+func NewReader(eventSource EventSource) *Reader {
 	return &Reader{
 		eventSource: eventSource,
 	}

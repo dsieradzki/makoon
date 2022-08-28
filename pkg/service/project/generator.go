@@ -8,7 +8,7 @@ import (
 	"github.com/dsieradzki/k4prox/internal/k4p"
 	"github.com/dsieradzki/k4prox/internal/proxmox"
 	"github.com/dsieradzki/k4prox/internal/ssh"
-	"github.com/dsieradzki/k4prox/internal/utils"
+	"github.com/dsieradzki/k4prox/internal/utils/network"
 	"github.com/dsieradzki/k4prox/internal/utils/task"
 	log "github.com/sirupsen/logrus"
 	systemruntime "runtime"
@@ -185,10 +185,10 @@ func (g *Generator) getDefaultNetwork() (proxmox.Network, error) {
 		log.WithError(err).Error("cannot find network bridges, return empty network settings")
 		return proxmox.Network{}, err
 	}
-	for _, network := range networks {
-		if network.Address == g.proxmoxClient.GetProxmoxHost() {
+	for _, net := range networks {
+		if net.Address == g.proxmoxClient.GetProxmoxHost() {
 			log.Debug("found network where proxmox is working on")
-			return network, nil
+			return net, nil
 		}
 	}
 	log.Warn("cannot find network where proxmox is working on, return empty network")
@@ -211,7 +211,7 @@ func (g *Generator) getFirstAddressFromFreePool() (string, int, error) {
 	if err != nil {
 		return "", 0, err
 	}
-	if utils.IsCheckIPToolAvailable() {
+	if network.IsCheckIPToolAvailable() {
 		return findIpRangeForNetwork(defaultNetwork)
 	} else {
 		log.Warn("tool for checking IP is not available")
@@ -249,7 +249,7 @@ func pingHostRange(networkPart string, lIP int, hIP int) task.Result[bool] {
 		log.Warn("due to errors in exec.Comand on Linux check will be fired in single goroutine")
 		for i := lIP; i < hIP; i++ {
 			ipToCheck := fmt.Sprintf("%s.%d", networkPart, i)
-			available, err := utils.PingHost(ipToCheck)
+			available, err := network.PingHost(ipToCheck)
 			log.Debugf("Ping [%s] host to check IP reservation. Host available: [%t]", ipToCheck, available)
 			// Optimize single thread checking
 			if available {
@@ -271,7 +271,7 @@ func pingHostRange(networkPart string, lIP int, hIP int) task.Result[bool] {
 					context.WithValue(context.Background(), "ip", i),
 					func(ctx context.Context) (bool, error) {
 						ipToCheck := fmt.Sprintf("%s.%d", networkPart, ctx.Value("ip"))
-						available, err := utils.PingHost(ipToCheck)
+						available, err := network.PingHost(ipToCheck)
 						log.Debugf("Ping [%s] host to check IP reservation. Host available: [%t]", ipToCheck, available)
 						return available, err
 					})

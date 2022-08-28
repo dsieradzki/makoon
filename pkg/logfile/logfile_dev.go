@@ -1,6 +1,6 @@
 //go:build !production
 
-package applogger
+package logfile
 
 func PrepareLogFile() string {
 	return "./" + LogFileName

@@ -69,12 +69,12 @@ import InputText from "primevue/inputtext";
 import InputNumber from "primevue/inputnumber";
 import Button from "primevue/button";
 import type { k4p } from "@wails/models";
-import { GetStorage } from "@wails/service/ProvisionerService";
 import Dropdown from 'primevue/dropdown';
 import { useProjectStore } from "@/stores/projectStore";
 import { usePropertiesPanelStore } from "@/stores/propertiesPanelStore";
 import { showError } from "@/utils/errors";
 import { useDialog } from "primevue/usedialog";
+import { GetStorage } from "@wails/provisioner/Service";
 
 const projectStore = useProjectStore();
 const dialog = useDialog();

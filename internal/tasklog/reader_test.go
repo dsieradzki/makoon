@@ -4,6 +4,7 @@ import (
 	"github.com/google/uuid"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
 )
@@ -13,15 +14,19 @@ func TestTaskLog(t *testing.T) {
 	RunSpecs(t, "Task log")
 }
 
+func TestTaskLogReader_ThereIsNoTasksWithoutEvents(t *testing.T) {
+	// given
+	reader := readerWithNoEvents()
+
+	// when
+	logs := reader.Logs()
+
+	// then
+	assert.Len(t, logs, 0)
+}
+
 var _ = Describe("Task log", func() {
 	Context("User reads task log", func() {
-		When("is no events", func() {
-			reader := readerWithNoEvents()
-			It("there are no tasks", func() {
-				Expect(reader.Logs()).
-					Should(HaveLen(0))
-			})
-		})
 		When("is only start event", func() {
 			reader := readerWithOneEvent()
 			It("task is in progress state", func() {
@@ -43,9 +48,9 @@ var _ = Describe("Task log", func() {
 				Expect(reader.Logs()).
 					Should(
 						ContainElement(NewTaskBuilder().
-							WithCreateTime(time.Unix(100, 0)).
-							WithDuration(100 * time.Second).
-							WithState(TaskState(FinishedEvent)).
+							CreateTime(time.Unix(100, 0)).
+							Duration(100 * time.Second).
+							State(TaskState(FinishedEvent)).
 							Build(),
 						))
 			})
@@ -55,31 +60,31 @@ var _ = Describe("Task log", func() {
 })
 
 func readerWithOneEvent() *Reader {
-	return NewTaskLogReader(func() []Event {
+	return NewReader(func() []Event {
 		return []Event{
 			NewEventBuilder().
-				WithState(StartingEvent).
+				State(StartingEvent).
 				Build(),
 		}
 	})
 }
 func readerWithTwoEventsWithTheSameIdAndSecondWithFinishState() *Reader {
-	return NewTaskLogReader(func() []Event {
+	return NewReader(func() []Event {
 		return []Event{
 			NewEventBuilder().
 				WithCreateTime(time.Unix(100, 0)).
-				WithState(StartingEvent).
+				State(StartingEvent).
 				Build(),
 			NewEventBuilder().
 				WithCreateTime(time.Unix(200, 0)).
-				WithState(FinishedEvent).
+				State(FinishedEvent).
 				Build(),
 		}
 	})
 }
 
 func readerWithNoEvents() *Reader {
-	return NewTaskLogReader(func() []Event { return []Event{} })
+	return NewReader(func() []Event { return []Event{} })
 }
 
 type EventBuilder struct {
@@ -102,7 +107,7 @@ func (b *EventBuilder) WithDetails(details string) *EventBuilder {
 	b.event.Details = details
 	return b
 }
-func (b *EventBuilder) WithState(state EventState) *EventBuilder {
+func (b *EventBuilder) State(state EventState) *EventBuilder {
 	b.event.State = state
 	return b
 }
@@ -129,12 +134,12 @@ func (b *TaskBuilder) WithCorrelationId(correlationId uuid.UUID) *TaskBuilder {
 	return b
 }
 
-func (b *TaskBuilder) WithCreateTime(createTime time.Time) *TaskBuilder {
+func (b *TaskBuilder) CreateTime(createTime time.Time) *TaskBuilder {
 	b.task.CreateTime = createTime
 	return b
 }
 
-func (b *TaskBuilder) WithDuration(duration time.Duration) *TaskBuilder {
+func (b *TaskBuilder) Duration(duration time.Duration) *TaskBuilder {
 	b.task.Duration = Duration(duration)
 	return b
 }
@@ -149,7 +154,7 @@ func (b *TaskBuilder) WithDetails(details string) *TaskBuilder {
 	return b
 }
 
-func (b *TaskBuilder) WithState(state TaskState) *TaskBuilder {
+func (b *TaskBuilder) State(state TaskState) *TaskBuilder {
 	b.task.State = state
 	return b
 }

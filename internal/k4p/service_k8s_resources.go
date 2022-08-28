@@ -8,7 +8,7 @@ import (
 
 func (k *Service) InstallAdditionalK8sResources(provisionRequest Cluster, keyPair ssh.RsaKeyPair) error {
 	firstMasterNode, _ := findFirstMasterNode(provisionRequest.Nodes)
-	sshMasterNode := ssh.NewSshClientKey(provisionRequest.NodeUsername, keyPair, firstMasterNode.IpAddress)
+	sshMasterNode := ssh.NewClientWithKey(provisionRequest.NodeUsername, keyPair, firstMasterNode.IpAddress)
 
 	eventSession := k.eventCollector.Start("Apply custom K8S resources")
 	crs := collect.Map(provisionRequest.CustomK8sResources, func(r CustomK8sResource) string {

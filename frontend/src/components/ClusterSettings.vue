@@ -109,9 +109,9 @@ import { useProjectStore } from "@/stores/projectStore";
 import { onMounted, ref } from "vue";
 import type { k4p } from "@wails/models";
 import Dropdown from 'primevue/dropdown';
-import { GetNetworkBridges } from "@wails/service/ProvisionerService";
 import { useDialog } from "primevue/usedialog";
 import { showError } from "@/utils/errors";
+import { GetNetworkBridges } from "@wails/provisioner/Service";
 
 const emits = defineEmits<{
   (e: "deployCluster", pr: k4p.ProvisionRequest): void

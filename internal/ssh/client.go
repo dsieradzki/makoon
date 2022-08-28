@@ -8,11 +8,11 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-func NewSshClient() *Client {
+func NewClient() *Client {
 	return &Client{}
 }
 
-func NewSshClientKey(username string, rsaKeyPair RsaKeyPair, host string) *Client {
+func NewClientWithKey(username string, rsaKeyPair RsaKeyPair, host string) *Client {
 	return &Client{
 		username:   username,
 		password:   "",

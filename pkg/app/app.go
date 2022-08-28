@@ -2,18 +2,17 @@ package app
 
 import (
 	"context"
-	"github.com/dsieradzki/k4prox/pkg/applogger"
-	"github.com/dsieradzki/k4prox/pkg/service"
+	"github.com/dsieradzki/k4prox/pkg/logfile"
+	"github.com/dsieradzki/k4prox/pkg/wails"
 )
 
 // App struct
 type App struct {
 	ctx              context.Context
-	contextConsumers []service.WailsContext
+	contextConsumers []wails.ContextSetter
 }
 
-// NewApp creates a new App application struct
-func NewApp(contextConsumers []service.WailsContext) *App {
+func NewApp(contextConsumers []wails.ContextSetter) *App {
 	return &App{
 		contextConsumers: contextConsumers,
 	}
@@ -30,7 +29,7 @@ func (a *App) Shutdown(ctx context.Context) {
 }
 
 func (a *App) LogFileLocation() string {
-	return applogger.PrepareLogFile()
+	return logfile.PrepareLogFile()
 }
 
 func (a *App) GetContext() context.Context {

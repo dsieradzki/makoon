@@ -1,6 +1,6 @@
 //go:build darwin
 
-package utils
+package network
 
 import "syscall"
 

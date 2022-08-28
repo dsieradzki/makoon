@@ -1,21 +1,18 @@
-//go:build production && windows
+//go:build production && darwin
 
-package applogger
+package logfile
 
 import (
 	"os"
 	"path"
 )
 
-const WindowsAppDirNameInHomeDir = "." + AppDirNameInHomeDir
-
 func PrepareLogFile() string {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return logFileInTempLocation()
 	}
-	logDirectory := path.Join(home, WindowsAppDirNameInHomeDir)
-
+	logDirectory := path.Join(home, "Library", "Logs", AppDirNameInHomeDir)
 	err = os.MkdirAll(logDirectory, 0750)
 	if err != nil {
 		return logFileInTempLocation()

@@ -33,7 +33,7 @@ func (k *Service) startVirtualMachine(cluster Cluster, node KubernetesNode, keyP
 		return err
 	}
 
-	sshNode := ssh.NewSshClientKey(cluster.NodeUsername, keyPair, node.IpAddress)
+	sshNode := ssh.NewClientWithKey(cluster.NodeUsername, keyPair, node.IpAddress)
 	err = utils.Retry(30, 10*time.Second,
 		func(attempt int) error {
 			log.Infof("waiting for start [%d] VM, attempt [%d]", node.Vmid, attempt)
