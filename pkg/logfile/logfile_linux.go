@@ -1,6 +1,6 @@
 //go:build production && linux
 
-package applogger
+package logfile
 
 import (
 	"os"

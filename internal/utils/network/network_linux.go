@@ -1,11 +1,11 @@
-//go:build windows
+//go:build linux
 
-package utils
+package network
 
 import "syscall"
 
 func GetSysProcAttr() *syscall.SysProcAttr {
-	return &syscall.SysProcAttr{HideWindow: true}
+	return &syscall.SysProcAttr{}
 }
 
 func TimeoutParamName() string {
@@ -13,5 +13,5 @@ func TimeoutParamName() string {
 }
 
 func ProbesParamName() string {
-	return "-n"
+	return "-c"
 }

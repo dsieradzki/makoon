@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import type { tasklog } from "@wails/models";
-import { GetTaskLog } from "@wails/service/TaskLogService";
+import { GetTaskLog } from "@wails/tasklog/Service";
 
 interface State {
     data: tasklog.Task[]

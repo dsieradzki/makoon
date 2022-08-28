@@ -6,7 +6,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func NewEventCollector() *Collector {
+func NewCollector() *Collector {
 	log.Info("Create event collector")
 	collector := Collector{
 		events:       make([]Event, 0),

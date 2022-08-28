@@ -1,4 +1,4 @@
-package service
+package provisioner
 
 import (
 	"github.com/dsieradzki/k4prox/internal/collect"
@@ -10,29 +10,29 @@ import (
 	"sort"
 )
 
-func NewProvisionerService(
+func NewService(
 	projectService *project.Service,
 	proxmoxClient *proxmox.Client,
 	sshClient *ssh.Client,
-	eventCollector *event.Collector) *ProvisionerService {
-	return &ProvisionerService{
+	eventCollector *event.Collector) *Service {
+	return &Service{
 		project:       projectService,
 		proxmoxClient: proxmoxClient,
 		k4p:           k4p.NewK4PService(proxmoxClient, sshClient, eventCollector),
 	}
 }
 
-type ProvisionerService struct {
+type Service struct {
 	k4p           *k4p.Service
 	proxmoxClient *proxmox.Client
 	project       *project.Service
 }
 
-func (p *ProvisionerService) SetupEnvironmentOnProxmox() error {
+func (p *Service) SetupEnvironmentOnProxmox() error {
 	return p.k4p.SetupEnvironmentOnProxmox()
 }
 
-func (p *ProvisionerService) CreateCluster(provisionRequest k4p.ProvisionRequest) error {
+func (p *Service) CreateCluster(provisionRequest k4p.ProvisionRequest) error {
 	projectData, err := p.project.LoadProject()
 	if err != nil {
 		return err
@@ -140,7 +140,7 @@ func (p *ProvisionerService) CreateCluster(provisionRequest k4p.ProvisionRequest
 	return nil
 }
 
-func (p *ProvisionerService) GetNetworkBridges() ([]string, error) {
+func (p *Service) GetNetworkBridges() ([]string, error) {
 	networks, err := p.proxmoxClient.GetNetworkBridges(p.proxmoxClient.GetProxmoxNodeName())
 	if err != nil {
 		return []string{}, err
@@ -152,7 +152,7 @@ func (p *ProvisionerService) GetNetworkBridges() ([]string, error) {
 	return netNames, nil
 }
 
-func (p *ProvisionerService) GetStorage() ([]string, error) {
+func (p *Service) GetStorage() ([]string, error) {
 	storage, err := p.proxmoxClient.GetStorage()
 	if err != nil {
 		return []string{}, err

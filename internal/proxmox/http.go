@@ -7,13 +7,13 @@ import (
 	"errors"
 	"fmt"
 	log "github.com/sirupsen/logrus"
-	"io/ioutil"
+	"io"
 	"net/http"
 )
 
 type HttpMethod string
 
-func (h HttpMethod) ToString() string {
+func (h HttpMethod) String() string {
 	return string(h)
 }
 
@@ -26,7 +26,7 @@ const (
 
 type MediaType string
 
-func (m MediaType) ToString() string {
+func (m MediaType) String() string {
 	return string(m)
 }
 
@@ -73,12 +73,12 @@ func request(
 		}
 	}
 
-	request, err := http.NewRequest(method.ToString(), endpoint, bytes.NewBuffer(data))
+	request, err := http.NewRequest(method.String(), endpoint, bytes.NewBuffer(data))
 	if err != nil {
 		return err
 	}
 	appHeaders := headers
-	appHeaders.Add("Content-Type", mediaType.ToString())
+	appHeaders.Add("Content-Type", mediaType.String())
 	request.Header = headers
 	for _, cookie := range cookies {
 		request.AddCookie(&cookie)
@@ -91,7 +91,7 @@ func request(
 		return err
 	}
 
-	bodyData, err := ioutil.ReadAll(response.Body)
+	bodyData, err := io.ReadAll(response.Body)
 	if err != nil {
 		return err
 	}
@@ -115,11 +115,10 @@ func isErrorResponse(err error, res *http.Response) bool {
 func getErrorFromResponse(err error, res *http.Response) error {
 	if err != nil {
 		return err
-	} else {
-		body, err := ioutil.ReadAll(res.Body)
-		if err != nil {
-			return err
-		}
-		return errors.New(fmt.Sprintf("Status [%d], body [%s]", res.StatusCode, string(body)))
 	}
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return err
+	}
+	return errors.New(fmt.Sprintf("Status [%d], body [%s]", res.StatusCode, string(body)))
 }

@@ -49,8 +49,8 @@ import Password from 'primevue/password';
 import Button from 'primevue/button';
 import { ref } from "vue";
 
-import { Login } from "@wails/service/LoginService";
 import { useRouter } from "vue-router";
+import { Login } from "@wails/auth/Service";
 
 // eslint-disable-next-line no-undef
 const version = APP_VERSION;

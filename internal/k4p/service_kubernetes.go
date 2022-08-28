@@ -24,7 +24,7 @@ func (k *Service) InstallKubernetesOnNodes(cluster Cluster, keyPair ssh.RsaKeyPa
 	return executor.Results().AnyError()
 }
 func (k *Service) installKubernetesOnNode(provisionRequest Cluster, node KubernetesNode, keyPair ssh.RsaKeyPair) error {
-	sshClient := ssh.NewSshClientKey(provisionRequest.NodeUsername, keyPair, node.IpAddress)
+	sshClient := ssh.NewClientWithKey(provisionRequest.NodeUsername, keyPair, node.IpAddress)
 	//
 	//
 	//
@@ -71,7 +71,7 @@ func (k *Service) JoinNodesToCluster(provisionRequest Cluster, keyPair ssh.RsaKe
 
 	firstNode, nodesToJoin := findFirstMasterNode(provisionRequest.Nodes)
 
-	sshClientFirstNode := ssh.NewSshClientKey(provisionRequest.NodeUsername, keyPair, firstNode.IpAddress)
+	sshClientFirstNode := ssh.NewClientWithKey(provisionRequest.NodeUsername, keyPair, firstNode.IpAddress)
 
 	for _, node := range nodesToJoin {
 		eventSession := k.eventCollector.Startf("[VM%d] Generate join token", node.Vmid)
@@ -100,7 +100,7 @@ func (k *Service) JoinNodesToCluster(provisionRequest Cluster, keyPair ssh.RsaKe
 		//
 		//
 		//
-		sshClientNodeToJoin := ssh.NewSshClientKey(provisionRequest.NodeUsername, keyPair, node.IpAddress)
+		sshClientNodeToJoin := ssh.NewClientWithKey(provisionRequest.NodeUsername, keyPair, node.IpAddress)
 		//
 		//
 		//
@@ -135,7 +135,7 @@ func (k *Service) JoinNodesToCluster(provisionRequest Cluster, keyPair ssh.RsaKe
 
 func (k *Service) GetKubeConfigFromCluster(clusterDef Cluster, keyPair ssh.RsaKeyPair) (string, error) {
 	firstMasterNode, _ := findFirstMasterNode(clusterDef.Nodes)
-	sshMasterNode := ssh.NewSshClientKey(clusterDef.NodeUsername, keyPair, firstMasterNode.IpAddress)
+	sshMasterNode := ssh.NewClientWithKey(clusterDef.NodeUsername, keyPair, firstMasterNode.IpAddress)
 	eventSession := k.eventCollector.Start("Get KubeConfig from cluster")
 	executionResult, err := sshMasterNode.Execute("sudo microk8s config")
 	if err != nil {

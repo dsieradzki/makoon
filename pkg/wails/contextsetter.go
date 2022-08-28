@@ -1,7 +1,7 @@
-package service
+package wails
 
 import "context"
 
-type WailsContext interface {
+type ContextSetter interface {
 	SetContext(ctx context.Context)
 }

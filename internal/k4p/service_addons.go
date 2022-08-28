@@ -6,7 +6,7 @@ import (
 
 func (k *Service) InstallAddons(provisionRequest Cluster, keyPair ssh.RsaKeyPair) error {
 	firstMasterNode, _ := findFirstMasterNode(provisionRequest.Nodes)
-	sshMasterNode := ssh.NewSshClientKey(provisionRequest.NodeUsername, keyPair, firstMasterNode.IpAddress)
+	sshMasterNode := ssh.NewClientWithKey(provisionRequest.NodeUsername, keyPair, firstMasterNode.IpAddress)
 
 	eventSession := k.eventCollector.Start("Enable community addons repository")
 	executionResult, err := sshMasterNode.Execute("sudo microk8s enable community")

@@ -76,9 +76,9 @@ import { computed, onMounted, ref } from "vue";
 import type { k4p } from "@wails/models";
 import { useProjectStore } from "@/stores/projectStore";
 import { findLastLoadBalancerIP } from "@/utils/loadbalancerIp";
-import { EncodeUsingBCrypt } from "@wails/service/PasswordEncoder";
 import { useDialog } from "primevue/usedialog";
 import { showError } from "@/utils/errors";
+import { EncodeUsingBCrypt } from "@wails/auth/Service";
 
 const propertiesPanelStore = usePropertiesPanelStore();
 const projectStore = useProjectStore();

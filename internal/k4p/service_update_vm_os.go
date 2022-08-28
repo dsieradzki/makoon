@@ -24,7 +24,7 @@ func (k *Service) UpdateVmsOs(provisionRequest Cluster, keyPair ssh.RsaKeyPair) 
 }
 
 func (k *Service) updateVmOs(provisionRequest Cluster, keyPair ssh.RsaKeyPair, node KubernetesNode) error {
-	sshClient := ssh.NewSshClientKey(provisionRequest.NodeUsername, keyPair, node.IpAddress)
+	sshClient := ssh.NewClientWithKey(provisionRequest.NodeUsername, keyPair, node.IpAddress)
 	eventSession := k.eventCollector.Startf("[VM%d] Update virtual machine OS", node.Vmid)
 
 	err := utils.Retry(30, 10*time.Second, func(attempt int) error {

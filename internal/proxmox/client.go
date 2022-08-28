@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func NewProxmoxClient() *Client {
+func NewClient() *Client {
 	proxmox := &Client{}
 	return proxmox
 }
@@ -24,7 +24,7 @@ func (p *Client) GetSession() SessionData {
 	return *p.session
 }
 
-func (p *Client) LoginToProxmox(username string, password string, proxmoxHost string, proxmoxPort int) error {
+func (p *Client) Login(username string, password string, proxmoxHost string, proxmoxPort int) error {
 	p.proxmoxHost = proxmoxHost
 	p.proxmoxPort = proxmoxPort
 	var proxmoxSession Response[SessionData]

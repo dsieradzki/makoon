@@ -59,15 +59,15 @@ import PropertiesPanel from "@/components/PropertiesPanel.vue";
 import type { k4p } from "@wails/models";
 import { onMounted, ref } from "vue";
 import { useProjectStore } from "@/stores/projectStore";
-import { CreateCluster, SetupEnvironmentOnProxmox } from "@wails/service/ProvisionerService";
 import { useRouter } from "vue-router";
 import ProgressSpinner from 'primevue/progressspinner';
 import { useTaskLogStore } from "@/stores/eventStore";
-import { ClearTaskLog } from "@wails/service/TaskLogService";
 import { usePropertiesPanelStore } from "@/stores/propertiesPanelStore";
 import { LogDebug } from "@wails-runtime/runtime";
 import { showError } from "@/utils/errors";
 import { useDialog } from "primevue/usedialog";
+import { ClearTaskLog } from "@wails/tasklog/Service";
+import { CreateCluster, SetupEnvironmentOnProxmox } from "@wails/provisioner/Service";
 
 const projectStore = useProjectStore();
 const taskLogStore = useTaskLogStore();

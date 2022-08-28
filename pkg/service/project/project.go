@@ -28,7 +28,7 @@ type ProjectData struct {
 	Cluster    k4p.Cluster    `json:"cluster" yaml:"cluster"`
 }
 
-func NewProjectService(proxmoxClient *proxmox.Client) *Service {
+func NewService(proxmoxClient *proxmox.Client) *Service {
 	return &Service{
 		proxmoxClient: proxmoxClient,
 		projectGenerator: &Generator{

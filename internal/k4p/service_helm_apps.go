@@ -9,7 +9,7 @@ import (
 
 func (k *Service) InstallHelmApps(cluster Cluster, keyPair ssh.RsaKeyPair) error {
 	firstMasterNode, _ := findFirstMasterNode(cluster.Nodes)
-	sshMasterNode := ssh.NewSshClientKey(cluster.NodeUsername, keyPair, firstMasterNode.IpAddress)
+	sshMasterNode := ssh.NewClientWithKey(cluster.NodeUsername, keyPair, firstMasterNode.IpAddress)
 
 	for _, app := range cluster.HelmApps {
 		eventSession := k.eventCollector.Startf("Install Helm app [%s]", app.ChartName)
@@ -30,7 +30,7 @@ func (k *Service) InstallHelmApps(cluster Cluster, keyPair ssh.RsaKeyPair) error
 }
 func (k *Service) InstallCustomHelmApps(cluster Cluster, keyPair ssh.RsaKeyPair) error {
 	firstMasterNode, _ := findFirstMasterNode(cluster.Nodes)
-	sshMasterNode := ssh.NewSshClientKey(cluster.NodeUsername, keyPair, firstMasterNode.IpAddress)
+	sshMasterNode := ssh.NewClientWithKey(cluster.NodeUsername, keyPair, firstMasterNode.IpAddress)
 
 	for _, app := range cluster.CustomHelmApps {
 		eventSession := k.eventCollector.Startf("Install custom Helm app [%s]", app.ChartName)

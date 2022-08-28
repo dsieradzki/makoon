@@ -1,26 +1,26 @@
-package service
+package tasklog
 
 import (
 	"github.com/dsieradzki/k4prox/internal/event"
 	"github.com/dsieradzki/k4prox/internal/tasklog"
 )
 
-func NewTaskLogService(eventCollector *event.Collector, taskLogReader *tasklog.Reader) *TaskLogService {
-	return &TaskLogService{
+func NewService(eventCollector *event.Collector, taskLogReader *tasklog.Reader) *Service {
+	return &Service{
 		eventCollector: eventCollector,
 		taskLogReader:  taskLogReader,
 	}
 }
 
-type TaskLogService struct {
+type Service struct {
 	eventCollector *event.Collector
 	taskLogReader  *tasklog.Reader
 }
 
-func (t *TaskLogService) GetTaskLog() []tasklog.Task {
+func (t *Service) GetTaskLog() []tasklog.Task {
 	return t.taskLogReader.Logs()
 }
 
-func (t *TaskLogService) ClearTaskLog() int {
+func (t *Service) ClearTaskLog() int {
 	return t.eventCollector.Clear()
 }

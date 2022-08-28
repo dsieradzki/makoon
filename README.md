@@ -20,8 +20,8 @@
 
 ## :grey_question: What is this?
 
-**K4Prox** is a desktop application, for managing Kubernetes installations in Proxmox VE.
-The application automates creating a high available multi-node Kubernetes cluster
+**K4Prox** is a desktop application, for managing Kubernetes installations in Proxmox VE, in few clicks you can
+create a high available multi-node Kubernetes cluster
 *(tested on Proxmox 7.2-7)*.
 
 **What does the K4Prox under the hood?**
