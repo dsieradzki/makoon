@@ -1,0 +1,6 @@
+.expandLogs {
+ transition: 0.3s ease-out;
+}
+.expandLogs:hover {
+    transform: translateY(10px);
+}

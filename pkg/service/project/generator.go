@@ -80,13 +80,8 @@ func (g *Generator) GenerateDefaultProject(fileName string) error {
 			NodePassword: "k4prox",
 			MicroK8sAddons: []k4p.MicroK8sAddon{
 				{
-					Name:                   "dns",
-					Args:                   "",
-					AdditionalK8sResources: nil,
-				},
-				{
-					Name:                   "helm3",
-					Args:                   "",
+					Name:                   "metallb",
+					Args:                   metallbIpRange,
 					AdditionalK8sResources: nil,
 				},
 				{
@@ -100,11 +95,6 @@ func (g *Generator) GenerateDefaultProject(fileName string) error {
 					AdditionalK8sResources: []string{
 						strings.ReplaceAll(defaultIngressLb, "{{LB_IP}}", ingressLB),
 					},
-				},
-				{
-					Name:                   "metallb",
-					Args:                   metallbIpRange,
-					AdditionalK8sResources: nil,
 				},
 				{
 					Name:                   "openebs",

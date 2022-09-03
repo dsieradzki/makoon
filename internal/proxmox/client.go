@@ -48,6 +48,12 @@ func (p *Client) Login(username string, password string, proxmoxHost string, pro
 
 }
 
+func (p *Client) ClearLoginData() {
+	p.proxmoxHost = ""
+	p.proxmoxPort = 0
+	p.session = nil
+}
+
 func (p *Client) endpoint(e string) string {
 	return fmt.Sprintf("https://%s:%d/api2/json%s", p.proxmoxHost, p.proxmoxPort, e)
 }

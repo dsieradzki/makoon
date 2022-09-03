@@ -4,7 +4,9 @@
     "dev": "wails dev",
     "build": "wails build",
     "generate": "wails generate module",
-    "update:dependencies:backend": "go get -u all"
+    "update:dependencies": "npm run update:dependencies:frontend && npm run update:dependencies:backend",
+    "update:dependencies:backend": "go get -u all",
+    "update:dependencies:frontend": "cd frontend && npm run update:dependencies"
   },
   "author": {
     "name": "Damian Sieradzki"

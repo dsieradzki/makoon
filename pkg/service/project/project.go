@@ -113,7 +113,7 @@ func (p *Service) SaveKubeConfigDialog() error {
 func (p *Service) SaveSshPrivateKeyDialog() error {
 	kubeConfigFileName, err := runtime.SaveFileDialog(p.ctx, runtime.SaveDialogOptions{
 		DefaultDirectory: getHomeDir(),
-		DefaultFilename:  "cluster.pem",
+		DefaultFilename:  "cluster_key.pem",
 		Title:            "Save SSH private key",
 	})
 	if err != nil {
@@ -139,7 +139,7 @@ func (p *Service) SaveSshPrivateKeyDialog() error {
 func (p *Service) SaveSshAuthorizationKeyDialog() error {
 	kubeConfigFileName, err := runtime.SaveFileDialog(p.ctx, runtime.SaveDialogOptions{
 		DefaultDirectory: getHomeDir(),
-		DefaultFilename:  "cluster.txt",
+		DefaultFilename:  "cluster_key.txt",
 		Title:            "Save SSH authorization key",
 	})
 	if err != nil {

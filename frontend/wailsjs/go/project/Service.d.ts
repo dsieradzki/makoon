@@ -17,4 +17,4 @@ export function SaveSshAuthorizationKeyDialog():Promise<Error>;
 
 export function SaveSshPrivateKeyDialog():Promise<Error>;
 
-export function SetContext(arg1:context.Context):void;
+export function SetContext(arg1:context.Context):Promise<void>;

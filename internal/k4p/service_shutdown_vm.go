@@ -28,7 +28,7 @@ func (k *Service) ShutdownVirtualMachines(cluster Cluster) error {
 
 func (k *Service) shutdownVirtualMachine(node KubernetesNode) error {
 	// Shutdown VM's
-	eventSession := k.eventCollector.Startf("[VM%d] Shutdown virtual machine", node.Vmid)
+	eventSession := k.eventCollector.StartWithDetails("Shutdown virtual machine", k.generateVmIdDetails(node.Vmid))
 	err := k.proxmoxClient.ShutdownVM(node.Vmid)
 	if err != nil {
 		eventSession.ReportError(err)

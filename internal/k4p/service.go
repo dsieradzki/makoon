@@ -1,6 +1,7 @@
 package k4p
 
 import (
+	"fmt"
 	"github.com/dsieradzki/k4prox/internal/event"
 	"github.com/dsieradzki/k4prox/internal/proxmox"
 	"github.com/dsieradzki/k4prox/internal/ssh"
@@ -82,4 +83,8 @@ func (k *Service) SetupEnvironmentOnProxmox() error {
 		eventSession.Done()
 	}
 	return nil
+}
+
+func (k *Service) generateVmIdDetails(id uint32) string {
+	return fmt.Sprintf("VM ID: %d", id)
 }

@@ -28,7 +28,7 @@ func (k *Service) installKubernetesOnNode(provisionRequest Cluster, node Kuberne
 	//
 	//
 	//
-	eventSession := k.eventCollector.Startf("[VM%d] Install Kubernetes", node.Vmid)
+	eventSession := k.eventCollector.StartWithDetails("Install Kubernetes", k.generateVmIdDetails(node.Vmid))
 	executionResult, err := sshClient.Execute("sudo snap install microk8s --classic")
 	if err != nil {
 		eventSession.ReportError(err)
@@ -42,7 +42,7 @@ func (k *Service) installKubernetesOnNode(provisionRequest Cluster, node Kuberne
 	//
 	//
 	//
-	eventSession = k.eventCollector.Startf("[VM%d] Wait for Kubernetes readiness", node.Vmid)
+	eventSession = k.eventCollector.StartWithDetails("Wait for Kubernetes readiness", k.generateVmIdDetails(node.Vmid))
 	executionResult, err = sshClient.Execute("sudo microk8s status --wait-ready")
 	if err != nil {
 		eventSession.ReportError(err)
@@ -74,7 +74,7 @@ func (k *Service) JoinNodesToCluster(provisionRequest Cluster, keyPair ssh.RsaKe
 	sshClientFirstNode := ssh.NewClientWithKey(provisionRequest.NodeUsername, keyPair, firstNode.IpAddress)
 
 	for _, node := range nodesToJoin {
-		eventSession := k.eventCollector.Startf("[VM%d] Generate join token", node.Vmid)
+		eventSession := k.eventCollector.StartWithDetails("Generate join token", k.generateVmIdDetails(node.Vmid))
 		executionResult, err := sshClientFirstNode.Execute("sudo microk8s add-node --format json")
 		if err != nil {
 			eventSession.ReportError(err)
@@ -104,7 +104,7 @@ func (k *Service) JoinNodesToCluster(provisionRequest Cluster, keyPair ssh.RsaKe
 		//
 		//
 		//
-		eventSession = k.eventCollector.Startf("[VM%d] Join node to cluster", node.Vmid)
+		eventSession = k.eventCollector.StartWithDetails("Join node to cluster", k.generateVmIdDetails(node.Vmid))
 		executionResult, err = sshClientFirstNode.Executef("echo '%s %s' | sudo tee -a /etc/hosts", node.IpAddress, node.Name)
 		if err != nil {
 			eventSession.ReportError(err)

@@ -34,6 +34,12 @@ func (p *Client) SetConnectionData(username string, password string, host string
 	p.host = host
 }
 
+func (p *Client) ClearConnectionData() {
+	p.username = ""
+	p.password = ""
+	p.host = ""
+}
+
 func (p *Client) Executef(command string, a ...any) (ExecutionResult, error) {
 	return p.Execute(fmt.Sprintf(command, a...))
 }
