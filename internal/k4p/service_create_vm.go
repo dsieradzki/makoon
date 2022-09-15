@@ -18,7 +18,7 @@ func (k *Service) CreateVirtualMachines(provisionRequest Cluster, keyPair ssh.Rs
 }
 
 func (k *Service) createVirtualMachine(pr Cluster, node KubernetesNode, keyPair ssh.RsaKeyPair) error {
-	eventSession := k.eventCollector.Startf("[VM%d] Create Virtual Machine", node.Vmid)
+	eventSession := k.eventCollector.StartWithDetails("Create Virtual Machine", k.generateVmIdDetails(node.Vmid))
 	err := k.proxmoxClient.CreateVM(proxmox.VmDefinition{
 		proxmox.Vmid:   node.Vmid,
 		proxmox.Name:   node.Name,
@@ -37,7 +37,7 @@ func (k *Service) createVirtualMachine(pr Cluster, node KubernetesNode, keyPair 
 	//
 	//
 	//
-	eventSession = k.eventCollector.Startf("[VM%d] Import disk", node.Vmid)
+	eventSession = k.eventCollector.StartWithDetails("Import disk", k.generateVmIdDetails(node.Vmid))
 	importDiskResult, err := k.proxmoxSsh.Executef(
 		"qm importdisk %d %s %s", node.Vmid, k4pDataDir+"/"+linuxCloudImageFileName, node.StoragePool)
 
@@ -53,7 +53,7 @@ func (k *Service) createVirtualMachine(pr Cluster, node KubernetesNode, keyPair 
 	//
 	//
 	//
-	eventSession = k.eventCollector.Startf("[VM%d] Setup scsi controller and attach to disk", node.Vmid)
+	eventSession = k.eventCollector.StartWithDetails("Setup scsi controller and attach to disk", k.generateVmIdDetails(node.Vmid))
 	err = k.proxmoxClient.UpdateVM(proxmox.VmDefinition{
 		proxmox.Vmid:   node.Vmid,
 		proxmox.ScsiHW: "virtio-scsi-pci",
@@ -67,7 +67,7 @@ func (k *Service) createVirtualMachine(pr Cluster, node KubernetesNode, keyPair 
 	//
 	//
 	//
-	eventSession = k.eventCollector.Startf("[VM%d] Resize disk to desired size", node.Vmid)
+	eventSession = k.eventCollector.StartWithDetails("Resize disk to desired size", k.generateVmIdDetails(node.Vmid))
 	err = k.proxmoxClient.ResizeDisk(proxmox.VmDefinition{
 		proxmox.Vmid: node.Vmid,
 		"disk":       "scsi0",
@@ -81,7 +81,7 @@ func (k *Service) createVirtualMachine(pr Cluster, node KubernetesNode, keyPair 
 	//
 	//
 	//
-	eventSession = k.eventCollector.Startf("[VM%d] Setup cloud init drive", node.Vmid)
+	eventSession = k.eventCollector.StartWithDetails("Setup cloud init drive", k.generateVmIdDetails(node.Vmid))
 	err = k.proxmoxClient.UpdateVM(proxmox.VmDefinition{
 		proxmox.Vmid: node.Vmid,
 		"ide2":       fmt.Sprintf("%s:cloudinit", node.StoragePool),
@@ -94,7 +94,7 @@ func (k *Service) createVirtualMachine(pr Cluster, node KubernetesNode, keyPair 
 	//
 	//
 	//
-	eventSession = k.eventCollector.Startf("[VM%d] Setup boot disk", node.Vmid)
+	eventSession = k.eventCollector.StartWithDetails("Setup boot disk", k.generateVmIdDetails(node.Vmid))
 	err = k.proxmoxClient.UpdateVM(proxmox.VmDefinition{
 		proxmox.Vmid:     node.Vmid,
 		proxmox.Boot:     "c",
@@ -108,7 +108,7 @@ func (k *Service) createVirtualMachine(pr Cluster, node KubernetesNode, keyPair 
 	//
 	//
 	//
-	eventSession = k.eventCollector.Startf("[VM%d] Setup serial console", node.Vmid)
+	eventSession = k.eventCollector.StartWithDetails("Setup serial console", k.generateVmIdDetails(node.Vmid))
 	err = k.proxmoxClient.UpdateVM(proxmox.VmDefinition{
 		proxmox.Vmid: node.Vmid,
 		"serial0":    "socket",
@@ -122,7 +122,7 @@ func (k *Service) createVirtualMachine(pr Cluster, node KubernetesNode, keyPair 
 	//
 	//
 	//
-	eventSession = k.eventCollector.Startf("[VM%d] Setup cloud init", node.Vmid)
+	eventSession = k.eventCollector.StartWithDetails("Setup cloud init", k.generateVmIdDetails(node.Vmid))
 	encodedPublicKey := utils.PathEscape(string(keyPair.PublicKey))
 
 	err = k.proxmoxClient.UpdateVM(proxmox.VmDefinition{

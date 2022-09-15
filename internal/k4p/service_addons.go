@@ -20,7 +20,23 @@ func (k *Service) InstallAddons(provisionRequest Cluster, keyPair ssh.RsaKeyPair
 	}
 	eventSession.Done()
 
-	for _, feature := range provisionRequest.MicroK8sAddons {
+	// add mandatory addons
+	addonsToProcess := make([]MicroK8sAddon, 0)
+
+	addonsToProcess = append(addonsToProcess, MicroK8sAddon{
+		Name:                   "dns",
+		Args:                   "",
+		AdditionalK8sResources: nil,
+	})
+
+	addonsToProcess = append(addonsToProcess, MicroK8sAddon{
+		Name:                   "helm3",
+		Args:                   "",
+		AdditionalK8sResources: nil,
+	})
+	addonsToProcess = append(addonsToProcess, provisionRequest.MicroK8sAddons...)
+
+	for _, feature := range addonsToProcess {
 		eventSession := k.eventCollector.Startf("Enable addon [%s]", feature.Name)
 		err := k.enableAddon(feature, sshMasterNode)
 		if err != nil {

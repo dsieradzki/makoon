@@ -6,6 +6,14 @@ export function EncodeUsingBCrypt(arg1) {
   return window['go']['auth']['Service']['EncodeUsingBCrypt'](arg1);
 }
 
+export function GetProxmoxIp() {
+  return window['go']['auth']['Service']['GetProxmoxIp']();
+}
+
 export function Login(arg1, arg2, arg3) {
   return window['go']['auth']['Service']['Login'](arg1, arg2, arg3);
+}
+
+export function Logout() {
+  return window['go']['auth']['Service']['Logout']();
 }

@@ -26,7 +26,7 @@ func (k *Service) StartVirtualMachines(cluster Cluster, keyPair ssh.RsaKeyPair) 
 }
 
 func (k *Service) startVirtualMachine(cluster Cluster, node KubernetesNode, keyPair ssh.RsaKeyPair) error {
-	eventSession := k.eventCollector.Startf("[VM%d] Start virtual machine", node.Vmid)
+	eventSession := k.eventCollector.StartWithDetails("Start virtual machine", k.generateVmIdDetails(node.Vmid))
 	err := k.proxmoxClient.StartVM(node.Vmid)
 	if err != nil {
 		eventSession.ReportError(err)

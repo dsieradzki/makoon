@@ -23,7 +23,7 @@ func (k *Service) SetupVmsOs(provisionRequest Cluster, keyPair ssh.RsaKeyPair) e
 
 func (k *Service) setupVmOs(provisionRequest Cluster, keyPair ssh.RsaKeyPair, node KubernetesNode) error {
 	sshClient := ssh.NewClientWithKey(provisionRequest.NodeUsername, keyPair, node.IpAddress)
-	eventSession := k.eventCollector.Startf("[VM%d] Setup virtual machine OS", node.Vmid)
+	eventSession := k.eventCollector.StartWithDetails("Setup virtual machine OS", k.generateVmIdDetails(node.Vmid))
 
 	// iscsid is needed by OpenEBS
 	executionResult, err := sshClient.Execute("sudo systemctl enable iscsid")
