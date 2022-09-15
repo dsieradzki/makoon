@@ -1,3 +1,12 @@
+# [0.6.0](https://github.com/dsieradzki/k4prox/compare/v0.5.2...v0.6.0) (2022-09-15)
+
+
+### Features
+
+* rewrite frontend to React ([3cab12f](https://github.com/dsieradzki/k4prox/commit/3cab12ffe45f507a608bc3725a45415026388ada))
+
+
+
 ## [0.5.2](https://github.com/dsieradzki/k4prox/compare/v0.5.1...v0.5.2) (2022-08-22)
 
 
@@ -38,15 +47,6 @@
 
 * support Argo-cd, Portainer, custom helm charts and kubernetes resources ([a6e7f4b](https://github.com/dsieradzki/k4prox/commit/a6e7f4bec9233d667a52c457ba7dff5133885914))
 * support Helm 3 addon ([4c85f63](https://github.com/dsieradzki/k4prox/commit/4c85f631ff7a7867a4659887161095a1e4209ff2))
-
-
-
-# [0.3.0](https://github.com/dsieradzki/k4prox/compare/v0.2.0...v0.3.0) (2022-07-20)
-
-
-### Features
-
-* support OpenEBS, storage solution for Kubernetes ([6ab78fd](https://github.com/dsieradzki/k4prox/commit/6ab78fd3edea07c855deef2d10b2f678a80f0bc4))
 
 
 
