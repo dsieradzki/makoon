@@ -1,3 +1,12 @@
+## [0.6.1](https://github.com/dsieradzki/k4prox/compare/v0.6.0...v0.6.1) (2022-09-16)
+
+
+### Bug Fixes
+
+* blank screen on load properties panels, update ubuntu cloud image ([5077540](https://github.com/dsieradzki/k4prox/commit/50775401dcf796dd06e7a14a8c3e517a02260ccb))
+
+
+
 # [0.6.0](https://github.com/dsieradzki/k4prox/compare/v0.5.2...v0.6.0) (2022-09-15)
 
 
@@ -37,16 +46,6 @@
 ### Features
 
 * error handling and logs collection to file ([0c25f83](https://github.com/dsieradzki/k4prox/commit/0c25f83f7dd54389f384788ffcd7237455c87eda))
-
-
-
-# [0.4.0](https://github.com/dsieradzki/k4prox/compare/v0.3.0...v0.4.0) (2022-07-26)
-
-
-### Features
-
-* support Argo-cd, Portainer, custom helm charts and kubernetes resources ([a6e7f4b](https://github.com/dsieradzki/k4prox/commit/a6e7f4bec9233d667a52c457ba7dff5133885914))
-* support Helm 3 addon ([4c85f63](https://github.com/dsieradzki/k4prox/commit/4c85f631ff7a7867a4659887161095a1e4209ff2))
 
 
 
