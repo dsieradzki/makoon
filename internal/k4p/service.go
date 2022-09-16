@@ -8,8 +8,8 @@ import (
 )
 
 const k4pDataDir = "/var/k4p"
-const linuxCloudImageFileName = "jammy-server-cloudimg-amd64.img"
-const linuxCloudImage = "https://cloud-images.ubuntu.com/jammy/current/" + linuxCloudImageFileName
+const linuxCloudImageFileName = "kinetic-server-cloudimg-amd64.img"
+const linuxCloudImage = "https://cloud-images.ubuntu.com/kinetic/current/" + linuxCloudImageFileName
 
 func NewK4PService(
 	proxmoxClient *proxmox.Client,
@@ -70,7 +70,7 @@ func (k *Service) SetupEnvironmentOnProxmox() error {
 	//
 	//
 	if shouldDownloadLinuxImage {
-		eventSession = k.eventCollector.Startf("Download linux cloud image to [%s]", k4pDataDir)
+		eventSession = k.eventCollector.StartWithDetails(fmt.Sprintf("Download linux cloud image to [%s]", k4pDataDir), linuxCloudImage)
 		result, err = k.proxmoxSsh.Executef("wget -q %s -P %s", linuxCloudImage, k4pDataDir)
 		if err != nil {
 			eventSession.ReportError(err)
