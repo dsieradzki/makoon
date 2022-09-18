@@ -48,6 +48,7 @@ const NodeProperties = () => {
             return null
         }
     })
+
     const formik = useFormik({
         validationSchema: schema,
         initialValues: {

@@ -118,7 +118,7 @@ func (p *Service) CreateCluster(provisionRequest k4p.ProvisionRequest) error {
 			return err
 		}
 	}
-	if provisionRequest.Stages.InstallHelpApps {
+	if provisionRequest.Stages.InstallHelmApps {
 		err = p.k4p.InstallHelmApps(projectData.Cluster, projectData.SshKey)
 		if err != nil {
 			return err

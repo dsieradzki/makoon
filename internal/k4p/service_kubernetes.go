@@ -29,7 +29,7 @@ func (k *Service) installKubernetesOnNode(provisionRequest Cluster, node Kuberne
 	//
 	//
 	eventSession := k.eventCollector.StartWithDetails("Install Kubernetes", k.generateVmIdDetails(node.Vmid))
-	executionResult, err := sshClient.Execute("sudo snap install microk8s --classic")
+	executionResult, err := sshClient.Execute("sudo snap install microk8s --channel=1.24/stable --classic")
 	if err != nil {
 		eventSession.ReportError(err)
 		return err

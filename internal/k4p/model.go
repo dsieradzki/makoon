@@ -65,7 +65,7 @@ type ProvisionStage struct {
 	InstallKubernetes         bool `json:"installKubernetes"`
 	JoinNodesToCluster        bool `json:"joinNodesToCluster"`
 	InstallAddons             bool `json:"installAddons"`
-	InstallHelpApps           bool `json:"installHelpApps"`
+	InstallHelmApps           bool `json:"installHelmApps"`
 	InstallCustomHelmApps     bool `json:"installCustomHelmApps"`
 	InstallCustomK8sResources bool `json:"installCustomK8SResources"`
 }
