@@ -202,13 +202,14 @@ export namespace k4p {
 		    return a;
 		}
 	}
+	
 	export class ProvisionStage {
 	    createVirtualMachines: boolean;
 	    setupVirtualMachines: boolean;
 	    installKubernetes: boolean;
 	    joinNodesToCluster: boolean;
 	    installAddons: boolean;
-	    installHelpApps: boolean;
+	    installHelmApps: boolean;
 	    installCustomHelmApps: boolean;
 	    installCustomK8SResources: boolean;
 	
@@ -223,7 +224,7 @@ export namespace k4p {
 	        this.installKubernetes = source["installKubernetes"];
 	        this.joinNodesToCluster = source["joinNodesToCluster"];
 	        this.installAddons = source["installAddons"];
-	        this.installHelpApps = source["installHelpApps"];
+	        this.installHelmApps = source["installHelmApps"];
 	        this.installCustomHelmApps = source["installCustomHelmApps"];
 	        this.installCustomK8SResources = source["installCustomK8SResources"];
 	    }
@@ -260,7 +261,6 @@ export namespace k4p {
 		    return a;
 		}
 	}
-	
 
 }
 

@@ -112,24 +112,11 @@ class ProjectStore {
         makeAutoObservable(this);
     }
 
-    async provisionCluster() {
+    async provisionCluster(pr: k4p.ProvisionRequest) {
         await SaveProject(this.projectData)
         runInAction(() => {
             this.provisioningInProgress = true
         })
-
-        const pr = {
-            stages: {
-                createVirtualMachines: true,
-                setupVirtualMachines: true,
-                installKubernetes: true,
-                joinNodesToCluster: true,
-                installAddons: true,
-                installHelpApps: true,
-                installCustomHelmApps: true,
-                installCustomK8SResources: true
-            }
-        } as k4p.ProvisionRequest
 
         const readTaskLogInterval = setInterval(() => {
                 taskLogStore.loadTaskLog().catch(LogError)
