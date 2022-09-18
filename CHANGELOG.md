@@ -1,3 +1,12 @@
+## [0.6.2](https://github.com/dsieradzki/k4prox/compare/v0.6.1...v0.6.2) (2022-09-18)
+
+
+### Bug Fixes
+
+* Set fixed Kubernetes version, Add steps selection ([0a1c18c](https://github.com/dsieradzki/k4prox/commit/0a1c18cc988b9cf53bf9bc82857d20287783b47c))
+
+
+
 ## [0.6.1](https://github.com/dsieradzki/k4prox/compare/v0.6.0...v0.6.1) (2022-09-16)
 
 
@@ -32,20 +41,6 @@
 ### Bug Fixes
 
 * sometimes application starts with empty window on macOS ([7f66f2c](https://github.com/dsieradzki/k4prox/commit/7f66f2cf2b40209bf7662f7a567b1c7a4ba6ad43))
-
-
-
-# [0.5.0](https://github.com/dsieradzki/k4prox/compare/v0.4.0...v0.5.0) (2022-07-31)
-
-
-### Bug Fixes
-
-* should not showing terminal window during ping on Windows OS ([9ec9fea](https://github.com/dsieradzki/k4prox/commit/9ec9fead556f371c6f15db8bc63d98c1c5cd3fbf))
-
-
-### Features
-
-* error handling and logs collection to file ([0c25f83](https://github.com/dsieradzki/k4prox/commit/0c25f83f7dd54389f384788ffcd7237455c87eda))
 
 
 
