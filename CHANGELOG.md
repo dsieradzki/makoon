@@ -1,3 +1,12 @@
+## [0.6.3](https://github.com/dsieradzki/k4prox/compare/v0.6.2...v0.6.3) (2022-10-13)
+
+
+### Bug Fixes
+
+* add more logs, event for saving kubernetes config, update dependencies ([7b11553](https://github.com/dsieradzki/k4prox/commit/7b11553f30ffad79261183e40a005ff9ce57fdf9))
+
+
+
 ## [0.6.2](https://github.com/dsieradzki/k4prox/compare/v0.6.1...v0.6.2) (2022-09-18)
 
 
@@ -32,15 +41,6 @@
 
 * additional resources for Microk8s addons are not updated, after modifying addon properties ([a370468](https://github.com/dsieradzki/k4prox/commit/a3704687a775a6396e0a51829963f03e4d7bf6ac))
 * Update dependencies ([59ae06c](https://github.com/dsieradzki/k4prox/commit/59ae06cd781602dc4864c67e14d1cf86c62ca865))
-
-
-
-## [0.5.1](https://github.com/dsieradzki/k4prox/compare/v0.5.0...v0.5.1) (2022-08-08)
-
-
-### Bug Fixes
-
-* sometimes application starts with empty window on macOS ([7f66f2c](https://github.com/dsieradzki/k4prox/commit/7f66f2cf2b40209bf7662f7a567b1c7a4ba6ad43))
 
 
 
