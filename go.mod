@@ -5,12 +5,12 @@ go 1.18
 require (
 	github.com/goccy/go-yaml v1.9.5
 	github.com/google/uuid v1.3.0
-	github.com/onsi/ginkgo/v2 v2.1.6
-	github.com/onsi/gomega v1.20.2
+	github.com/onsi/ginkgo/v2 v2.3.1
+	github.com/onsi/gomega v1.22.1
 	github.com/sirupsen/logrus v1.9.0
 	github.com/stretchr/testify v1.8.0
-	github.com/wailsapp/wails/v2 v2.0.0-rc.1.1
-	golang.org/x/crypto v0.0.0-20220829220503-c86fa9a7ed90
+	github.com/wailsapp/wails/v2 v2.0.0
+	golang.org/x/crypto v0.0.0-20221012134737-56aed061732a
 )
 
 require (
@@ -21,8 +21,8 @@ require (
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
 	github.com/jchv/go-winloader v0.0.0-20210711035445-715c2860da7e // indirect
-	github.com/labstack/echo/v4 v4.9.0 // indirect
-	github.com/labstack/gommon v0.3.1 // indirect
+	github.com/labstack/echo/v4 v4.9.1 // indirect
+	github.com/labstack/gommon v0.4.0 // indirect
 	github.com/leaanthony/go-ansi-parser v1.6.0 // indirect
 	github.com/leaanthony/gosod v1.0.3 // indirect
 	github.com/leaanthony/slicer v1.6.0 // indirect
@@ -36,9 +36,9 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.1 // indirect
 	github.com/wailsapp/mimetype v1.4.1 // indirect
-	golang.org/x/net v0.0.0-20220909164309-bea034e7d591 // indirect
-	golang.org/x/sys v0.0.0-20220913153101-76c7481b5158 // indirect
-	golang.org/x/text v0.3.7 // indirect
+	golang.org/x/net v0.0.0-20221012135044-0b7e1fb9d458 // indirect
+	golang.org/x/sys v0.0.0-20221013171732-95e765b1cc43 // indirect
+	golang.org/x/text v0.3.8 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

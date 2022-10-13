@@ -136,7 +136,7 @@ func (k *Service) JoinNodesToCluster(provisionRequest Cluster, keyPair ssh.RsaKe
 func (k *Service) GetKubeConfigFromCluster(clusterDef Cluster, keyPair ssh.RsaKeyPair) (string, error) {
 	firstMasterNode, _ := findFirstMasterNode(clusterDef.Nodes)
 	sshMasterNode := ssh.NewClientWithKey(clusterDef.NodeUsername, keyPair, firstMasterNode.IpAddress)
-	eventSession := k.eventCollector.Start("Get KubeConfig from cluster")
+	eventSession := k.eventCollector.Start("Get Kubernetes config from cluster")
 	executionResult, err := sshMasterNode.Execute("sudo microk8s config")
 	if err != nil {
 		eventSession.ReportError(err)
