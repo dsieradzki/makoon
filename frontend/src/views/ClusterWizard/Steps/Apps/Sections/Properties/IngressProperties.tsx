@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import AddonSwitch from "@/views/ClusterWizard/Steps/ClusterPlanner/Sections/Properties/components/AddonSwitch";
+import AddonSwitch from "@/views/ClusterWizard/Steps/Apps/Sections/Properties/components/AddonSwitch";
 import { InputText } from "primereact/inputtext";
 import projectStore from "@/store/projectStore";
 import { observer } from "mobx-react-lite";

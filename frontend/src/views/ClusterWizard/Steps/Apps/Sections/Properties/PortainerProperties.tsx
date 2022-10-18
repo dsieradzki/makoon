@@ -7,7 +7,7 @@ import { k4p } from "@wails/models";
 import { observer } from "mobx-react-lite";
 import {
     findLastLoadBalancerIP
-} from "@/views/ClusterWizard/Steps/ClusterPlanner/Sections/Properties/utils/loadbalancerIp";
+} from "@/views/ClusterWizard/Steps/Apps/Sections/Properties/utils/loadbalancerIp";
 
 const appName = "portainer"
 
