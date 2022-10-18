@@ -6,7 +6,7 @@ import { useOnFirstMount } from "@/reactHooks";
 import projectStore from "@/store/projectStore";
 import {
     findLastLoadBalancerIP
-} from "@/views/ClusterWizard/Steps/ClusterPlanner/Sections/Properties/utils/loadbalancerIp";
+} from "@/views/ClusterWizard/Steps/Apps/Sections/Properties/utils/loadbalancerIp";
 import { EncodeUsingBCrypt } from "@wails/auth/Service";
 import { observer } from "mobx-react-lite";
 

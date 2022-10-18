@@ -1,6 +1,6 @@
 import React from 'react';
 import Block from "@/components/Block";
-import Section from "@/views/ClusterWizard/Steps/ClusterPlanner/Sections/Section";
+import Section from "@/views/ClusterWizard/Section";
 import { observer } from "mobx-react-lite";
 import projectStore from "@/store/projectStore";
 import uiPropertiesPanelStore from "@/store/uiPropertiesPanelStore";

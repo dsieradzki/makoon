@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { k4p } from "@wails/models";
-import TileNode from "@/views/ClusterWizard/Steps/ClusterPlanner/Sections/Nodes/TileNode";
+import TileNode from "@/views/ClusterWizard/Steps/Nodes/Sections/Nodes/TileNode";
 
 type Props = {
     nodes: k4p.KubernetesNode[]

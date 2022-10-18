@@ -2,7 +2,7 @@ import { Steps } from "primereact/steps";
 import { useState } from "react";
 import StartStep from "./Steps/StartStep";
 import { Button } from "primereact/button";
-import ClusterPlannerStep from "@/views/ClusterWizard/Steps/ClusterPlanner/ClusterPlannerStep";
+import NodesStep from "@/views/ClusterWizard/Steps/Nodes/NodesStep";
 import ProvisioningStep from "@/views/ClusterWizard/Steps/Provisioning/ProvisioningStep";
 import FinishStep from "@/views/ClusterWizard/Steps/FinishStep";
 import projectStore from "@/store/projectStore";
@@ -14,10 +14,12 @@ import { useNavigate } from "react-router-dom";
 import { k4p } from "@wails/models";
 import { InputSwitch } from "primereact/inputswitch";
 import { Dialog } from "primereact/dialog";
+import AppsStep from "@/views/ClusterWizard/Steps/Apps/AppsStep";
 
 const steps = [
     {label: 'Start'},
-    {label: 'Cluster planner'},
+    {label: 'Nodes'},
+    {label: 'Apps'},
     {label: 'Provisioning'},
     {label: 'Finish'}
 ];
@@ -56,10 +58,12 @@ const ClusterWizardView = (props: Props) => {
             case 0:
                 return <StartStep/>
             case 1:
-                return <ClusterPlannerStep/>
+                return <NodesStep/>
             case 2:
-                return <ProvisioningStep/>
+                return <AppsStep/>
             case 3:
+                return <ProvisioningStep/>
+            case 4:
                 return <FinishStep/>
             default:
                 return <></>
@@ -166,7 +170,7 @@ const ClusterWizardView = (props: Props) => {
         </div>
     }
     const nextStep = () => {
-        if (activeIndex == 1) {
+        if (activeIndex == 2) {
             setShowProvisioningConfirmation(true)
         } else {
             if (activeIndex < steps.length - 1) {
@@ -180,10 +184,10 @@ const ClusterWizardView = (props: Props) => {
         }
     }
     const isPreviousStepHidden = () => {
-        return activeIndex == 0 || activeIndex == 2
+        return activeIndex == 0 || activeIndex == 3
     }
     const isNextStepHidden = () => {
-        return activeIndex == steps.length - 1 || (projectStore.provisioningInProgress && activeIndex == 2)
+        return activeIndex == steps.length - 1 || (projectStore.provisioningInProgress && activeIndex == 3)
     }
 
     const startClusterProvisioning = () => {
@@ -215,7 +219,7 @@ const ClusterWizardView = (props: Props) => {
             <div className="flex justify-start items-center">
                 <div className="text-4xl">K<span className="primary-text-color font-bold">4</span>Prox</div>
                 <span className="primary-text-color text-4xl mx-2">/</span>
-                <div className="text-3xl">Cluster planner</div>
+                <div className="text-3xl">Nodes</div>
             </div>
             <div className="flex items-center">
                 <p className="pi pi-server mr-2" style={{fontSize: "1.5rem"}}/>

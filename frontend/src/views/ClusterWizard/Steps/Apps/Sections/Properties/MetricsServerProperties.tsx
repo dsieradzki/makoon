@@ -1,5 +1,5 @@
 import React from 'react';
-import AddonSwitch from "@/views/ClusterWizard/Steps/ClusterPlanner/Sections/Properties/components/AddonSwitch";
+import AddonSwitch from "@/views/ClusterWizard/Steps/Apps/Sections/Properties/components/AddonSwitch";
 
 
 const MetricsServerProperties = () => {
