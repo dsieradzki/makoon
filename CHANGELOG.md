@@ -1,3 +1,17 @@
+# [0.7.0](https://github.com/dsieradzki/k4prox/compare/v0.6.3...v0.7.0) (2022-10-18)
+
+
+### Bug Fixes
+
+* update Wails ([3682894](https://github.com/dsieradzki/k4prox/commit/36828947623c61c28420a1706eac9f209fe775d7))
+
+
+### Features
+
+* Split nodes plan and applications in wizard ([60442ea](https://github.com/dsieradzki/k4prox/commit/60442ea61e461b1ed5bb78388f88f9b7a770cd35))
+
+
+
 ## [0.6.3](https://github.com/dsieradzki/k4prox/compare/v0.6.2...v0.6.3) (2022-10-13)
 
 
@@ -31,16 +45,6 @@
 ### Features
 
 * rewrite frontend to React ([3cab12f](https://github.com/dsieradzki/k4prox/commit/3cab12ffe45f507a608bc3725a45415026388ada))
-
-
-
-## [0.5.2](https://github.com/dsieradzki/k4prox/compare/v0.5.1...v0.5.2) (2022-08-22)
-
-
-### Bug Fixes
-
-* additional resources for Microk8s addons are not updated, after modifying addon properties ([a370468](https://github.com/dsieradzki/k4prox/commit/a3704687a775a6396e0a51829963f03e4d7bf6ac))
-* Update dependencies ([59ae06c](https://github.com/dsieradzki/k4prox/commit/59ae06cd781602dc4864c67e14d1cf86c62ca865))
 
 
 
