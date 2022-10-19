@@ -219,7 +219,7 @@ const ClusterWizardView = (props: Props) => {
             <div className="flex justify-start items-center">
                 <div className="text-4xl">K<span className="primary-text-color font-bold">4</span>Prox</div>
                 <span className="primary-text-color text-4xl mx-2">/</span>
-                <div className="text-3xl">Nodes</div>
+                <div className="text-3xl">Cluster planner</div>
             </div>
             <div className="flex items-center">
                 <p className="pi pi-server mr-2" style={{fontSize: "1.5rem"}}/>
