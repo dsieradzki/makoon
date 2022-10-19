@@ -81,6 +81,13 @@ const NodeProperties = () => {
         }
     })
 
+    const canBeDeleted = () => {
+        if (projectStore.findNode(Number(uiPropertiesPanelStore.selectedPropertiesId))?.nodeType==="master") {
+            return projectStore.masterNodes.length > 1;
+        } else {
+            return true;
+        }
+    }
     const onDelete = () => {
         if (uiPropertiesPanelStore.selectedPropertiesId) {
             const id = uiPropertiesPanelStore.selectedPropertiesId;
@@ -178,7 +185,9 @@ const NodeProperties = () => {
                             <div className="mr-5">
                                 <Button disabled={!formik.isValid} type="submit" label="SAVE" className="p-button-primary"/>
                             </div>
-                            <Button onClick={onDelete} label="Delete"
+                            <Button onClick={onDelete}
+                                    disabled={!canBeDeleted()}
+                                    label="Delete"
                                     className="p-button-raised p-button-danger p-button-text"/>
                         </div>
                     </div>
