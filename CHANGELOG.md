@@ -1,3 +1,12 @@
+## [0.7.1](https://github.com/dsieradzki/k4prox/compare/v0.7.0...v0.7.1) (2022-10-19)
+
+
+### Bug Fixes
+
+* Prevent deletion of last master node ([fd34f77](https://github.com/dsieradzki/k4prox/commit/fd34f777ce021cb4e8b9eecd74338f46b7600325))
+
+
+
 # [0.7.0](https://github.com/dsieradzki/k4prox/compare/v0.6.3...v0.7.0) (2022-10-18)
 
 
@@ -36,15 +45,6 @@
 ### Bug Fixes
 
 * blank screen on load properties panels, update ubuntu cloud image ([5077540](https://github.com/dsieradzki/k4prox/commit/50775401dcf796dd06e7a14a8c3e517a02260ccb))
-
-
-
-# [0.6.0](https://github.com/dsieradzki/k4prox/compare/v0.5.2...v0.6.0) (2022-09-15)
-
-
-### Features
-
-* rewrite frontend to React ([3cab12f](https://github.com/dsieradzki/k4prox/commit/3cab12ffe45f507a608bc3725a45415026388ada))
 
 
 
