@@ -1,3 +1,12 @@
+# [0.8.0](https://github.com/dsieradzki/k4prox/compare/v0.7.1...v0.8.0) (2022-10-26)
+
+
+### Features
+
+* Post-install cluster management - cluster overview, nodes status ([c50219a](https://github.com/dsieradzki/k4prox/commit/c50219acced29aa920952c797ac69c56e4a042a1))
+
+
+
 ## [0.7.1](https://github.com/dsieradzki/k4prox/compare/v0.7.0...v0.7.1) (2022-10-19)
 
 
@@ -36,15 +45,6 @@
 ### Bug Fixes
 
 * Set fixed Kubernetes version, Add steps selection ([0a1c18c](https://github.com/dsieradzki/k4prox/commit/0a1c18cc988b9cf53bf9bc82857d20287783b47c))
-
-
-
-## [0.6.1](https://github.com/dsieradzki/k4prox/compare/v0.6.0...v0.6.1) (2022-09-16)
-
-
-### Bug Fixes
-
-* blank screen on load properties panels, update ubuntu cloud image ([5077540](https://github.com/dsieradzki/k4prox/commit/50775401dcf796dd06e7a14a8c3e517a02260ccb))
 
 
 
