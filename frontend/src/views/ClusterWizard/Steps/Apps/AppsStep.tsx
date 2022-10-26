@@ -1,7 +1,7 @@
 import React from 'react';
 import uiPropertiesPanelStore from "@/store/uiPropertiesPanelStore";
 import { Sidebar } from "primereact/sidebar";
-import PropertiesPanel from "@/views/ClusterWizard/PropertiesPanel";
+import PropertiesPanel from "@/components/PropertiesPanel";
 import AddonsSection from "@/views/ClusterWizard/Steps/Apps/Sections/AddonsSection";
 import HelmAppsSection from "@/views/ClusterWizard/Steps/Apps/Sections/HelmAppsSection";
 import CustomHelmAppsSection from "@/views/ClusterWizard/Steps/Apps/Sections/CustomHelmAppsSection";

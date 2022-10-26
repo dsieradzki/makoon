@@ -1,6 +1,9 @@
 package collect
 
-import "sort"
+import (
+	"errors"
+	"sort"
+)
 
 func Filter[T any](c []T, ff func(T) bool) []T {
 	var result []T
@@ -12,6 +15,16 @@ func Filter[T any](c []T, ff func(T) bool) []T {
 	return result
 }
 
+func FindAny[T any](c []T, ff func(T) bool) (T, error) {
+	for _, v := range c {
+		if ff(v) {
+			return v, nil
+		}
+	}
+	var defRes T
+	return defRes, errors.New("not found")
+}
+
 func Not[T comparable](v T) func(T) bool {
 	return func(t T) bool {
 		return v != t
@@ -19,9 +32,9 @@ func Not[T comparable](v T) func(T) bool {
 }
 
 /*
-	Sorting without side effect and using generic types
-	Consume more memory in comparison to standard sorting
-	due to working on copy of data set
+Sorting without side effect and using generic types
+Consume more memory in comparison to standard sorting
+due to working on copy of data set
 */
 func Sort[T any](c []T, sf func(a T, b T) bool) []T {
 	result := make([]T, len(c))

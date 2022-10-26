@@ -124,7 +124,7 @@ const GeneralSettingsSection = () => {
             <div className="flex mt-3">
                 <div className="grow flex flex-col pr-5">
                     <div>
-                        <div className="text-stone-400 required">Disk size (GB)</div>
+                        <div className="text-stone-400 required">Disks size (GB)</div>
                         <InputNumber name="nodeDiskSize"
                                      className="w-full p-inputtext-sm"
                                      value={formik.values.nodeDiskSize}

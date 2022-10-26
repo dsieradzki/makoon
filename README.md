@@ -47,17 +47,17 @@ create a high available multi-node Kubernetes cluster
 **Used technologies:**
 
 - [Wails V2](https://wails.io/)
-- Go 1.18
+- Go 1.19
 - React 18 (MobX, PrimeReact, Tailwind, Formik, Yup)
 
 ## :pushpin: Plans for the future
 
-Project was created in spare time to test [Wails V2](https://wails.io/) library in practice, for my another
+Project was created in spare time to test [Wails V2](https://wails.io/) library in practice for my another
 application,
-also I missed tools for creating Kubernetes cluster on Proxmox so decided take advantage of this situation,
+also I missed tools for creating Kubernetes cluster in easy way on [Proxmox VE](https://www.proxmox.com) so decided take advantage of this situation,
 and I wrote my own. I hope it will be useful to someone, but keep in mind, project is in early stage of development.
 
-Basically, development of the project depends on interest of community, feel free to report bugs and features.
+Basically, development of the project depends on interest of community, feel free to report bugs and feature requests.
 
 **Planned features:**
 
@@ -73,9 +73,8 @@ Basically, development of the project depends on interest of community, feel fre
     * change VM resources (CPU, Memory)
 
 - Support more MicroK8s addons nad Helm charts
-- Command line app for deploying project
-- Web application
-    * opens possibilities for live monitoring and autoscaling
+- Create web version application
+
 
 ## :hammer: Building from source and development
 
@@ -96,7 +95,9 @@ To build a redistributable, production mode package, use `wails build`.
 ![Cluster planner - 2](./screenshots/3_2.png)
 ![Cluster planner - 3](./screenshots/3_3.png)
 ![Cluster planner - 4](./screenshots/3_4.png)
-![Cluster planner - 5](./screenshots/3_5.png)
-![Cluster planner - 6](./screenshots/3_6.png)
+![Cluster planner - 4](./screenshots/3_5.png)
+![Cluster planner - 5](./screenshots/3_6.png)
+![Cluster planner - 6](./screenshots/3_7.png)
 ![Cluster provisioning](./screenshots/4.png)
-![Summary](./screenshots/5.png)
+![Cluster management - 1](./screenshots/5.png)
+![Cluster management - 2](./screenshots/5_1.png)

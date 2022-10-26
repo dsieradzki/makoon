@@ -11,6 +11,7 @@ import (
 	"github.com/dsieradzki/k4prox/pkg/app"
 	"github.com/dsieradzki/k4prox/pkg/logfile"
 	"github.com/dsieradzki/k4prox/pkg/service/auth"
+	"github.com/dsieradzki/k4prox/pkg/service/management"
 	"github.com/dsieradzki/k4prox/pkg/service/project"
 	"github.com/dsieradzki/k4prox/pkg/service/provisioner"
 	tasklogService "github.com/dsieradzki/k4prox/pkg/service/tasklog"
@@ -56,6 +57,7 @@ func main() {
 	projectService := project.NewService(proxmoxClient)
 	provisionerService := provisioner.NewService(projectService, proxmoxClient, proxmoxSsh, eventCollector)
 	taskLogService := tasklogService.NewService(eventCollector, taskLogReader)
+	managementService := management.NewService(projectService)
 
 	application := app.NewApp([]custWails.ContextSetter{
 		projectService,
@@ -78,6 +80,7 @@ func main() {
 			authService,
 			provisionerService,
 			taskLogService,
+			managementService,
 		},
 	})
 

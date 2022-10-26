@@ -5,6 +5,8 @@ import TaskLog from "@/views/ClusterWizard/Steps/Provisioning/TaskLog/TaskLog";
 import { observer } from "mobx-react-lite";
 import taskLogStore from "@/store/taskLogStore";
 import projectStore from "@/store/projectStore";
+import { Button } from "primereact/button";
+import { useNavigate } from "react-router-dom";
 
 const progressSpinnerStyles = {
     margin: "0"
@@ -14,6 +16,7 @@ const showMoreButtonStyles = {
 }
 
 const ProvisioningStep = () => {
+    const navigate = useNavigate()
     const [isLogTableVisible, setLogTableVisibility] = useState(false)
     const toggleLogsVisibility = () => {
         setLogTableVisibility(e => !e)
@@ -32,11 +35,11 @@ const ProvisioningStep = () => {
 
                 : projectStore.provisioningFinishedSuccessfully
                     ? <div className="flex flex-col items-center justify-center">
-                        <div className="text-7xl pt-20">Cluster is ready!</div>
-                        <div className="mt-4 primary-text-color">Go to next step to save you config files</div>
+                        <div className="text-5xl pt-20">Cluster is ready!</div>
+                        <div className="mt-4"><Button  onClick={() => navigate("/cluster")}>Close</Button></div>
                     </div>
                     : <div className="flex flex-col items-center justify-center">
-                        <div className="text-7xl pt-20 p-error">Cluster creation error!</div>
+                        <div className="text-5xl pt-20 p-error">Cluster creation error!</div>
                     </div>
             }
             <div className="flex justify-center mt-10 mb-10">

@@ -35,3 +35,8 @@ input::placeholder {
     content: '*';
     color: #ef9a9a;;
 }
+
+.p-tag.p-tag-warning{
+    background-color: rgb(64 64 64);
+    color:#121212
+}
