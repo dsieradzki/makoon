@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/ssh"
+	"time"
 )
 
 func NewClient() *Client {
@@ -18,6 +18,7 @@ func NewClientWithKey(username string, rsaKeyPair RsaKeyPair, host string) *Clie
 		password:   "",
 		rsaKeyPair: &rsaKeyPair,
 		host:       host,
+		timeout:    0,
 	}
 }
 
@@ -26,6 +27,12 @@ type Client struct {
 	password   string
 	rsaKeyPair *RsaKeyPair
 	host       string
+	timeout    time.Duration
+}
+
+func (p *Client) WithTimeout(timeout time.Duration) *Client {
+	p.timeout = timeout
+	return p
 }
 
 func (p *Client) SetConnectionData(username string, password string, host string) {
@@ -53,6 +60,7 @@ func (p *Client) Execute(command string) (ExecutionResult, error) {
 				ssh.Password(p.password),
 			},
 			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+			Timeout:         p.timeout,
 		}
 	} else {
 		// create signer
@@ -67,6 +75,7 @@ func (p *Client) Execute(command string) (ExecutionResult, error) {
 				ssh.PublicKeys(signer),
 			},
 			HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+			Timeout:         p.timeout,
 		}
 	}
 	// connect to ssh server
@@ -80,14 +89,8 @@ func (p *Client) Execute(command string) (ExecutionResult, error) {
 		return ExecutionResult{}, err
 	}
 	defer func() {
-		err := session.Close()
-		if err != nil {
-			log.WithError(err).Error("cannot close session")
-		}
-		err = conn.Close()
-		if err != nil {
-			log.WithError(err).Error("cannot close connection")
-		}
+		_ = session.Close()
+		_ = conn.Close()
 	}()
 
 	//Run command

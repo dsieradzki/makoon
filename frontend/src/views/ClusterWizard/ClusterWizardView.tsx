@@ -4,7 +4,6 @@ import StartStep from "./Steps/StartStep";
 import { Button } from "primereact/button";
 import NodesStep from "@/views/ClusterWizard/Steps/Nodes/NodesStep";
 import ProvisioningStep from "@/views/ClusterWizard/Steps/Provisioning/ProvisioningStep";
-import FinishStep from "@/views/ClusterWizard/Steps/FinishStep";
 import projectStore from "@/store/projectStore";
 import { observer } from "mobx-react-lite";
 import { LogInfo } from "@wails-runtime/runtime";
@@ -15,22 +14,20 @@ import { k4p } from "@wails/models";
 import { InputSwitch } from "primereact/inputswitch";
 import { Dialog } from "primereact/dialog";
 import AppsStep from "@/views/ClusterWizard/Steps/Apps/AppsStep";
+import Header from "@/components/Header";
 
 const steps = [
     {label: 'Start'},
     {label: 'Nodes'},
     {label: 'Apps'},
-    {label: 'Provisioning'},
-    {label: 'Finish'}
+    {label: 'Provisioning'}
 ];
 
 type Props = {
     step?: number
 }
 const ClusterWizardView = (props: Props) => {
-    const navigate = useNavigate()
     const [activeIndex, setActiveIndex] = useState(0);
-    const [proxmoxIp, setProxmoxIp] = useState("")
     const [selectedProvisioningSteps, setSelectedProvisioningSteps] = useState({
         createVirtualMachines: true,
         setupVirtualMachines: true,
@@ -45,13 +42,7 @@ const ClusterWizardView = (props: Props) => {
 
     useOnFirstMount(async () => {
         props.step && setActiveIndex(props.step)
-        setProxmoxIp(await GetProxmoxIp())
     })
-
-    const onLogoutHandler = async () => {
-        await Logout()
-        navigate("/login")
-    }
 
     const renderStep = () => {
         switch (activeIndex) {
@@ -63,8 +54,6 @@ const ClusterWizardView = (props: Props) => {
                 return <AppsStep/>
             case 3:
                 return <ProvisioningStep/>
-            case 4:
-                return <FinishStep/>
             default:
                 return <></>
         }
@@ -209,28 +198,14 @@ const ClusterWizardView = (props: Props) => {
 
 
     return <>
-        <Dialog header="Confirmation" footer={footerConfirmProvisioning} visible={showProvisioningConfirmation} modal draggable={false}
+        <Dialog header="Confirmation" footer={footerConfirmProvisioning} visible={showProvisioningConfirmation} modal
+                draggable={false}
                 onHide={() => {
                     setShowProvisioningConfirmation(false)
                 }}>
             {provisionConfirmationContent()}
         </Dialog>
-        <div className="flex justify-between pt-10 pl-10 pr-10 pb-8">
-            <div className="flex justify-start items-center">
-                <div className="text-4xl">K<span className="primary-text-color font-bold">4</span>Prox</div>
-                <span className="primary-text-color text-4xl mx-2">/</span>
-                <div className="text-3xl">Cluster planner</div>
-            </div>
-            <div className="flex items-center">
-                <p className="pi pi-server mr-2" style={{fontSize: "1.5rem"}}/>
-                <p className="pi pi-angle-double-left primary-text-color mr-2"/>
-                <span title="Proxmox IP">{proxmoxIp}</span>
-                <span className="primary-text-color text-4xl mx-2">/</span>
-                <Button disabled={projectStore.provisioningInProgress} onClick={onLogoutHandler} icon="pi pi-sign-out"
-                        className="p-button-rounded p-button-secondary p-button-text" style={{color: "#FFFFFF"}}
-                        aria-label="Logout"/>
-            </div>
-        </div>
+        <Header title="Cluster planner"/>
         <div className="flex flex-col">
             <Steps model={steps} activeIndex={activeIndex} className="mx-20"/>
             <div className="flex justify-center">
@@ -253,8 +228,8 @@ const ClusterWizardView = (props: Props) => {
                         }
                     </div>
                     {renderStep()}
-               </div>
-           </div>
+                </div>
+            </div>
         </div>
     </>
 }

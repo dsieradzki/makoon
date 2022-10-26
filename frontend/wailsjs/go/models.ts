@@ -210,6 +210,27 @@ export namespace k4p {
 
 }
 
+export namespace management {
+	
+	export class NodeStatus {
+	    vmid: number;
+	    vmStatus: string;
+	    k8SStatus: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new NodeStatus(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.vmid = source["vmid"];
+	        this.vmStatus = source["vmStatus"];
+	        this.k8SStatus = source["k8SStatus"];
+	    }
+	}
+
+}
+
 export namespace project {
 	
 	export class ProjectData {

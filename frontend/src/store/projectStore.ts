@@ -1,10 +1,11 @@
 import { makeAutoObservable, runInAction } from "mobx";
-import { k4p, project } from "@wails/models";
+import { k4p, management, project } from "@wails/models";
 import { LoadProject, SaveProject } from "@wails/project/Service";
 import { LogDebug, LogError } from "@wails-runtime/runtime";
 import { ClearTaskLog } from "@wails/tasklog/Service";
 import { CreateCluster, SetupEnvironmentOnProxmox } from "@wails/provisioner/Service";
 import taskLogStore from "@/store/taskLogStore";
+import { GetNodesStatus } from "@wails/management/Service";
 
 export interface FeatureDefinition {
     name: string;
@@ -102,11 +103,27 @@ function createNextNodeDefinition(node: k4p.KubernetesNode, step = 1): k4p.Kuber
     }
 }
 
+
+export type VmStatus = "up" | "down" | "loading";
+export type K8sStatus = "ready" | "not_ready" | "unknown" | "loading";
+
+export class KubernetesNodeWithStatus extends k4p.KubernetesNode {
+    vmStatus: VmStatus = "loading";
+    k8sStatus: K8sStatus = "loading";
+
+    constructor(node: k4p.KubernetesNode, vmStatus: VmStatus, k8sStatus: K8sStatus) {
+        super(node);
+        this.vmStatus = vmStatus;
+        this.k8sStatus = k8sStatus;
+    }
+}
+
 class ProjectStore {
     projectData: project.ProjectData = initialProjectData
     defaultMasterNode: k4p.KubernetesNode = {} as k4p.KubernetesNode
     provisioningInProgress: boolean = false
     provisioningFinishedSuccessfully = true
+    nodesStatus: management.NodeStatus[] = [];
 
     constructor() {
         makeAutoObservable(this);
@@ -285,6 +302,13 @@ class ProjectStore {
         this.saveProject()
     }
 
+    async updateNodesStatus() {
+        LogDebug("Update nodes status");
+        const updatedNodeStatuses = await GetNodesStatus();
+        runInAction(()=> {
+            this.nodesStatus = updatedNodeStatuses;
+        })
+    }
     async loadProject() {
         const project = await LoadProject();
 
@@ -342,6 +366,32 @@ class ProjectStore {
 
     get masterNodes() {
         return this.projectData.cluster.nodes.filter(e => e.nodeType == "master").sort(vmIdAsc)
+    }
+
+    get masterNodesWithStatus() {
+        return this.projectData.cluster.nodes
+            .filter(e => e.nodeType == "master")
+            .sort(vmIdAsc)
+            .map(e => {
+                const nodeStatus = this.nodesStatus.find(s => s.vmid === e.vmid);
+                if (!nodeStatus) {
+                    return new KubernetesNodeWithStatus(e, "loading", "loading")
+                }
+                return new KubernetesNodeWithStatus(e, nodeStatus.vmStatus as VmStatus, nodeStatus.k8SStatus as K8sStatus)
+            })
+    }
+
+    get workerNodesWithStatus() {
+        return this.projectData.cluster.nodes
+            .filter(e => e.nodeType == "worker")
+            .sort(vmIdAsc)
+            .map(e => {
+                const nodeStatus = this.nodesStatus.find(s => s.vmid === e.vmid);
+                if (!nodeStatus) {
+                    return new KubernetesNodeWithStatus(e, "loading", "loading")
+                }
+                return new KubernetesNodeWithStatus(e, nodeStatus.vmStatus as VmStatus, nodeStatus.k8SStatus as K8sStatus)
+            })
     }
 
     get workerNodes() {

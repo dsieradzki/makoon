@@ -31,9 +31,9 @@ const ProjectView = () => {
             setOpeningProjectInProgress(true)
             const clusterIsAlreadyCreated = await OpenProjectDialog();
             if (clusterIsAlreadyCreated) {
-                navigate("/cluster-is-ready")
+                navigate("/cluster")
             } else {
-                navigate("/cluster-open-not-provisioned")
+                navigate("/cluster-planner-in-progress")
             }
         } catch (err: any) {
             LogError(err)
