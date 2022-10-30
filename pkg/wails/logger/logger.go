@@ -3,6 +3,7 @@ package logger
 import (
 	log "github.com/sirupsen/logrus"
 	"github.com/wailsapp/wails/v2/pkg/logger"
+	"strings"
 )
 
 var wailsToLogrusLoggerAdapter = wailsLogger{}
@@ -23,6 +24,10 @@ func (w wailsLogger) Trace(message string) {
 }
 
 func (w wailsLogger) Debug(message string) {
+	if strings.HasPrefix(message, "[ExternalAssetHandler] Loading") {
+		log.Trace(message)
+		return
+	}
 	log.Debug(message)
 }
 

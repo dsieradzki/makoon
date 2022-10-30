@@ -1,8 +1,8 @@
 import React from 'react';
 import Table from "@/components/Table/Table";
 import VmStatusComponent from "@/views/ClusterManagement/components/Nodes/VmStatusComponent";
-import { KubernetesNodeWithStatus } from "@/store/projectStore";
 import K8sStatusComponent from "@/views/ClusterManagement/components/Nodes/K8sStatusComponent";
+import { KubernetesNodeWithStatus } from "@/store/clusterManagementStore";
 
 
 

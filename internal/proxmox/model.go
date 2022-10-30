@@ -31,6 +31,10 @@ type Response[T any] struct {
 	Data T `json:"data"`
 }
 
+type GetVMsResponse struct {
+	Vmid uint32 `json:"vmid"`
+}
+
 type SessionData struct {
 	CSRFPreventionToken string `json:"CSRFPreventionToken"`
 	Ticket              string `json:"ticket"`

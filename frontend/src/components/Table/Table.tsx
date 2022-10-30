@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from "./Table.module.scss"
+import { ProgressSpinner } from "primereact/progressspinner";
 
 const Header = (props: React.PropsWithChildren) => {
     return <th>{props.children}</th>
@@ -29,7 +30,7 @@ const Row = (props: RowProps) => {
     }
 
     return <tr onClick={onClickHandler}
-        className={props.selected ? styles.selected : ""}>{props.children}</tr>
+               className={props.selected ? styles.selected : ""}>{props.children}</tr>
 }
 
 const filterComponents = (children: React.ReactNode, targetType: any) => {
@@ -43,21 +44,38 @@ const filterComponents = (children: React.ReactNode, targetType: any) => {
     })?.filter(e => e != null)
 }
 
-const Table = (props: React.PropsWithChildren) => {
+type TableProps = {
+    length?: number;
+    emptyMessage?: React.ReactNode;
+    loadingInProgress?: boolean
+} & React.PropsWithChildren
+
+const Table = (props: TableProps) => {
 
 
-    return <table className={styles.table}>
-        <thead>
-        <tr>
-            {filterComponents(props.children, Header)}
-        </tr>
-        </thead>
-        <tbody>
-        {filterComponents(props.children, Row)}
-        </tbody>
-    </table>
+    return <>
+        <table className={styles.table}>
+            <thead>
+            <tr>
+                {filterComponents(props.children, Header)}
+            </tr>
+            </thead>
+            <tbody>
 
-};
+            {filterComponents(props.children, Row)}
+            </tbody>
+        </table>
+        {
+            (!props.loadingInProgress && props.emptyMessage && (props.length != null && props.length == 0)) &&
+            <div className="w-full text-2xl text-stone-600 text-center mt-4">{props.emptyMessage}</div>
+        }
+        {
+            props.loadingInProgress && <div className="flex justify-center mt-6">
+                <ProgressSpinner style={{width: '50px', height: '50px'}} strokeWidth="8" fill="var(--surface-ground)"/>
+            </div>
+        }
+    </>
+}
 
 Table.Header = Header
 Table.Column = Column

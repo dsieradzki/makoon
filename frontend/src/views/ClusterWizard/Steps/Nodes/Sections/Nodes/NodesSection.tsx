@@ -21,6 +21,7 @@ const panelName = 'NodeProperties'
 type Props = {
     title: string
     nodes: k4p.KubernetesNode[]
+    clusterName: string
     onAddNode: ()=>void
 }
 const NodesSection = (props: Props) => {
@@ -55,8 +56,8 @@ const NodesSection = (props: Props) => {
     return (
         <Section title={title} titleContainerClass="-ml-5">
             {nodesViewType
-                ? <TableNodes nodes={props.nodes} selectedId={getSelectedId()} onClick={onClickNodeHandler}/>
-                : <TileNodes nodes={props.nodes} selectedId={getSelectedId()} onClick={onClickNodeHandler}/>
+                ? <TableNodes clusterName={props.clusterName} nodes={props.nodes} selectedId={getSelectedId()} onClick={onClickNodeHandler}/>
+                : <TileNodes clusterName={props.clusterName} nodes={props.nodes} selectedId={getSelectedId()} onClick={onClickNodeHandler}/>
             }
 
 

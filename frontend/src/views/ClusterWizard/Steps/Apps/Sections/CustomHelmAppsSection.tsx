@@ -1,13 +1,14 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import Block from "@/components/Block";
 import Section from "@/components/Section";
-import projectStore from "@/store/projectStore";
 import { observer } from "mobx-react-lite";
 import uiPropertiesPanelStore from "@/store/uiPropertiesPanelStore";
 import Table from "@/components/Table/Table";
+import { ClusterWizardStoreContext } from "@/views/ClusterWizard/ClusterWizardView";
 
 
 const CustomHelmAppsSection = () => {
+    const clusterStore = useContext(ClusterWizardStoreContext)
     const isSelected = function (panelKey: string, id: string): boolean {
         return uiPropertiesPanelStore.selectedPropertiesId === id && uiPropertiesPanelStore.selectedPropertiesPanelKey === panelKey;
     }
@@ -23,7 +24,7 @@ const CustomHelmAppsSection = () => {
     return (
         <Section
             title={<>
-                <div className="mr-5">Custom Helm apps
+                <div className="mr-5">Helm apps
                 </div>
                 <Block className="flex justify-center items-center w-[56px] h-[56px]"
                        onClick={addCustomHelmApp}>
@@ -31,13 +32,13 @@ const CustomHelmAppsSection = () => {
                 </Block>
             </>}>
 
-            { projectStore.customHelmApps.length > 0 &&
+            { clusterStore.customHelmApps.length > 0 &&
                 <Table>
                     <Table.Header>Release name</Table.Header>
                     <Table.Header>Chart name</Table.Header>
                     <Table.Header>Namespace</Table.Header>
 
-                    {projectStore.customHelmApps.map(app =>
+                    {clusterStore.customHelmApps.map(app =>
                         <Table.Row
                             id={app.repository}
                             key={app.releaseName}
@@ -54,8 +55,8 @@ const CustomHelmAppsSection = () => {
                 </Table>
             }
             {
-                projectStore.customHelmApps.length == 0 &&
-                <div className="w-full text-2xl text-stone-600 text-center">No custom Help apps</div>
+                clusterStore.customHelmApps.length == 0 &&
+                <div className="w-full text-2xl text-stone-600 text-center">No Helm apps</div>
             }
         </Section>
     );

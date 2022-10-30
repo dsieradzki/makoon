@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import Block from "@/components/Block";
 import Section from "@/components/Section";
 import { SelectButton } from "primereact/selectbutton";
 import { observer } from "mobx-react-lite";
 import uiPropertiesPanelStore from "@/store/uiPropertiesPanelStore";
 import TableNodes from "@/views/ClusterManagement/components/Nodes/TableNodes";
 import TileNodes from "@/views/ClusterManagement/components/Nodes/TileNodes";
-import { KubernetesNodeWithStatus } from "@/store/projectStore";
+import { KubernetesNodeWithStatus } from "@/store/clusterManagementStore";
 
 const viewOptions = [
     {icon: 'pi pi-list', value: true},

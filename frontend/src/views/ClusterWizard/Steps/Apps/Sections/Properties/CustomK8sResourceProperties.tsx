@@ -1,28 +1,29 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import uiPropertiesPanelStore from "@/store/uiPropertiesPanelStore";
 import { useFormik } from "formik";
-import projectStore from "@/store/projectStore";
 import { LogError } from "@wails-runtime/runtime";
 import FormError from "@/components/FormError";
 import * as Yup from "yup"
-import { useOnFirstMount } from "@/reactHooks";
+import { useOnFirstMount } from "@/utils/hooks";
 import { observer } from "mobx-react-lite";
+import { ClusterWizardStoreContext } from "@/views/ClusterWizard/ClusterWizardView";
 
 const schema = Yup.object({
-    name: Yup.string().required(),
+    name: Yup.string().required().strict().trim(),
     content: Yup.string().required()
 })
 
 const CustomK8SResourceProperties = () => {
+    const clusterStore = useContext(ClusterWizardStoreContext)
     const [initialValues, setInitialValues] = useState({
             name: "",
             content: ""
         })
     useOnFirstMount(async () => {
-        const resFromStore = projectStore.customK8SResources.find(e => e.name === uiPropertiesPanelStore.selectedPropertiesId);
+        const resFromStore = clusterStore.customK8SResources.find(e => e.name === uiPropertiesPanelStore.selectedPropertiesId);
         if (resFromStore) {
             setInitialValues(resFromStore)
         }
@@ -34,16 +35,16 @@ const CustomK8SResourceProperties = () => {
         validationSchema: schema,
         onSubmit: (values, formikHelpers) => {
             if (uiPropertiesPanelStore.selectedPropertiesId) {
-                projectStore.updateCustomK8SResources(uiPropertiesPanelStore.selectedPropertiesId, values);
+                clusterStore.updateCustomK8SResources(uiPropertiesPanelStore.selectedPropertiesId, values);
             } else {
-                projectStore.addCustomK8SResources(values)
+                clusterStore.addCustomK8SResources(values)
             }
             uiPropertiesPanelStore.hidePanel()
         }
     })
     const onDelete = () => {
         if (uiPropertiesPanelStore.selectedPropertiesId) {
-            projectStore.deleteCustomK8SResources(uiPropertiesPanelStore.selectedPropertiesId);
+            clusterStore.deleteCustomK8SResources(uiPropertiesPanelStore.selectedPropertiesId);
             uiPropertiesPanelStore.hidePanel()
         } else {
             LogError("Kubernetes resource is not selected")
@@ -54,7 +55,7 @@ const CustomK8SResourceProperties = () => {
 
             <div className="grow w-full">
                 <form onSubmit={formik.handleSubmit}>
-                    <div className="text-3xl text-center font-bold mt-5">Custom Resource</div>
+                    <div className="text-3xl text-center font-bold mt-5">Kubernetes Resource</div>
                     <div className="p-10">
 
                         <div className="flex flex-col mb-2">

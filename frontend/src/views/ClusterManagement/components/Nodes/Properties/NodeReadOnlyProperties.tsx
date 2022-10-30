@@ -4,16 +4,16 @@ import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
 import { observer } from "mobx-react-lite";
 import { useFormik } from "formik";
-import projectStore from "@/store/projectStore";
 import uiPropertiesPanelStore from "@/store/uiPropertiesPanelStore";
 import { LogError } from "@wails-runtime/runtime";
-import { k4p } from "@wails/models";
 import { computed } from "mobx";
-import { useOnFirstMount } from "@/reactHooks";
+import { useOnFirstMount } from "@/utils/hooks";
 import { GetStorage } from "@wails/provisioner/Service";
 import { useState } from "react";
 import * as Yup from 'yup';
 import FormError from "@/components/FormError";
+import clusterManagementStore from "@/store/clusterManagementStore";
+import { apiCall } from "@/utils/api";
 
 interface NodeFormModel {
     name: string
@@ -37,12 +37,12 @@ const NodeReadOnlyProperties = () => {
     const [storages, setStorages] = useState([] as string[])
 
     useOnFirstMount(async () => {
-        setStorages(await GetStorage())
+        setStorages(await apiCall(() => GetStorage()))
     })
 
     const storedNode = computed(() => {
         if (uiPropertiesPanelStore.selectedPropertiesId) {
-            return projectStore.findNode(Number(uiPropertiesPanelStore.selectedPropertiesId))
+            return clusterManagementStore.findNode(Number(uiPropertiesPanelStore.selectedPropertiesId))
         } else {
             LogError("cannot delete node because selected node is null, this shouldn't happen")
             return null
@@ -61,42 +61,8 @@ const NodeReadOnlyProperties = () => {
         } as NodeFormModel,
 
         onSubmit: (values, formikHelpers) => {
-            if (uiPropertiesPanelStore.selectedPropertiesId) {
-                projectStore.updateNode(
-                    Number(uiPropertiesPanelStore.selectedPropertiesId),
-                    {
-                        vmid: values.vmid,
-                        name: values.name,
-                        cores: values.cores,
-                        memory: values.memory,
-                        ipAddress: values.ipAddress,
-                        storagePool: values.storagePool,
-                        nodeType: storedNode.get()?.nodeType
-                    } as k4p.KubernetesNode)
-                formik.resetForm()
-                uiPropertiesPanelStore.hidePanel()
-            } else {
-                LogError("cannot save node because selected node is null, this shouldn't happen")
-            }
         }
     })
-
-    const canBeDeleted = () => {
-        if (projectStore.findNode(Number(uiPropertiesPanelStore.selectedPropertiesId))?.nodeType === "master") {
-            return projectStore.masterNodes.length > 1;
-        } else {
-            return true;
-        }
-    }
-    const onDelete = () => {
-        if (uiPropertiesPanelStore.selectedPropertiesId) {
-            const id = uiPropertiesPanelStore.selectedPropertiesId;
-            uiPropertiesPanelStore.hidePanel()
-            projectStore.deleteNode(Number(id))
-        } else {
-            LogError("cannot delete node because selected node is null, this shouldn't happen")
-        }
-    }
 
     return <form onSubmit={formik.handleSubmit}>
         <div className="flex flex-col w-full h-full items-center">

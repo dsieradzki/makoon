@@ -35,7 +35,7 @@ func (k *Service) startVirtualMachine(cluster Cluster, node KubernetesNode, keyP
 
 	sshNode := ssh.NewClientWithKey(cluster.NodeUsername, keyPair, node.IpAddress)
 	err = utils.Retry(30, 10*time.Second,
-		func(attempt int) error {
+		func(attempt uint) error {
 			log.Infof("waiting for start [%d] VM, attempt [%d]", node.Vmid, attempt)
 			execute, err := sshNode.Execute("time")
 			if err != nil {

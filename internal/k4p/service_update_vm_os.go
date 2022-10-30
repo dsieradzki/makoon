@@ -27,7 +27,7 @@ func (k *Service) updateVmOs(provisionRequest Cluster, keyPair ssh.RsaKeyPair, n
 	sshClient := ssh.NewClientWithKey(provisionRequest.NodeUsername, keyPair, node.IpAddress)
 	eventSession := k.eventCollector.StartWithDetails("Update virtual machine OS", k.generateVmIdDetails(node.Vmid))
 
-	err := utils.Retry(30, 10*time.Second, func(attempt int) error {
+	err := utils.Retry(30, 10*time.Second, func(attempt uint) error {
 		log.Infof("trying to update OS packages for VM [VM%d], attempt [%d]", node.Vmid, attempt)
 
 		executionResult, err := sshClient.Execute(

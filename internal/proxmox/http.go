@@ -9,6 +9,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"io"
 	"net/http"
+	"time"
 )
 
 type HttpMethod string
@@ -40,6 +41,9 @@ func NoCookies() []http.Cookie {
 func NoBody() interface{} {
 	return nil
 }
+func EmptyBody() any {
+	return struct{}{}
+}
 func NoResponse() interface{} {
 	return nil
 }
@@ -57,6 +61,18 @@ func request(
 	cookies []http.Cookie,
 	body interface{},
 	resp interface{}) error {
+	return requestWithTimeout(method, mediaType, endpoint, headers, cookies, body, resp, 0)
+}
+
+func requestWithTimeout(
+	method HttpMethod,
+	mediaType MediaType,
+	endpoint string,
+	headers http.Header,
+	cookies []http.Cookie,
+	body interface{},
+	resp interface{},
+	timeout time.Duration) error {
 
 	var data []byte
 	var err error
@@ -84,7 +100,7 @@ func request(
 		request.AddCookie(&cookie)
 	}
 
-	response, err := httpsClient().Do(request)
+	response, err := httpsClient(timeout).Do(request)
 	if isErrorResponse(err, response) {
 		err := getErrorFromResponse(err, response)
 		log.WithError(err).Error("request error")
@@ -101,11 +117,11 @@ func request(
 	return json.Unmarshal(bodyData, resp)
 }
 
-func httpsClient() *http.Client {
+func httpsClient(timeout time.Duration) *http.Client {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
-	return &http.Client{Transport: tr}
+	return &http.Client{Transport: tr, Timeout: timeout}
 }
 
 func isErrorResponse(err error, res *http.Response) bool {
@@ -115,6 +131,9 @@ func isErrorResponse(err error, res *http.Response) bool {
 func getErrorFromResponse(err error, res *http.Response) error {
 	if err != nil {
 		return err
+	}
+	if res == nil {
+		return errors.New("no error and no response found")
 	}
 	body, err := io.ReadAll(res.Body)
 	if err != nil {

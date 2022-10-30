@@ -4,12 +4,22 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/dsieradzki/k4prox/internal/utils"
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/ssh"
+	"io"
 	"time"
 )
 
 func NewClient() *Client {
 	return &Client{}
+}
+
+type ExecuteOptions struct {
+	Command            string
+	Stdin              io.Reader
+	Retries            uint
+	TimeBetweenRetries time.Duration
 }
 
 func NewClientWithKey(username string, rsaKeyPair RsaKeyPair, host string) *Client {
@@ -47,11 +57,54 @@ func (p *Client) ClearConnectionData() {
 	p.host = ""
 }
 
+func (p *Client) IsRootUser() (bool, error) {
+	executionResult, err := p.Execute("whoami")
+	if err != nil {
+		return false, err
+	}
+	if executionResult.IsError() {
+		return false, executionResult.Error()
+	}
+	return executionResult.Output == "root", nil
+}
+
 func (p *Client) Executef(command string, a ...any) (ExecutionResult, error) {
 	return p.Execute(fmt.Sprintf(command, a...))
 }
 
 func (p *Client) Execute(command string) (ExecutionResult, error) {
+	return p.ExecuteWithOptions(ExecuteOptions{
+		Command: command,
+		Stdin:   nil,
+		Retries: 1,
+	})
+}
+func (p *Client) ExecuteWithOptions(options ExecuteOptions) (ExecutionResult, error) {
+	var result ExecutionResult
+	var err error
+	var retries = uint(1)
+	if options.Retries > 0 {
+		retries = options.Retries
+	}
+	_ = utils.Retry(retries, options.TimeBetweenRetries, func(attempt uint) error {
+		executionResult, rerr := p.executeWithStdin(options.Command, options.Stdin)
+		result = executionResult
+		if rerr != nil {
+			log.WithError(rerr).Error("Execute command finished with error")
+			err = rerr
+			return rerr
+		}
+		if executionResult.IsError() {
+			log.WithError(executionResult.Error()).Error("Execute command finished with error")
+			return executionResult.Error()
+		}
+		err = nil // Reset main error, command executed correctly after some retires
+		return nil
+	})
+	return result, err
+}
+
+func (p *Client) executeWithStdin(command string, stdin io.Reader) (ExecutionResult, error) {
 	var config *ssh.ClientConfig
 	if p.rsaKeyPair == nil {
 		config = &ssh.ClientConfig{
@@ -98,18 +151,25 @@ func (p *Client) Execute(command string) (ExecutionResult, error) {
 	var buffErr bytes.Buffer
 	session.Stdout = &buffOut
 	session.Stderr = &buffErr
-
+	session.Stdin = stdin
 	err = session.Run(command)
 	if err != nil {
 		errOut := buffErr.String()
 		if len(errOut) == 0 {
 			errOut = buffOut.String()
 		}
+		code := -1
+		switch err.(type) {
+		case *ssh.ExitError:
+			code = err.(*ssh.ExitError).ExitStatus()
+		default:
+			log.Errorf("ssh client returned string error instead ExitError [%s]", err)
+		}
 		return ExecutionResult{
 			Output: buffOut.String(),
 			error: &ExecutionError{
 				Output: errOut,
-				Code:   err.(*ssh.ExitError).ExitStatus(),
+				Code:   code,
 			},
 		}, nil
 	}
@@ -125,7 +185,11 @@ type ExecutionError struct {
 }
 
 func (e *ExecutionError) ToError() error {
-	return errors.New(fmt.Sprintf("[%d] - %s", e.Code, e.Output))
+	o := e.Output
+	if len(o) == 0 {
+		o = "[NO OUTPUT]"
+	}
+	return errors.New(fmt.Sprintf("[%d] - %s", e.Code, o))
 }
 
 type ExecutionResult struct {

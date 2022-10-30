@@ -4,16 +4,17 @@ import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
 import { observer } from "mobx-react-lite";
 import { useFormik } from "formik";
-import projectStore from "@/store/projectStore";
 import uiPropertiesPanelStore from "@/store/uiPropertiesPanelStore";
 import { LogError } from "@wails-runtime/runtime";
 import { k4p } from "@wails/models";
 import { computed } from "mobx";
-import { useOnFirstMount } from "@/reactHooks";
+import { useOnFirstMount } from "@/utils/hooks";
 import { GetStorage } from "@wails/provisioner/Service";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import * as Yup from 'yup';
 import FormError from "@/components/FormError";
+import { ClusterWizardStoreContext } from "@/views/ClusterWizard/ClusterWizardView";
+import { apiCall } from "@/utils/api";
 
 interface NodeFormModel {
     name: string
@@ -33,23 +34,26 @@ const schema = Yup.object().shape({
     storagePool: Yup.string().required()
 })
 const NodeProperties = () => {
-
+    const clusterStore = useContext(ClusterWizardStoreContext)
     const [storages, setStorages] = useState([] as string[])
 
     useOnFirstMount(async () => {
-        setStorages(await GetStorage())
+        setStorages(await apiCall(() => GetStorage()))
     })
 
     const storedNode = computed(() => {
         if (uiPropertiesPanelStore.selectedPropertiesId) {
-            return projectStore.findNode(Number(uiPropertiesPanelStore.selectedPropertiesId))
+            return clusterStore.findNode(Number(uiPropertiesPanelStore.selectedPropertiesId))
         } else {
             LogError("cannot delete node because selected node is null, this shouldn't happen")
             return null
         }
     })
 
+    const clusterName = clusterStore.cluster.clusterName;
+
     const formik = useFormik({
+        validateOnMount: true,
         validationSchema: schema,
         initialValues: {
             vmid: storedNode.get()?.vmid,
@@ -62,7 +66,7 @@ const NodeProperties = () => {
 
         onSubmit: (values, formikHelpers) => {
             if (uiPropertiesPanelStore.selectedPropertiesId) {
-                projectStore.updateNode(
+                clusterStore.updateNode(
                     Number(uiPropertiesPanelStore.selectedPropertiesId),
                     {
                         vmid: values.vmid,
@@ -82,8 +86,8 @@ const NodeProperties = () => {
     })
 
     const canBeDeleted = () => {
-        if (projectStore.findNode(Number(uiPropertiesPanelStore.selectedPropertiesId))?.nodeType==="master") {
-            return projectStore.masterNodes.length > 1;
+        if (clusterStore.findNode(Number(uiPropertiesPanelStore.selectedPropertiesId))?.nodeType === "master") {
+            return clusterStore.masterNodes.length > 1;
         } else {
             return true;
         }
@@ -92,7 +96,7 @@ const NodeProperties = () => {
         if (uiPropertiesPanelStore.selectedPropertiesId) {
             const id = uiPropertiesPanelStore.selectedPropertiesId;
             uiPropertiesPanelStore.hidePanel()
-            projectStore.deleteNode(Number(id))
+            clusterStore.deleteNode(Number(id))
         } else {
             LogError("cannot delete node because selected node is null, this shouldn't happen")
         }
@@ -107,7 +111,7 @@ const NodeProperties = () => {
                         <div className="text-stone-400 required">VM id</div>
                         <InputNumber name="vmid"
                                      value={formik.values.vmid}
-                                     onChange={v=> {
+                                     onChange={v => {
                                          formik.setFieldValue("vmid", v.value, true)
                                      }}
                                      onBlur={formik.handleBlur}
@@ -119,12 +123,15 @@ const NodeProperties = () => {
 
                     <div className="mt-3">
                         <div className="text-stone-400 required">Node name</div>
-                        <InputText name="name"
-                                   value={formik.values.name}
-                                   onChange={formik.handleChange}
-                                   onBlur={formik.handleBlur}
-                                   className="w-full p-inputtext-sm"></InputText>
-                        <FormError error={formik.errors.name} touched={formik.touched.name}/>
+                        <div className="flex items-center">
+                            <div className="text-stone-400">{clusterName}-</div>
+                            <InputText name="name"
+                                       value={formik.values.name}
+                                       onChange={formik.handleChange}
+                                       onBlur={formik.handleBlur}
+                                       className="w-full p-inputtext-sm ml-1"></InputText>
+                            <FormError error={formik.errors.name} touched={formik.touched.name}/>
+                        </div>
                     </div>
 
                     <div className="mt-3">
@@ -154,7 +161,7 @@ const NodeProperties = () => {
                         <div className="text-stone-400 required">CPU cores</div>
                         <InputNumber name="cores"
                                      value={formik.values.cores}
-                                     onChange={v=> {
+                                     onChange={v => {
                                          formik.setFieldValue("cores", v.value, true)
                                      }}
                                      onBlur={formik.handleBlur}
@@ -168,7 +175,7 @@ const NodeProperties = () => {
                         <div className="text-stone-400 required">Memory (MB)</div>
                         <InputNumber name="memory"
                                      value={formik.values.memory}
-                                     onChange={v=> {
+                                     onChange={v => {
                                          formik.setFieldValue("memory", v.value, true)
                                      }}
                                      onBlur={formik.handleBlur}
@@ -183,7 +190,8 @@ const NodeProperties = () => {
                     <div className="mt-10 flex flex-col items-center">
                         <div className="flex justify-center items-center">
                             <div className="mr-5">
-                                <Button disabled={!formik.isValid} type="submit" label="SAVE" className="p-button-primary"/>
+                                <Button disabled={!formik.isValid} type="submit" label="SAVE"
+                                        className="p-button-primary"/>
                             </div>
                             <Button onClick={onDelete}
                                     disabled={!canBeDeleted()}

@@ -23,16 +23,26 @@ func (p *Client) ResizeDisk(vmd VmDefinition) error {
 
 func (p *Client) StartVM(vmid uint32) error {
 	// struct{}{} Proxmox API throw error on empty body
-	return p.Postf(struct{}{}, NoResponse(), "/nodes/%s/qemu/%d/status/start", p.proxmoxNode, vmid)
+	return p.Postf(EmptyBody(), NoResponse(), "/nodes/%s/qemu/%d/status/start", p.proxmoxNode, vmid)
 }
 
 func (p *Client) ShutdownVM(vmid uint32) error {
 	// struct{}{} Proxmox API throw error on empty body
-	return p.Postf(struct{}{}, NoResponse(), "/nodes/%s/qemu/%d/status/shutdown", p.proxmoxNode, vmid)
+	return p.Postf(EmptyBody(), NoResponse(), "/nodes/%s/qemu/%d/status/shutdown", p.proxmoxNode, vmid)
+}
+
+func (p *Client) DeleteVM(vmid uint32) error {
+	return p.Deletef(NoResponse(), "/nodes/%s/qemu/%d", p.proxmoxNode, vmid)
+}
+
+func (p *Client) GetVMs() ([]GetVMsResponse, error) {
+	var resp Response[[]GetVMsResponse]
+	return resp.Data, p.Getf(&resp, "/nodes/%s/qemu", p.proxmoxNode)
 }
 
 func (p *Client) StopVM(vmid uint32) error {
-	return p.Postf(NoBody(), NoResponse(), "/nodes/%s/qemu/%d/status/stop", p.proxmoxNode, vmid)
+	// struct{}{} Proxmox API throw error on empty body
+	return p.Postf(EmptyBody(), NoResponse(), "/nodes/%s/qemu/%d/status/stop", p.proxmoxNode, vmid)
 }
 
 func (p *Client) CurrentVMStatus(vmid uint32) (VmStatus, error) {
