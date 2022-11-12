@@ -8,6 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/ssh"
 	"io"
+	"strings"
 	"time"
 )
 
@@ -65,7 +66,7 @@ func (p *Client) IsRootUser() (bool, error) {
 	if executionResult.IsError() {
 		return false, executionResult.Error()
 	}
-	return executionResult.Output == "root", nil
+	return strings.TrimSpace(executionResult.Output) == "root", nil
 }
 
 func (p *Client) Executef(command string, a ...any) (ExecutionResult, error) {
