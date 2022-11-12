@@ -1,7 +1,7 @@
 import { Tag } from "primereact/tag";
 import React from "react";
-import { VmStatus } from "@/store/projectStore";
 import { ProgressSpinner } from "primereact/progressspinner";
+import { VmStatus } from "@/store/clusterManagementStore";
 
 type VmStatusComponentProps = {
     status: VmStatus;

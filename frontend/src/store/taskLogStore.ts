@@ -1,6 +1,7 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import { tasklog } from "@wails/models";
 import { GetTaskLog } from "@wails/tasklog/Service";
+import { apiCall } from "@/utils/api";
 
 class TaskLogStore {
     log: tasklog.Task[] = []
@@ -18,7 +19,7 @@ class TaskLogStore {
     }
 
     async loadTaskLog() {
-        const response = await GetTaskLog();
+        const response = await apiCall(() => GetTaskLog())
         runInAction(() => {
             this.log = response
         })

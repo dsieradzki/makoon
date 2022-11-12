@@ -21,7 +21,7 @@ func (k *Service) createVirtualMachine(pr Cluster, node KubernetesNode, keyPair 
 	eventSession := k.eventCollector.StartWithDetails("Create Virtual Machine", k.generateVmIdDetails(node.Vmid))
 	err := k.proxmoxClient.CreateVM(proxmox.VmDefinition{
 		proxmox.Vmid:   node.Vmid,
-		proxmox.Name:   node.Name,
+		proxmox.Name:   node.Name(pr.ClusterName),
 		proxmox.Cores:  node.Cores,
 		proxmox.Memory: node.Memory,
 		proxmox.Ostype: "l26",
@@ -37,9 +37,20 @@ func (k *Service) createVirtualMachine(pr Cluster, node KubernetesNode, keyPair 
 	//
 	//
 	//
-	eventSession = k.eventCollector.StartWithDetails("Import disk", k.generateVmIdDetails(node.Vmid))
-	importDiskResult, err := k.proxmoxSsh.Executef(
-		"qm importdisk %d %s %s", node.Vmid, k4pDataDir+"/"+linuxCloudImageFileName, node.StoragePool)
+	isRoot, err := k.proxmoxSsh.IsRootUser()
+	if err != nil {
+		k.eventCollector.Startf("Check that logger user is root").ReportError(err)
+	}
+
+	importDiskCommand := fmt.Sprintf("qm importdisk %d %s %s", node.Vmid, k4pDataDir+"/"+linuxCloudImageFileName, node.StoragePool)
+	var importDiskResult ssh.ExecutionResult
+	if isRoot {
+		eventSession = k.eventCollector.StartWithDetails("Import disk", k.generateVmIdDetails(node.Vmid))
+		importDiskResult, err = k.proxmoxSsh.Execute(importDiskCommand)
+	} else {
+		eventSession = k.eventCollector.StartWithDetails("Import disk", k.generateVmIdDetails(node.Vmid))
+		importDiskResult, err = k.proxmoxSsh.Executef("sudo %s", importDiskCommand)
+	}
 
 	if err != nil {
 		eventSession.ReportError(err)

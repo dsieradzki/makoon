@@ -4,6 +4,7 @@ import TileNode from "@/views/ClusterWizard/Steps/Nodes/Sections/Nodes/TileNode"
 
 type Props = {
     nodes: k4p.KubernetesNode[]
+    clusterName: string
     selectedId: string | null
     onClick: (id: string) => void
 }
@@ -24,6 +25,7 @@ const TileNodes = (props: Props) => {
                 props.nodes.map((wNode, idx) =>
                     <TileNode
                         node={wNode}
+                        clusterName={props.clusterName}
                         selected={wNode.vmid.toString() === props.selectedId}
                         onClick={onSelect(wNode.vmid.toString())}
                         key={idx}

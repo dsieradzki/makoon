@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import TileNode from "@/views/ClusterManagement/components/Nodes/TileNode";
-import { KubernetesNodeWithStatus } from "@/store/projectStore";
+import { KubernetesNodeWithStatus } from "@/store/clusterManagementStore";
 
 type Props = {
     nodes: KubernetesNodeWithStatus[]

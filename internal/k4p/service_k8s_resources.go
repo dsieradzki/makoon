@@ -1,7 +1,6 @@
 package k4p
 
 import (
-	"github.com/dsieradzki/k4prox/internal/collect"
 	"github.com/dsieradzki/k4prox/internal/ssh"
 	"strings"
 )
@@ -10,45 +9,39 @@ func (k *Service) InstallAdditionalK8sResources(provisionRequest Cluster, keyPai
 	firstMasterNode, _ := findFirstMasterNode(provisionRequest.Nodes)
 	sshMasterNode := ssh.NewClientWithKey(provisionRequest.NodeUsername, keyPair, firstMasterNode.IpAddress)
 
-	eventSession := k.eventCollector.Start("Apply custom K8S resources")
-	crs := collect.Map(provisionRequest.CustomK8sResources, func(r CustomK8sResource) string {
-		return r.Content
-	})
-	err := k.installAdditionalK8sResources("custom_k8s_resource", crs, sshMasterNode)
-	if err != nil {
-		eventSession.ReportError(err)
-		return err
-	}
-	eventSession.Done()
-	return nil
-}
-func (k *Service) installAdditionalK8sResources(featureName string, resources []string, sshMasterNode *ssh.Client) error {
-	for idx, content := range resources {
-		if len(content) > 0 {
-			escapedContent := strings.ReplaceAll(content, `"`, `\"`)
-			executionResult, err := sshMasterNode.Executef("echo \"%s\" > /tmp/%s-%d.yaml", escapedContent, featureName, idx)
+	for _, k8sResource := range provisionRequest.CustomK8sResources {
+		if len(k8sResource.Content) > 0 {
+			eventSession := k.eventCollector.Startf("Apply resource [%s]", k8sResource.Name)
+			escapedContent := strings.ReplaceAll(k8sResource.Content, `"`, `\"`)
+			executionResult, err := sshMasterNode.Executef("echo \"%s\" > /tmp/%s.yaml", escapedContent, k8sResource.Name)
 			if err != nil {
+				eventSession.ReportError(err)
 				return err
 			}
 			if executionResult.IsError() {
+				eventSession.ReportError(executionResult.Error())
 				return executionResult.Error()
 			}
-			executionResult, err = sshMasterNode.Executef("sudo microk8s.kubectl apply -f /tmp/%s-%d.yaml", featureName, idx)
+			executionResult, err = sshMasterNode.Executef("sudo microk8s.kubectl apply -f /tmp/%s.yaml", k8sResource.Name)
 			if err != nil {
+				eventSession.ReportError(err)
 				return err
 			}
 			if executionResult.IsError() {
+				eventSession.ReportError(executionResult.Error())
 				return executionResult.Error()
 			}
-			executionResult, err = sshMasterNode.Executef("sudo rm /tmp/%s-%d.yaml", featureName, idx)
+			executionResult, err = sshMasterNode.Executef("sudo rm /tmp/%s.yaml", k8sResource.Name)
 			if err != nil {
+				eventSession.ReportError(err)
 				return err
 			}
 			if executionResult.IsError() {
+				eventSession.ReportError(executionResult.Error())
 				return executionResult.Error()
 			}
+			eventSession.Done()
 		}
-
 	}
 	return nil
 }

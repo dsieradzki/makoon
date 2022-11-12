@@ -4,6 +4,7 @@ import React from "react";
 
 type Props = {
     node: k4p.KubernetesNode
+    clusterName: string
     selected?: boolean,
     onClick?: (node: k4p.KubernetesNode) => void
     className?: string
@@ -19,7 +20,7 @@ const TileNode = (props: Props) => {
             props.onClick(props.node)
         }
     }
-    return <Block title={props.node.name} selected={props.selected} onClick={handeOnClick} className={props.className}>
+    return <Block title={props.clusterName+"-"+props.node.name} selected={props.selected} onClick={handeOnClick} className={props.className}>
         <div className="bg-stone-800 rounded-xl p-4 mt-3">
             <table className="w-full">
                 <tbody>

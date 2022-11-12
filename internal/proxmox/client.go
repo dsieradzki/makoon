@@ -6,6 +6,7 @@ import (
 	"github.com/dsieradzki/k4prox/internal/utils"
 	log "github.com/sirupsen/logrus"
 	"net/http"
+	"time"
 )
 
 func NewClient() *Client {
@@ -29,7 +30,7 @@ func (p *Client) Login(username string, password string, proxmoxHost string, pro
 	p.proxmoxPort = proxmoxPort
 	var proxmoxSession Response[SessionData]
 	encodedPassword := utils.PathEscape(password)
-	err := request(
+	err := requestWithTimeout(
 		POST,
 		ApplicationWwwFormUrlEncoded,
 		p.endpoint(fmt.Sprintf("/access/ticket?password=%s", encodedPassword)),
@@ -37,10 +38,12 @@ func (p *Client) Login(username string, password string, proxmoxHost string, pro
 		NoCookies(),
 		fmt.Sprintf("username=%s@pam", username),
 		&proxmoxSession,
+		10*time.Second,
 	)
 	if err != nil {
-		return err
+		return errors.New("authentication_error")
 	}
+
 	p.session = &proxmoxSession.Data
 	proxmoxNode, err := p.DetermineProxmoxNodeName()
 	p.proxmoxNode = proxmoxNode
@@ -56,6 +59,14 @@ func (p *Client) ClearLoginData() {
 
 func (p *Client) endpoint(e string) string {
 	return fmt.Sprintf("https://%s:%d/api2/json%s", p.proxmoxHost, p.proxmoxPort, e)
+}
+
+func (p *Client) Deletef(resp interface{}, api string, params ...any) error {
+	return p.Delete(resp, fmt.Sprintf(api, params...))
+}
+
+func (p *Client) Delete(resp interface{}, api string) error {
+	return request(DELETE, ApplicationJson, p.endpoint(api), p.proxmoxHeaders(), p.proxmoxCookies(), nil, resp)
 }
 
 func (p *Client) Getf(resp interface{}, api string, params ...any) error {

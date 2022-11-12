@@ -11,8 +11,8 @@ import (
 	"github.com/dsieradzki/k4prox/pkg/app"
 	"github.com/dsieradzki/k4prox/pkg/logfile"
 	"github.com/dsieradzki/k4prox/pkg/service/auth"
+	"github.com/dsieradzki/k4prox/pkg/service/database"
 	"github.com/dsieradzki/k4prox/pkg/service/management"
-	"github.com/dsieradzki/k4prox/pkg/service/project"
 	"github.com/dsieradzki/k4prox/pkg/service/provisioner"
 	tasklogService "github.com/dsieradzki/k4prox/pkg/service/tasklog"
 	custWails "github.com/dsieradzki/k4prox/pkg/wails"
@@ -28,7 +28,25 @@ import (
 var assets embed.FS
 
 func main() {
-	log.SetLevel(log.TraceLevel)
+	switch os.Getenv("K4PROX_LOGLEVEL") {
+	case "TRACE":
+		log.SetLevel(log.TraceLevel)
+	case "DEBUG":
+		log.SetLevel(log.DebugLevel)
+	case "INFO":
+		log.SetLevel(log.InfoLevel)
+	case "WARNING":
+		log.SetLevel(log.WarnLevel)
+	case "ERROR":
+		log.SetLevel(log.ErrorLevel)
+	case "FATAL":
+		log.SetLevel(log.FatalLevel)
+	case "PANIC":
+		log.SetLevel(log.PanicLevel)
+	default:
+		log.SetLevel(log.DebugLevel)
+	}
+
 	file, err := os.OpenFile(logfile.PrepareLogFile(), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err == nil {
 		log.SetOutput(file)
@@ -54,33 +72,35 @@ func main() {
 
 	// SERVICES
 	authService := auth.NewService(proxmoxClient, proxmoxSsh)
-	projectService := project.NewService(proxmoxClient)
-	provisionerService := provisioner.NewService(projectService, proxmoxClient, proxmoxSsh, eventCollector)
+	databaseService := database.NewService(proxmoxClient, proxmoxSsh)
+	provisionerService := provisioner.NewService(databaseService, proxmoxClient, proxmoxSsh, eventCollector)
 	taskLogService := tasklogService.NewService(eventCollector, taskLogReader)
-	managementService := management.NewService(projectService)
+	managementService := management.NewService(databaseService, proxmoxClient)
+	clusterGenerator := provisioner.NewGenerator(proxmoxClient)
 
 	application := app.NewApp([]custWails.ContextSetter{
-		projectService,
+		databaseService,
 	})
 
 	err = wails.Run(&options.App{
 
 		Title:              "K4Prox",
 		Width:              1370,
-		Height:             850,
+		Height:             870,
 		Assets:             assets,
 		OnStartup:          application.Startup,
 		OnShutdown:         application.Shutdown,
-		LogLevel:           logger.DEBUG,
-		LogLevelProduction: logger.DEBUG,
+		LogLevel:           logger.TRACE, // Level is controlled by logrus
+		LogLevelProduction: logger.TRACE,
 		Logger:             appLogger.Default(),
 		Bind: []any{
 			application,
-			projectService,
+			databaseService,
 			authService,
 			provisionerService,
 			taskLogService,
 			managementService,
+			clusterGenerator,
 		},
 	})
 

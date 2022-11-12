@@ -2,8 +2,8 @@ import Block from "@/components/Block";
 import { k4p } from "@wails/models";
 import React from "react";
 import VmStatusComponent from "@/views/ClusterManagement/components/Nodes/VmStatusComponent";
-import { KubernetesNodeWithStatus } from "@/store/projectStore";
 import K8sStatusComponent from "@/views/ClusterManagement/components/Nodes/K8sStatusComponent";
+import { KubernetesNodeWithStatus } from "@/store/clusterManagementStore";
 
 type Props = {
     node: KubernetesNodeWithStatus

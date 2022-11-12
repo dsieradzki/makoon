@@ -3,6 +3,7 @@ import "./Block.css"
 
 type BlockProps = {
     title?: string
+    tooltip?: string
     children?: React.ReactNode
     className?: string
     notActive?: boolean
@@ -30,6 +31,7 @@ const Block = (props: BlockProps) => {
         onMouseOver={() => setHover(true)}
         onMouseOut={() => setHover(false)}
         onClick={props.onClick}
+        title={props.tooltip}
         className={`block-container p-3 rounded-xl border-2 cursor-pointer ${blockBorder()} ${props.className}`}>
         {
             props.title &&

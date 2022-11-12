@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { useFormik } from "formik";
 import { k4p } from "@wails/models";
 import * as Yup from "yup"
-import projectStore from "@/store/projectStore";
 import uiPropertiesPanelStore from "@/store/uiPropertiesPanelStore";
-import { useOnFirstMount } from "@/reactHooks";
+import { useOnFirstMount } from "@/utils/hooks";
 import { observer } from "mobx-react-lite";
 import { LogError } from "@wails-runtime/runtime";
 import FormError from "@/components/FormError";
+import { ClusterWizardStoreContext } from "@/views/ClusterWizard/ClusterWizardView";
 
 const schema = Yup.object({
     releaseName: Yup.string().required(),
@@ -20,17 +20,18 @@ const schema = Yup.object({
     valueFileContent: Yup.string()
 })
 const CustomHelmAppProperties = () => {
+    const clusterStore = useContext(ClusterWizardStoreContext)
     const [initialValues, setInitialValues] = useState({} as k4p.HelmApp)
 
     useOnFirstMount(async () => {
-        const appFromStore = projectStore.customHelmApps.find(e => e.releaseName === uiPropertiesPanelStore.selectedPropertiesId);
+        const appFromStore = clusterStore.customHelmApps.find(e => e.releaseName === uiPropertiesPanelStore.selectedPropertiesId);
         if (appFromStore) {
             setInitialValues(appFromStore)
         }
     })
     const onDelete = () => {
         if (uiPropertiesPanelStore.selectedPropertiesId) {
-            projectStore.deleteCustomHelmApp(uiPropertiesPanelStore.selectedPropertiesId);
+            clusterStore.deleteCustomHelmApp(uiPropertiesPanelStore.selectedPropertiesId);
             uiPropertiesPanelStore.hidePanel()
         } else {
             LogError("Helm app is not selected")
@@ -44,9 +45,9 @@ const CustomHelmAppProperties = () => {
         validationSchema: schema,
         onSubmit: (values, formikHelpers) => {
             if (uiPropertiesPanelStore.selectedPropertiesId) {
-                projectStore.updateCustomHelmApp(uiPropertiesPanelStore.selectedPropertiesId, values);
+                clusterStore.updateCustomHelmApp(uiPropertiesPanelStore.selectedPropertiesId, values);
             } else {
-                projectStore.addCustomHelmApp(values)
+                clusterStore.addCustomHelmApp(values)
             }
             uiPropertiesPanelStore.hidePanel()
         }
@@ -55,7 +56,7 @@ const CustomHelmAppProperties = () => {
     return (
         <div className="flex flex-col w-full h-full items-center">
             <div className="grow w-full">
-                <div className="text-3xl text-center font-bold mt-5">Custom Helm app</div>
+                <div className="text-3xl text-center font-bold mt-5">Helm app</div>
                 <form onSubmit={formik.handleSubmit}>
                     <div className="p-10">
                         <div className="mt-3">

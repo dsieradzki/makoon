@@ -6,13 +6,13 @@ import (
 	"github.com/dsieradzki/k4prox/internal/k4p"
 	"github.com/dsieradzki/k4prox/internal/proxmox"
 	"github.com/dsieradzki/k4prox/internal/ssh"
-	"github.com/dsieradzki/k4prox/pkg/service/project"
+	"github.com/dsieradzki/k4prox/pkg/service/database"
 	log "github.com/sirupsen/logrus"
 	"sort"
 )
 
 func NewService(
-	projectService *project.Service,
+	projectService *database.Service,
 	proxmoxClient *proxmox.Client,
 	sshClient *ssh.Client,
 	eventCollector *event.Collector) *Service {
@@ -28,7 +28,7 @@ type Service struct {
 	eventCollector *event.Collector
 	k4p            *k4p.Service
 	proxmoxClient  *proxmox.Client
-	project        *project.Service
+	project        *database.Service
 }
 
 func (p *Service) SetupEnvironmentOnProxmox() error {
@@ -36,50 +36,52 @@ func (p *Service) SetupEnvironmentOnProxmox() error {
 }
 
 func (p *Service) CreateCluster(provisionRequest k4p.ProvisionRequest) error {
-	projectData, err := p.project.LoadProject()
-	if err != nil {
-		log.WithError(err).Error("Cannot load project")
-		return err
-	}
-	if projectData.SshKey.Empty() {
+	if provisionRequest.Cluster.SshKey.Empty() {
 		rsaKeyPair, err := ssh.GenerateRsaKeyPair()
 		if err != nil {
 			log.WithError(err).Error("Cannot generate RSA key pair")
 			return err
 		}
-		projectData.SshKey = rsaKeyPair
-		err = p.project.SaveProject(projectData)
-		if err != nil {
-			log.WithError(err).Error("Cannot save project file")
-			return err
-		}
+		provisionRequest.Cluster.SshKey = rsaKeyPair
 	}
+	loadedDatabase, err := p.project.LoadDatabase()
+	if err != nil {
+		log.WithError(err).Error("Cannot load database")
+		return err
+	}
+	loadedDatabase.Clusters = append(loadedDatabase.Clusters, provisionRequest.Cluster)
+	err = p.project.SaveDatabase(loadedDatabase)
+	if err != nil {
+		log.WithError(err).Error("Cannot save database")
+		return err
+	}
+
 	if provisionRequest.Stages.CreateVirtualMachines {
-		err = p.k4p.CreateVirtualMachines(projectData.Cluster, projectData.SshKey)
+		err = p.k4p.CreateVirtualMachines(provisionRequest.Cluster, provisionRequest.Cluster.SshKey)
 		if err != nil {
 			log.WithError(err).Error("Cannot create virtual machines")
 			return err
 		}
 
-		err = p.k4p.StartVirtualMachines(projectData.Cluster, projectData.SshKey)
+		err = p.k4p.StartVirtualMachines(provisionRequest.Cluster, provisionRequest.Cluster.SshKey)
 		if err != nil {
 			log.WithError(err).Error("Cannot start virtual machines")
 			return err
 		}
 
-		err = p.k4p.UpdateVmsOs(projectData.Cluster, projectData.SshKey)
+		err = p.k4p.UpdateVmsOs(provisionRequest.Cluster, provisionRequest.Cluster.SshKey)
 		if err != nil {
 			log.WithError(err).Error("Cannot update virtual machine OS")
 			return err
 		}
 
-		err = p.k4p.ShutdownVirtualMachines(projectData.Cluster)
+		err = p.k4p.ShutdownVirtualMachines(provisionRequest.Cluster)
 		if err != nil {
 			log.WithError(err).Error("Cannot shutdown virtual machines")
 			return err
 		}
 
-		err = p.k4p.StartVirtualMachines(projectData.Cluster, projectData.SshKey)
+		err = p.k4p.StartVirtualMachines(provisionRequest.Cluster, provisionRequest.Cluster.SshKey)
 		if err != nil {
 			log.WithError(err).Error("Cannot start virtual machines")
 			return err
@@ -87,7 +89,7 @@ func (p *Service) CreateCluster(provisionRequest k4p.ProvisionRequest) error {
 	}
 
 	if provisionRequest.Stages.SetupVirtualMachines {
-		err = p.k4p.SetupVmsOs(projectData.Cluster, projectData.SshKey)
+		err = p.k4p.SetupVmsOs(provisionRequest.Cluster, provisionRequest.Cluster.SshKey)
 		if err != nil {
 			log.WithError(err).Error("Cannot setup virtual machine OS")
 			return err
@@ -95,14 +97,14 @@ func (p *Service) CreateCluster(provisionRequest k4p.ProvisionRequest) error {
 	}
 
 	if provisionRequest.Stages.InstallKubernetes {
-		err = p.k4p.InstallKubernetesOnNodes(projectData.Cluster, projectData.SshKey)
+		err = p.k4p.InstallKubernetesOnVms(provisionRequest.Cluster, provisionRequest.Cluster.SshKey)
 		if err != nil {
 			log.WithError(err).Error("Cannot install Kubernetes")
 			return err
 		}
 	}
 	if provisionRequest.Stages.JoinNodesToCluster {
-		err = p.k4p.JoinNodesToCluster(projectData.Cluster, projectData.SshKey)
+		err = p.k4p.JoinNodesToCluster(provisionRequest.Cluster, provisionRequest.Cluster.SshKey)
 		if err != nil {
 			log.WithError(err).Error("Cannot join node to cluster")
 			return err
@@ -110,52 +112,49 @@ func (p *Service) CreateCluster(provisionRequest k4p.ProvisionRequest) error {
 	}
 
 	if provisionRequest.Stages.InstallKubernetes {
-		kubeConfigContent, err := p.k4p.GetKubeConfigFromCluster(projectData.Cluster, projectData.SshKey)
+		kubeConfigContent, err := p.k4p.GetKubeConfigFromCluster(provisionRequest.Cluster, provisionRequest.Cluster.SshKey)
 		if err != nil {
 			log.WithError(err).Error("Cannot get Kubernetes config from cluster")
 			return err
 		}
 		eventSession := p.eventCollector.Start("Add Kubernetes config to project file")
-		projectDataToUpdate, err := p.project.LoadProject()
+
+		// Update kube config
+		loadedDatabase, err = p.project.LoadDatabase()
 		if err != nil {
-			log.WithError(err).Error("Cannot load project file")
+			log.WithError(err).Error("Cannot load database")
 			eventSession.ReportError(err)
 			return err
 		}
-		projectDataToUpdate.KubeConfig = kubeConfigContent
-		projectData = projectDataToUpdate
-		err = p.project.SaveProject(projectDataToUpdate)
+		for i := 0; i < len(loadedDatabase.Clusters); i++ {
+			if loadedDatabase.Clusters[i].ClusterName == provisionRequest.Cluster.ClusterName {
+				loadedDatabase.Clusters[i].KubeConfig = kubeConfigContent
+			}
+		}
+		err = p.project.SaveDatabase(loadedDatabase)
 		if err != nil {
 			log.WithError(err).Error("Cannot save project file")
 			eventSession.ReportError(err)
 			return err
 		}
 		eventSession.Done()
-	}
 
-	if provisionRequest.Stages.InstallAddons {
-		err = p.k4p.InstallAddons(projectData.Cluster, projectData.SshKey)
+		err = p.k4p.InstallAddons(provisionRequest.Cluster, provisionRequest.Cluster.SshKey)
 		if err != nil {
 			log.WithError(err).Error("Cannot install addons")
 			return err
 		}
 	}
-	if provisionRequest.Stages.InstallHelmApps {
-		err = p.k4p.InstallHelmApps(projectData.Cluster, projectData.SshKey)
-		if err != nil {
-			log.WithError(err).Error("Cannot install Helm applications")
-			return err
-		}
-	}
+
 	if provisionRequest.Stages.InstallCustomHelmApps {
-		err = p.k4p.InstallCustomHelmApps(projectData.Cluster, projectData.SshKey)
+		err = p.k4p.InstallCustomHelmApps(provisionRequest.Cluster, provisionRequest.Cluster.SshKey)
 		if err != nil {
 			log.WithError(err).Error("Cannot install custom Helm applications")
 			return err
 		}
 	}
 	if provisionRequest.Stages.InstallCustomK8sResources {
-		err = p.k4p.InstallAdditionalK8sResources(projectData.Cluster, projectData.SshKey)
+		err = p.k4p.InstallAdditionalK8sResources(provisionRequest.Cluster, provisionRequest.Cluster.SshKey)
 		if err != nil {
 			log.WithError(err).Error("Cannot install additional Kubernetes resources")
 			return err

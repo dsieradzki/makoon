@@ -2,9 +2,6 @@
   <img src="././screenshots/logo.png">
 </p>
 <p align="center">
-  <a href="https://github.com/dsieradzki/k4prox/blob/main/LICENCE">
-    <img src="https://img.shields.io/badge/License-MIT-blue.svg">
-  </a>
   <a href="https://goreportcard.com/report/github.com/dsieradzki/k4prox">
     <img src="https://goreportcard.com/badge/github.com/dsieradzki/k4prox"/>
   </a>
@@ -12,17 +9,15 @@
 
 ## Table of contents
 
-- [:grey_question: What is this?](#what-is-this)
-- [:pushpin: Plans for the future](#plans-for-the-future)
-- [:hammer: Building from source and development](#building-from-source-and-development)
-- [:blue_book: Licence](./LICENCE)
-- [:camera: Screenshots](#screenshots)
+- [:grey_question: What is this?](#grey_question-what-is-this)
+- [:pushpin: Planned features](#pushpin-planned-features)
+- [:hammer: Building from source](#hammer-building-from-source)
+- [:blue_book: Licences](#blue_book-licences)
+- [:camera: Screenshots](#camera-screenshots)
 
 ## :grey_question: What is this?
 
-**K4Prox** is a desktop application, for managing Kubernetes installations in Proxmox VE, in few clicks you can
-create a high available multi-node Kubernetes cluster
-*(tested on Proxmox 7.2-7)*.
+**K4Prox** is an application for managing Kubernetes clusters in Proxmox VE *(tested on Proxmox 7.2-7)*.
 
 **What does the K4Prox under the hood?**
 
@@ -30,7 +25,7 @@ create a high available multi-node Kubernetes cluster
     * checks used vmid's in your proxmox to find the first free 20 id's
       range, starts from number round to 10 ex. 120, 400, 500 for the first node
     * determines automatically your network settings, like Gateway, Subnet mask and DNS server address
-    * try to figure out the IP range for VMs and load balancer, uses ping
+    * tries to figure out the IP range for VMs, uses ping
       application on your host - it's not guaranteed IP availability due to some devices on your network can have
       disabled ICMP protocol
 - Create and configure VMs using Proxmox API and SSH
@@ -50,34 +45,17 @@ create a high available multi-node Kubernetes cluster
 - Go 1.19
 - React 18 (MobX, PrimeReact, Tailwind, Formik, Yup)
 
-## :pushpin: Plans for the future
+## :pushpin: Planned features
+ - Add node to existing cluster
+ - Delete node from existing cluster
+ - Upgrade VM OS
+ - Change VM resources
+ - Create web application version
 
-Project was created in spare time to test [Wails V2](https://wails.io/) library in practice for my another
-application,
-also I missed tools for creating Kubernetes cluster in easy way on [Proxmox VE](https://www.proxmox.com) so decided take advantage of this situation,
-and I wrote my own. I hope it will be useful to someone, but keep in mind, project is in early stage of development.
-
-Basically, development of the project depends on interest of community, feel free to report bugs and feature requests.
-
-**Planned features:**
-
-- Project validation before deploying the cluster
-    * checking already used VMIDs
-    * checking resource availability on Proxmox
-    * checking used IPs for VMs (based on ping, so without guarantee, due to fact that network devices can have disabled
-      ICMP)
-- Post deploy management
-    * add a new node to the existing cluster
-    * delete a node from the cluster
-    * upgrade Kubernetes
-    * change VM resources (CPU, Memory)
-
-- Support more MicroK8s addons nad Helm charts
-- Create web version application
-
-
-## :hammer: Building from source and development
-
+## :hammer: Building from source
+### Install `Go` and `Node.js`
+### Install Wails
+Run `go install github.com/wailsapp/wails/v2/cmd/wails@latest` to install the Wails CLI.
 ### Live Development
 
 To run in live development mode, run `wails dev` in the project directory.
@@ -85,6 +63,12 @@ To run in live development mode, run `wails dev` in the project directory.
 ### Building
 
 To build a redistributable, production mode package, use `wails build`.
+
+## :blue_book: Licences
+### K4Prox can be used under two licences:
+#### For personal use [PolyForm Noncommercial License 1.0.0](./LICENCE)
+#### Internal Business Use [PolyForm Internal Use License 1.0.0](./LICENCE_INTERNAL_USE)
+
 
 # :camera: Screenshots
 
@@ -94,10 +78,7 @@ To build a redistributable, production mode package, use `wails build`.
 ![Cluster planner - 1](./screenshots/3_1.png)
 ![Cluster planner - 2](./screenshots/3_2.png)
 ![Cluster planner - 3](./screenshots/3_3.png)
-![Cluster planner - 4](./screenshots/3_4.png)
-![Cluster planner - 4](./screenshots/3_5.png)
-![Cluster planner - 5](./screenshots/3_6.png)
-![Cluster planner - 6](./screenshots/3_7.png)
 ![Cluster provisioning](./screenshots/4.png)
+![Cluster provisioning](./screenshots/4_1.png)
 ![Cluster management - 1](./screenshots/5.png)
 ![Cluster management - 2](./screenshots/5_1.png)

@@ -7,7 +7,7 @@ import (
 	"github.com/dsieradzki/k4prox/internal/ssh"
 )
 
-const k4pDataDir = "/var/k4p"
+const k4pDataDir = "~/k4prox"
 const linuxCloudImageFileName = "kinetic-server-cloudimg-amd64.img"
 const linuxCloudImage = "https://cloud-images.ubuntu.com/kinetic/current/" + linuxCloudImageFileName
 
@@ -70,7 +70,7 @@ func (k *Service) SetupEnvironmentOnProxmox() error {
 	//
 	//
 	if shouldDownloadLinuxImage {
-		eventSession = k.eventCollector.StartWithDetails(fmt.Sprintf("Download linux cloud image to [%s]", k4pDataDir), linuxCloudImage)
+		eventSession = k.eventCollector.StartWithDetails(fmt.Sprintf("Download linux cloud image to [%s] on Proxmox", k4pDataDir), linuxCloudImage)
 		result, err = k.proxmoxSsh.Executef("wget -q %s -P %s", linuxCloudImage, k4pDataDir)
 		if err != nil {
 			eventSession.ReportError(err)

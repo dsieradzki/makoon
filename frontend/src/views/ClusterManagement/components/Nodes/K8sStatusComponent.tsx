@@ -1,7 +1,7 @@
 import { Tag } from "primereact/tag";
 import React from "react";
-import { K8sStatus } from "@/store/projectStore";
 import { ProgressSpinner } from 'primereact/progressspinner';
+import { K8sStatus } from "@/store/clusterManagementStore";
 
 type K8sStatusComponentProps = {
     status: K8sStatus

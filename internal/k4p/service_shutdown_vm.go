@@ -35,7 +35,7 @@ func (k *Service) shutdownVirtualMachine(node KubernetesNode) error {
 		return err
 	}
 	err = utils.Retry(30, 10*time.Second,
-		func(attempt int) error {
+		func(attempt uint) error {
 			log.Infof("waiting for shutdown [%d] VM, attempt [%d]", node.Vmid, attempt)
 			vmStatus, err := k.proxmoxClient.CurrentVMStatus(node.Vmid)
 			if err != nil {

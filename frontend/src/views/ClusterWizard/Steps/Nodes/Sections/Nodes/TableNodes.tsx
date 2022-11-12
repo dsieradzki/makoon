@@ -5,6 +5,7 @@ import Table from "@/components/Table/Table";
 
 type Props = {
     nodes: k4p.KubernetesNode[]
+    clusterName: string
     selectedId: string | null
     onClick: (id: any) => void
 }
@@ -27,7 +28,7 @@ const TableNodes = (props: Props) => {
                                 selected={kNode.vmid.toString() === props.selectedId}
                                 onClick={props.onClick}>
                                 <Table.Column className="font-bold">
-                                    {kNode.name}
+                                    {props.clusterName}-{kNode.name}
                                 </Table.Column>
                                 <Table.Column>
                                     {kNode.vmid}

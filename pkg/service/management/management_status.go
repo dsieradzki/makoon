@@ -6,7 +6,6 @@ import (
 	"github.com/dsieradzki/k4prox/internal/collect"
 	"github.com/dsieradzki/k4prox/internal/k4p"
 	"github.com/dsieradzki/k4prox/internal/ssh"
-	"github.com/dsieradzki/k4prox/pkg/service/project"
 	log "github.com/sirupsen/logrus"
 	"sync"
 	"time"
@@ -33,27 +32,31 @@ type NodeStatus struct {
 const sshTimeout = 10 * time.Second
 const checkK8sNodesTimeout = "30s"
 
-func (s *Service) GetNodesStatus() ([]NodeStatus, error) {
-	projectData, err := s.projectService.LoadProject()
+func (s *Service) GetNodesStatus(clusterName string) ([]NodeStatus, error) {
+	databaseData, err := s.databaseService.LoadDatabase()
 	if err != nil {
 		return nil, err
 	}
-	vmsStatus := getVmsStatus(projectData)
-	status := getK8sStatus(projectData, vmsStatus)
+	cluster, err := databaseData.FindClusterByName(clusterName)
+	if err != nil {
+		return nil, err
+	}
+	vmsStatus := getVmsStatus(cluster)
+	status := getK8sStatus(cluster, vmsStatus)
 	return status, nil
 }
 
-func getVmsStatus(project project.ProjectData) []NodeStatus {
+func getVmsStatus(cluster k4p.Cluster) []NodeStatus {
 	var result = make([]NodeStatus, 0)
 	resultMutex := sync.Mutex{}
 	wg := sync.WaitGroup{}
-	wg.Add(len(project.Cluster.Nodes))
+	wg.Add(len(cluster.Nodes))
 
-	for _, v := range project.Cluster.Nodes {
+	for _, v := range cluster.Nodes {
 		go func(node k4p.KubernetesNode) {
-			log.Debugf("Get status for VM [%s]", node.Name)
+			log.Debugf("Get status for VM [%s]", node.Name(cluster.ClusterName))
 			client := ssh.
-				NewClientWithKey(project.Cluster.NodeUsername, project.SshKey, node.IpAddress).
+				NewClientWithKey(cluster.NodeUsername, cluster.SshKey, node.IpAddress).
 				WithTimeout(sshTimeout)
 
 			vmStatus := VmDown
@@ -84,8 +87,8 @@ func getVmsStatus(project project.ProjectData) []NodeStatus {
 	return result
 }
 
-func getK8sStatus(project project.ProjectData, inputStatus []NodeStatus) []NodeStatus {
-	masterNodes := collect.Filter(project.Cluster.Nodes, func(n k4p.KubernetesNode) bool {
+func getK8sStatus(cluster k4p.Cluster, inputStatus []NodeStatus) []NodeStatus {
+	masterNodes := collect.Filter(cluster.Nodes, func(n k4p.KubernetesNode) bool {
 		if n.NodeType != k4p.Master {
 			return false
 		}
@@ -104,10 +107,10 @@ func getK8sStatus(project project.ProjectData, inputStatus []NodeStatus) []NodeS
 	}
 	workingMasterNode := masterNodes[0]
 
-	log.WithField("node", workingMasterNode.Name).Debug("Selected working master node VM")
+	log.WithField("node", workingMasterNode.Name(cluster.ClusterName)).Debug("Selected working master node VM")
 
 	client := ssh.
-		NewClientWithKey(project.Cluster.NodeUsername, project.SshKey, workingMasterNode.IpAddress).
+		NewClientWithKey(cluster.NodeUsername, cluster.SshKey, workingMasterNode.IpAddress).
 		WithTimeout(sshTimeout)
 
 	executeResult, err := client.Executef("sudo microk8s kubectl get nodes -o json --request-timeout='%s'", checkK8sNodesTimeout)
@@ -132,7 +135,7 @@ func getK8sStatus(project project.ProjectData, inputStatus []NodeStatus) []NodeS
 	}
 
 	for i := 0; i < len(inputStatus); i++ {
-		nodeName := findVmIdForName(project, inputStatus[i].Vmid)
+		nodeName := findNameForVmId(cluster, inputStatus[i].Vmid)
 		nodeStatus := nodesStatus[nodeName]
 		log.Debugf("Node [%s] is ready: [%s]", nodeName, nodeStatus)
 
@@ -150,10 +153,10 @@ func getK8sStatus(project project.ProjectData, inputStatus []NodeStatus) []NodeS
 	return inputStatus
 }
 
-func findVmIdForName(project project.ProjectData, vmId uint32) string {
-	for _, v := range project.Cluster.Nodes {
+func findNameForVmId(cluster k4p.Cluster, vmId uint32) string {
+	for _, v := range cluster.Nodes {
 		if v.Vmid == vmId {
-			return v.Name
+			return v.Name(cluster.ClusterName)
 		}
 	}
 	log.Error("cannot find vm name for vm id")

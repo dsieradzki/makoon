@@ -2,9 +2,9 @@ package utils
 
 import "time"
 
-func Retry(attempts int, waitTime time.Duration, task func(attempt int) error) error {
+func Retry(attempts uint, waitTime time.Duration, task func(attempt uint) error) error {
 	var lastError error = nil
-	for i := 1; i <= attempts+1; i++ {
+	for i := uint(1); i <= attempts+1; i++ {
 		if i == attempts+1 {
 			return lastError
 		}
