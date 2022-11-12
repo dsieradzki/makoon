@@ -1,3 +1,12 @@
+# [0.9.0](https://github.com/dsieradzki/k4prox/compare/v0.8.0...v0.9.0) (2022-11-12)
+
+
+### Features
+
+* multi cluster support ([2ce8508](https://github.com/dsieradzki/k4prox/commit/2ce8508e5551ecf523ca3a815713371f468ddb23))
+
+
+
 # [0.8.0](https://github.com/dsieradzki/k4prox/compare/v0.7.1...v0.8.0) (2022-10-26)
 
 
@@ -36,15 +45,6 @@
 ### Bug Fixes
 
 * add more logs, event for saving kubernetes config, update dependencies ([7b11553](https://github.com/dsieradzki/k4prox/commit/7b11553f30ffad79261183e40a005ff9ce57fdf9))
-
-
-
-## [0.6.2](https://github.com/dsieradzki/k4prox/compare/v0.6.1...v0.6.2) (2022-09-18)
-
-
-### Bug Fixes
-
-* Set fixed Kubernetes version, Add steps selection ([0a1c18c](https://github.com/dsieradzki/k4prox/commit/0a1c18cc988b9cf53bf9bc82857d20287783b47c))
 
 
 
