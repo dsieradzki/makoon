@@ -83,6 +83,9 @@ func (p *Service) SaveKubeConfigDialog(clusterName string) error {
 		log.WithError(err).Error("Cannot save Kubernetes config")
 		return err
 	}
+	if len(kubeConfigFileName) == 0 {
+		return nil
+	}
 
 	database, err := p.LoadDatabase()
 	if err != nil {
@@ -122,6 +125,10 @@ func (p *Service) SaveSshPrivateKeyDialog(clusterName string) error {
 		return err
 	}
 
+	if len(kubeConfigFileName) == 0 {
+		return nil
+	}
+
 	database, err := p.LoadDatabase()
 	if err != nil {
 		log.WithError(err).Error("Cannot load database")
@@ -158,6 +165,10 @@ func (p *Service) SaveSshAuthorizationKeyDialog(clusterName string) error {
 	if err != nil {
 		log.WithError(err).Error("Cannot save ssh private key")
 		return err
+	}
+
+	if len(kubeConfigFileName) == 0 {
+		return nil
 	}
 
 	database, err := p.LoadDatabase()
