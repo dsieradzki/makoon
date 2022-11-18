@@ -3,6 +3,7 @@ import { makeAutoObservable } from "mobx";
 class UiPropertiesPanelStore {
     selectedPropertiesId: string | null = null
     selectedPropertiesPanelKey: string | null = null
+    blocked: boolean = false
 
     constructor() {
         makeAutoObservable(this)
@@ -20,6 +21,19 @@ class UiPropertiesPanelStore {
     hidePanel() {
         this.selectedPropertiesId = null;
         this.selectedPropertiesPanelKey = null;
+        this.unblockHiding()
+    }
+
+    isBlocked() {
+        return this.blocked
+    }
+
+    blockHiding() {
+        this.blocked = true
+    }
+
+    unblockHiding() {
+        this.blocked = false
     }
 }
 

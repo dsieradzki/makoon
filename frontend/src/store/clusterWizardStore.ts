@@ -22,8 +22,8 @@ const initialProjectData = {
         bridge: "",
         dnsServer: "",
     },
-    customHelmApps: [] as k4p.HelmApp[],
-    customK8SResources: [] as k4p.CustomK8sResource[],
+    helmApps: [] as k4p.HelmApp[],
+    k8SResources: [] as k4p.K8sResource[],
     nodes: [] as k4p.KubernetesNode[],
 } as k4p.Cluster
 
@@ -101,8 +101,8 @@ export class ClusterWizardStore {
         }
     }
 
-    addCustomHelmApp(app: k4p.HelmApp) {
-        this.cluster.customHelmApps.push(app);
+    addHelmApp(app: k4p.HelmApp) {
+        this.cluster.helmApps.push(app);
     }
 
 
@@ -164,26 +164,26 @@ export class ClusterWizardStore {
         this.cluster.nodes = this.cluster.nodes.filter((e: k4p.KubernetesNode) => e.vmid !== vmId);
     }
 
-    deleteCustomHelmApp(releaseName: string) {
-        this.cluster.customHelmApps = this.cluster.customHelmApps.filter((e: k4p.HelmApp) => e.releaseName !== releaseName);
+    deleteHelmApp(releaseName: string) {
+        this.cluster.helmApps = this.cluster.helmApps.filter((e: k4p.HelmApp) => e.releaseName !== releaseName);
     }
 
-    updateCustomHelmApp(releaseName: string, newApp: k4p.HelmApp) {
-        const index = this.cluster.customHelmApps.findIndex((e: k4p.HelmApp) => e.releaseName == releaseName);
-        this.cluster.customHelmApps[index] = newApp;
+    updateHelmApp(releaseName: string, newApp: k4p.HelmApp) {
+        const index = this.cluster.helmApps.findIndex((e: k4p.HelmApp) => e.releaseName == releaseName);
+        this.cluster.helmApps[index] = newApp;
     }
 
-    addCustomK8SResources(cks: k4p.CustomK8sResource) {
-        this.cluster.customK8SResources.push(cks);
+    addCustomK8SResources(cks: k4p.K8sResource) {
+        this.cluster.k8SResources.push(cks);
     }
 
-    updateCustomK8SResources(oldName: string, newCkr: k4p.CustomK8sResource) {
-        const index = this.cluster.customK8SResources.findIndex((e: k4p.CustomK8sResource) => e.name == oldName);
-        this.cluster.customK8SResources[index] = newCkr;
+    updateCustomK8SResources(oldName: string, newCkr: k4p.K8sResource) {
+        const index = this.cluster.k8SResources.findIndex((e: k4p.K8sResource) => e.name == oldName);
+        this.cluster.k8SResources[index] = newCkr;
     }
 
     deleteCustomK8SResources(name: string) {
-        this.cluster.customK8SResources = this.cluster.customK8SResources.filter((e: k4p.CustomK8sResource) => e.name !== name);
+        this.cluster.k8SResources = this.cluster.k8SResources.filter((e: k4p.K8sResource) => e.name !== name);
     }
 
 
@@ -236,11 +236,11 @@ export class ClusterWizardStore {
         return this.cluster.nodes.filter(e => e.nodeType == "worker").sort(vmIdAsc) || []
     }
 
-    get customHelmApps() {
-        return this.cluster.customHelmApps;
+    get helmApps() {
+        return this.cluster.helmApps || [];
     }
 
-    get customK8SResources(): k4p.CustomK8sResource[] {
-        return this.cluster.customK8SResources;
+    get k8SResources(): k4p.K8sResource[] {
+        return this.cluster.k8SResources || [];
     }
 }

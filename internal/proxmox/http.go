@@ -9,6 +9,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -103,6 +104,9 @@ func requestWithTimeout(
 	response, err := httpsClient(timeout).Do(request)
 	if isErrorResponse(err, response) {
 		err := getErrorFromResponse(err, response)
+		if strings.Contains(err.Error(), "password") {
+			err = errors.New("[SENSITIVE INFORMATION WILL BE NOT LOGGED]")
+		}
 		log.WithError(err).Error("request error")
 		return err
 	}

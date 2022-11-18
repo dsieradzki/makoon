@@ -10,20 +10,22 @@ import * as Yup from "yup"
 import { useOnFirstMount } from "@/utils/hooks";
 import { observer } from "mobx-react-lite";
 import { ClusterWizardStoreContext } from "@/views/ClusterWizard/ClusterWizardView";
+import { k4p } from "@wails/models";
 
 const schema = Yup.object({
     name: Yup.string().required().strict().trim(),
     content: Yup.string().required()
 })
 
-const CustomK8SResourceProperties = () => {
+const K8sResourceProperties = () => {
     const clusterStore = useContext(ClusterWizardStoreContext)
     const [initialValues, setInitialValues] = useState({
-            name: "",
-            content: ""
-        })
+        id: "",
+        name: "",
+        content: ""
+    } as k4p.K8sResource)
     useOnFirstMount(async () => {
-        const resFromStore = clusterStore.customK8SResources.find(e => e.name === uiPropertiesPanelStore.selectedPropertiesId);
+        const resFromStore = clusterStore.k8SResources.find(e => e.name === uiPropertiesPanelStore.selectedPropertiesId);
         if (resFromStore) {
             setInitialValues(resFromStore)
         }
@@ -33,7 +35,7 @@ const CustomK8SResourceProperties = () => {
         validateOnMount: true,
         initialValues: initialValues,
         validationSchema: schema,
-        onSubmit: (values, formikHelpers) => {
+        onSubmit: (values) => {
             if (uiPropertiesPanelStore.selectedPropertiesId) {
                 clusterStore.updateCustomK8SResources(uiPropertiesPanelStore.selectedPropertiesId, values);
             } else {
@@ -75,6 +77,7 @@ const CustomK8SResourceProperties = () => {
                             <div className="">
                                 <InputTextarea
                                     name="content"
+                                    rows={10}
                                     value={formik.values.content}
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
@@ -90,7 +93,9 @@ const CustomK8SResourceProperties = () => {
                                         className="p-button-primary"/>
                             </div>
                             {uiPropertiesPanelStore.selectedPropertiesId &&
-                                <Button onClick={onDelete} label="Delete"
+                                <Button onClick={onDelete}
+                                        label="Delete"
+                                        type="button"
                                         className="p-button-raised p-button-danger p-button-text"/>}
                         </div>
                     </div>
@@ -100,4 +105,4 @@ const CustomK8SResourceProperties = () => {
     </>
 };
 
-export default observer(CustomK8SResourceProperties);
+export default observer(K8sResourceProperties);

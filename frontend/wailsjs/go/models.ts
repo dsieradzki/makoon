@@ -112,26 +112,31 @@ export namespace k4p {
 	        this.nodeType = source["nodeType"];
 	    }
 	}
-	export class CustomK8sResource {
+	export class K8sResource {
+	    id: string;
 	    name: string;
 	    content: string;
 	
 	    static createFrom(source: any = {}) {
-	        return new CustomK8sResource(source);
+	        return new K8sResource(source);
 	    }
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
 	        this.name = source["name"];
 	        this.content = source["content"];
 	    }
 	}
 	export class HelmApp {
+	    id: string;
 	    chartName: string;
+	    version: string;
 	    repository: string;
 	    releaseName: string;
 	    namespace: string;
 	    valueFileContent: string;
+	    wait: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new HelmApp(source);
@@ -139,11 +144,14 @@ export namespace k4p {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
 	        this.chartName = source["chartName"];
+	        this.version = source["version"];
 	        this.repository = source["repository"];
 	        this.releaseName = source["releaseName"];
 	        this.namespace = source["namespace"];
 	        this.valueFileContent = source["valueFileContent"];
+	        this.wait = source["wait"];
 	    }
 	}
 	export class Cluster {
@@ -152,8 +160,8 @@ export namespace k4p {
 	    sshKey: ssh.RsaKeyPair;
 	    nodeUsername: string;
 	    nodePassword: string;
-	    customHelmApps: HelmApp[];
-	    customK8SResources: CustomK8sResource[];
+	    helmApps: HelmApp[];
+	    k8SResources: K8sResource[];
 	    nodeDiskSize: number;
 	    nodes: KubernetesNode[];
 	    network: Network;
@@ -169,8 +177,8 @@ export namespace k4p {
 	        this.sshKey = this.convertValues(source["sshKey"], ssh.RsaKeyPair);
 	        this.nodeUsername = source["nodeUsername"];
 	        this.nodePassword = source["nodePassword"];
-	        this.customHelmApps = this.convertValues(source["customHelmApps"], HelmApp);
-	        this.customK8SResources = this.convertValues(source["customK8SResources"], CustomK8sResource);
+	        this.helmApps = this.convertValues(source["helmApps"], HelmApp);
+	        this.k8SResources = this.convertValues(source["k8SResources"], K8sResource);
 	        this.nodeDiskSize = source["nodeDiskSize"];
 	        this.nodes = this.convertValues(source["nodes"], KubernetesNode);
 	        this.network = this.convertValues(source["network"], Network);
@@ -275,6 +283,20 @@ export namespace management {
 	        this.coresSum = source["coresSum"];
 	        this.memorySum = source["memorySum"];
 	        this.diskSizeSum = source["diskSizeSum"];
+	    }
+	}
+	export class HelmAppStatus {
+	    id: string;
+	    status: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new HelmAppStatus(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.status = source["status"];
 	    }
 	}
 	export class NodeStatus {

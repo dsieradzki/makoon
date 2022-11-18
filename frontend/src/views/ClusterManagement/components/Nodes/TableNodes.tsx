@@ -7,6 +7,7 @@ import { KubernetesNodeWithStatus } from "@/store/clusterManagementStore";
 
 
 type Props = {
+    clusterName: string
     nodes: KubernetesNodeWithStatus[]
     selectedId: string | null
     onClick: (id: any) => void
@@ -32,7 +33,7 @@ const TableNodes = (props: Props) => {
                                 selected={kNode.vmid.toString() === props.selectedId}
                                 onClick={props.onClick}>
                                 <Table.Column className="font-bold">
-                                    {kNode.name}
+                                    {props.clusterName}-{kNode.name}
                                 </Table.Column>
                                 <Table.Column>
                                     {kNode.vmid}

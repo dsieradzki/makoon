@@ -5,13 +5,13 @@ import (
 	"github.com/dsieradzki/k4prox/internal/ssh"
 )
 
-func (k *Service) InstallCustomHelmApps(cluster Cluster, keyPair ssh.RsaKeyPair) error {
-	firstMasterNode, _ := findFirstMasterNode(cluster.Nodes)
+func (k *Service) InstallHelmApps(cluster Cluster, keyPair ssh.RsaKeyPair) error {
+	firstMasterNode, _ := FindFirstMasterNode(cluster.Nodes)
 	sshMasterNode := ssh.NewClientWithKey(cluster.NodeUsername, keyPair, firstMasterNode.IpAddress)
 
-	for _, app := range cluster.CustomHelmApps {
+	for _, app := range cluster.HelmApps {
 		eventSession := k.eventCollector.Startf("Install Helm app [%s]", app.ChartName)
-		err := k.installHelmApp(app, sshMasterNode)
+		err := k.InstallHelmApp(app, sshMasterNode)
 		if err != nil {
 			eventSession.ReportError(err)
 			return err
@@ -21,8 +21,19 @@ func (k *Service) InstallCustomHelmApps(cluster Cluster, keyPair ssh.RsaKeyPair)
 	return nil
 }
 
-func (k *Service) installHelmApp(feature HelmApp, sshMasterNode *ssh.Client) error {
-	executionResult, err := sshMasterNode.Executef("sudo microk8s.helm3 repo add %s %s", feature.ChartName, feature.Repository)
+func (k *Service) UninstallHelmApp(app HelmApp, sshMasterNode *ssh.Client) error {
+	executionResult, err := sshMasterNode.Executef("sudo microk8s.helm3 uninstall %s -n %s", app.ReleaseName, app.Namespace)
+	if err != nil {
+		return err
+	}
+	if executionResult.IsError() {
+		return executionResult.Error()
+	}
+	return nil
+}
+
+func (k *Service) InstallHelmApp(app HelmApp, sshMasterNode *ssh.Client) error {
+	executionResult, err := sshMasterNode.Executef("sudo microk8s.helm3 repo add %s %s", app.ChartName, app.Repository)
 	if err != nil {
 		return err
 	}
@@ -39,19 +50,26 @@ func (k *Service) installHelmApp(feature HelmApp, sshMasterNode *ssh.Client) err
 	}
 
 	valuesFileCmd := ""
-	if len(feature.ValueFileContent) > 0 {
-		executionResult, err = sshMasterNode.Executef("echo \"%s\" > /tmp/%s.yaml", feature.ValueFileContent, feature.ChartName)
+	if len(app.ValueFileContent) > 0 {
+		executionResult, err = sshMasterNode.Executef("echo \"%s\" > /tmp/%s.yaml", app.ValueFileContent, app.ChartName)
 		if err != nil {
 			return err
 		}
 		if executionResult.IsError() {
 			return executionResult.Error()
 		}
-		valuesFileCmd = fmt.Sprintf("-f /tmp/%s.yaml", feature.ChartName)
+		valuesFileCmd = fmt.Sprintf("-f /tmp/%s.yaml", app.ChartName)
 	}
 
-	executionResult, err = sshMasterNode.Executef("sudo microk8s.helm3 upgrade --install --create-namespace -n%s %s %s %s",
-		feature.Namespace, feature.ReleaseName, feature.ChartName+"/"+feature.ChartName, valuesFileCmd)
+	installCommand := fmt.Sprintf("sudo microk8s.helm3 upgrade --install --create-namespace -n%s %s %s %s",
+		app.Namespace, app.ReleaseName, app.ChartName+"/"+app.ChartName, valuesFileCmd)
+	if len(app.Version) > 0 {
+		installCommand += " --version " + app.Version
+	}
+	if app.Wait {
+		installCommand += " --wait"
+	}
+	executionResult, err = sshMasterNode.Executef(installCommand)
 	if err != nil {
 		return err
 	}
@@ -59,8 +77,8 @@ func (k *Service) installHelmApp(feature HelmApp, sshMasterNode *ssh.Client) err
 		return executionResult.Error()
 	}
 
-	if len(feature.ValueFileContent) > 0 {
-		executionResult, err = sshMasterNode.Executef("sudo rm /tmp/%s.yaml", feature.ChartName)
+	if len(app.ValueFileContent) > 0 {
+		executionResult, err = sshMasterNode.Executef("sudo rm /tmp/%s.yaml", app.ChartName)
 		if err != nil {
 			return err
 		}

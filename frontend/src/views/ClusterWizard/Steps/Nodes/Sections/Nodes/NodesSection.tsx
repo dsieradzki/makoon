@@ -7,6 +7,7 @@ import TableNodes from "@/views/ClusterWizard/Steps/Nodes/Sections/Nodes/TableNo
 import { observer } from "mobx-react-lite";
 import uiPropertiesPanelStore from "@/store/uiPropertiesPanelStore";
 import { k4p } from "@wails/models";
+import { NODE_PROPERTIES_PANEL_NAME } from "@/components/PropertiesPanel";
 
 const viewOptions = [
     {icon: 'pi pi-list', value: true},
@@ -16,7 +17,6 @@ const viewOptionTemplate = (option: any) => {
     return <i className={option.icon}></i>;
 }
 
-const panelName = 'NodeProperties'
 
 type Props = {
     title: string
@@ -28,11 +28,11 @@ const NodesSection = (props: Props) => {
     const [nodesViewType, setNodesViewType] = useState(true);
 
     const onClickNodeHandler = (id: any) => {
-        uiPropertiesPanelStore.selectPanel(panelName, String(id))
+        uiPropertiesPanelStore.selectPanel(NODE_PROPERTIES_PANEL_NAME, String(id))
     }
 
     const getSelectedId = (): string | null => {
-        if (uiPropertiesPanelStore.selectedPropertiesPanelKey == panelName) {
+        if (uiPropertiesPanelStore.selectedPropertiesPanelKey == NODE_PROPERTIES_PANEL_NAME) {
             return uiPropertiesPanelStore.selectedPropertiesId
         } else {
             return null

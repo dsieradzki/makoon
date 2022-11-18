@@ -88,15 +88,15 @@ func (g *Generator) GenerateDefaultCluster() (k4p.Cluster, error) {
 	}
 
 	return k4p.Cluster{
-		ClusterName:        "",
-		KubeConfig:         "",
-		SshKey:             ssh.RsaKeyPair{},
-		NodeUsername:       "k4prox",
-		NodePassword:       "k4prox",
-		CustomHelmApps:     []k4p.HelmApp{},
-		CustomK8sResources: []k4p.CustomK8sResource{},
-		NodeDiskSize:       32,
-		Nodes:              nodes,
+		ClusterName:  "",
+		KubeConfig:   "",
+		SshKey:       ssh.RsaKeyPair{},
+		NodeUsername: "k4prox",
+		NodePassword: "k4prox",
+		HelmApps:     []k4p.HelmApp{},
+		K8sResources: []k4p.K8sResource{},
+		NodeDiskSize: 32,
+		Nodes:        nodes,
 		Network: k4p.Network{
 			Gateway:    defaultNetwork.Gateway,
 			SubnetMask: defaultNetwork.GetCIDRSubMask(),

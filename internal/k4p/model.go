@@ -32,28 +32,32 @@ type Network struct {
 }
 
 type HelmApp struct {
+	Id               string `json:"id"`
 	ChartName        string `json:"chartName" yaml:"chartName"`
+	Version          string `json:"version" yaml:"version"`
 	Repository       string `json:"repository" yaml:"repository"`
 	ReleaseName      string `json:"releaseName" yaml:"releaseName"`
 	Namespace        string `json:"namespace" yaml:"namespace"`
 	ValueFileContent string `json:"valueFileContent" yaml:"valueFileContent"`
+	Wait             bool   `json:"wait" yaml:"wait"`
 }
 
-type CustomK8sResource struct {
+type K8sResource struct {
+	Id      string `json:"id"`
 	Name    string `json:"name" yaml:"name"`
 	Content string `json:"content" yaml:"content"`
 }
 type Cluster struct {
-	ClusterName        string              `json:"clusterName" yaml:"clusterName"`
-	KubeConfig         string              `json:"kubeConfig" yaml:"kubeConfig"`
-	SshKey             ssh.RsaKeyPair      `json:"sshKey" yaml:"sshKey"`
-	NodeUsername       string              `json:"nodeUsername" yaml:"nodeUsername"`
-	NodePassword       string              `json:"nodePassword" yaml:"nodePassword"`
-	CustomHelmApps     []HelmApp           `json:"customHelmApps" yaml:"customHelmApps"`
-	CustomK8sResources []CustomK8sResource `json:"customK8SResources" yaml:"customK8SResources"`
-	NodeDiskSize       uint16              `json:"nodeDiskSize" yaml:"nodeDiskSize"`
-	Nodes              []KubernetesNode    `json:"nodes" yaml:"nodes"`
-	Network            Network             `json:"network" yaml:"network"`
+	ClusterName  string           `json:"clusterName" yaml:"clusterName"`
+	KubeConfig   string           `json:"kubeConfig" yaml:"kubeConfig"`
+	SshKey       ssh.RsaKeyPair   `json:"sshKey" yaml:"sshKey"`
+	NodeUsername string           `json:"nodeUsername" yaml:"nodeUsername"`
+	NodePassword string           `json:"nodePassword" yaml:"nodePassword"`
+	HelmApps     []HelmApp        `json:"helmApps" yaml:"helmApps"`
+	K8sResources []K8sResource    `json:"k8SResources" yaml:"k8SResources"`
+	NodeDiskSize uint16           `json:"nodeDiskSize" yaml:"nodeDiskSize"`
+	Nodes        []KubernetesNode `json:"nodes" yaml:"nodes"`
+	Network      Network          `json:"network" yaml:"network"`
 }
 
 type ProvisionRequest struct {
@@ -62,10 +66,10 @@ type ProvisionRequest struct {
 }
 
 type ProvisionStage struct {
-	CreateVirtualMachines     bool `json:"createVirtualMachines"`
-	SetupVirtualMachines      bool `json:"setupVirtualMachines"`
-	InstallKubernetes         bool `json:"installKubernetes"`
-	JoinNodesToCluster        bool `json:"joinNodesToCluster"`
-	InstallCustomHelmApps     bool `json:"installCustomHelmApps"`
-	InstallCustomK8sResources bool `json:"installCustomK8SResources"`
+	CreateVirtualMachines bool `json:"createVirtualMachines"`
+	SetupVirtualMachines  bool `json:"setupVirtualMachines"`
+	InstallKubernetes     bool `json:"installKubernetes"`
+	JoinNodesToCluster    bool `json:"joinNodesToCluster"`
+	InstallHelmApps       bool `json:"installCustomHelmApps"`
+	InstallK8sResources   bool `json:"installCustomK8SResources"`
 }
