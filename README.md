@@ -79,6 +79,5 @@ To build a redistributable, production mode package, use `wails build`.
 ![Cluster planner - 2](./screenshots/3_2.png)
 ![Cluster planner - 3](./screenshots/3_3.png)
 ![Cluster provisioning](./screenshots/4.png)
-![Cluster provisioning](./screenshots/4_1.png)
 ![Cluster management - 1](./screenshots/5.png)
 ![Cluster management - 2](./screenshots/5_1.png)
