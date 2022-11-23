@@ -15,6 +15,7 @@ import * as Yup from 'yup';
 import FormError from "@/components/FormError";
 import { ClusterWizardStoreContext } from "@/views/ClusterWizard/ClusterWizardView";
 import { apiCall } from "@/utils/api";
+import { hostnameEnd, hostnameMain, hostnameStart } from "@/utils/patterns";
 
 interface NodeFormModel {
     name: string
@@ -26,7 +27,14 @@ interface NodeFormModel {
 }
 
 const schema = Yup.object().shape({
-    name: Yup.string().required(),
+    name: Yup.string()
+        .required()
+        .strict()
+        .trim()
+        .max(128)
+        .matches(hostnameStart, {message: "Name can start with characters: a-z, A-Z, 0-9"})
+        .matches(hostnameMain, {message: "Name can contain characters: a-z, A-Z, 0-9, -"})
+        .matches(hostnameEnd, {message: "Name can end with characters: a-z, A-Z, 0-9"}),
     vmid: Yup.number().min(100).required(),
     cores: Yup.number().min(1).required(),
     memory: Yup.number().positive().required(),
@@ -123,7 +131,7 @@ const NodeProperties = () => {
 
                     <div className="mt-3">
                         <div className="text-stone-400 required">Node name</div>
-                        <div className="flex items-center">
+                        <div className="flex items-center flex-wrap">
                             <div className="text-stone-400">{clusterName}-</div>
                             <InputText name="name"
                                        value={formik.values.name}

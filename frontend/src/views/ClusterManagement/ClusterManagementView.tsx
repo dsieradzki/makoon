@@ -4,7 +4,6 @@ import { observer } from "mobx-react-lite";
 import { useOnFirstMount } from "@/utils/hooks";
 import Block from "@/components/Block";
 import { LogDebug } from "@wails-runtime/runtime";
-import NodesSection from "@/views/ClusterManagement/components/Nodes/NodesSection";
 import { Sidebar } from "primereact/sidebar";
 import uiPropertiesPanelStore from "@/store/uiPropertiesPanelStore";
 import PropertiesPanel from "@/components/PropertiesPanel";
@@ -20,9 +19,13 @@ import { ProgressSpinner } from "primereact/progressspinner";
 import Panel from "@/components/Panel";
 import { apiCall } from "@/utils/api";
 import processingIndicatorStoreUi from "@/store/processingIndicatorStoreUi";
+import Nodes from "@/views/ClusterManagement/components/Nodes/Nodes";
+import Apps from "@/views/ClusterManagement/components/Apps/Apps";
 
 
 const LOADING_INDICATOR_DELETE_CLUSTER = "DELETE_CLUSTER";
+type SelectedView = "NODES" | "APPS"
+
 const ClusterManagementView = () => {
     const navigate = useNavigate()
     let {clusterName} = useParams();
@@ -32,10 +35,12 @@ const ClusterManagementView = () => {
     useOnFirstMount(async () => {
         await clusterManagementStore.loadProject(clusterNameParam)
         await clusterManagementStore.updateNodesStatus()
+        await clusterManagementStore.updateAppsStatus()
     })
     const nodesStatusRequestFinish = useRef(true);
     const [showDeleteCluster, setShowDeleteCluster] = useState(false)
     const [clusterNameToConfirmDelete, setClusterNameToConfirmDelete] = useState("")
+    const [selectedView, setSelectedView] = useState<SelectedView>("NODES")
     const deletionInProgress = processingIndicatorStoreUi.status(LOADING_INDICATOR_DELETE_CLUSTER)
 
     useEffect(() => {
@@ -80,12 +85,16 @@ const ClusterManagementView = () => {
         LogDebug("ssh private key saved")
     }
 
-    let onHideHandler = () => uiPropertiesPanelStore.hidePanel();
+    let onHideHandler = () => {
+        if (!uiPropertiesPanelStore.isBlocked()) {
+            uiPropertiesPanelStore.hidePanel();
+        }
+    }
     return <>
         <Header title="Cluster management" titlePath={[clusterManagementStore.cluster.clusterName]}/>
         <Sidebar visible={uiPropertiesPanelStore.isPanelVisible}
                  onHide={onHideHandler}
-                 className="p-sidebar-md"
+                 className="p-sidebar-lg"
                  position="right">
             {uiPropertiesPanelStore.selectedPropertiesPanelKey &&
                 <PropertiesPanel componentName={uiPropertiesPanelStore.selectedPropertiesPanelKey}/>}
@@ -215,14 +224,39 @@ const ClusterManagementView = () => {
                         </Block>
                     </div>
                 </div>
-                <div className="border-t-2 border-stone-800 my-5 mt-20"/>
-                <NodesSection nodes={clusterManagementStore.masterNodesWithStatus} title="Master nodes"
-                              onAddNode={() => {
-                              }}/>
-                <div className="border-t-2 border-stone-800 my-5 mt-20"/>
-                <NodesSection nodes={clusterManagementStore.workerNodesWithStatus} title="Workers nodes"
-                              onAddNode={() => {
-                              }}/>
+                <div>
+                    <div className="flex items-center justify-center mt-20">
+                        <Block
+                            onClick={() => {
+                                setSelectedView("NODES")
+                            }}
+                            selected={selectedView == "NODES"}
+                            className="mb-4 flex justify-start items-center mr-4 w-full">
+                            <div className="flex items-center justify-start p-2">
+                                <i className="pi pi-server primary-text-color mr-4" style={{fontSize: "2rem"}}></i>
+                                <span className="text-center">Nodes</span>
+                            </div>
+                        </Block>
+
+                        <Block
+                            onClick={() => {
+                                setSelectedView("APPS")
+                            }}
+                            selected={selectedView == "APPS"}
+                            className="mb-4 flex justify-start items-center w-full">
+                            <div className="flex items-center justify-start p-2">
+                                <i className="pi pi-desktop primary-text-color mr-4" style={{fontSize: "2rem"}}></i>
+                                <span className="text-center">Apps</span>
+                            </div>
+                        </Block>
+                    </div>
+                </div>
+                <div className="border-t-2 border-stone-800 my-5 mt-4"/>
+                {
+                    selectedView == "NODES"
+                        ? <Nodes/>
+                        : <Apps/>
+                }
             </div>
         </div>
     </>;

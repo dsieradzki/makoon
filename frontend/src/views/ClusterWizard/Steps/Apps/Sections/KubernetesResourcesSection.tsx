@@ -4,9 +4,10 @@ import Section from "@/components/Section";
 import { observer } from "mobx-react-lite";
 import uiPropertiesPanelStore from "@/store/uiPropertiesPanelStore";
 import { ClusterWizardStoreContext } from "@/views/ClusterWizard/ClusterWizardView";
+import { K8S_RESOURCES_PROPERTIES_PANEL_NAME } from "@/components/PropertiesPanel";
 
 
-const CustomKubernetesResourcesSection = () => {
+const KubernetesResourcesSection = () => {
     const clusterStore = useContext(ClusterWizardStoreContext)
     const isSelected = function (panelKey: string, id: string): boolean {
         return uiPropertiesPanelStore.selectedPropertiesId === id && uiPropertiesPanelStore.selectedPropertiesPanelKey === panelKey;
@@ -17,7 +18,7 @@ const CustomKubernetesResourcesSection = () => {
     }
 
     const addCustomK8sResource = function () {
-        uiPropertiesPanelStore.selectPanel("CustomK8sResourceProperties");
+        uiPropertiesPanelStore.selectPanel(K8S_RESOURCES_PROPERTIES_PANEL_NAME);
     }
 
     return (
@@ -30,18 +31,18 @@ const CustomKubernetesResourcesSection = () => {
                 </Block>
             </>}>
             {
-                clusterStore.customK8SResources.length == 0 &&
+                clusterStore.k8SResources.length == 0 &&
                 <div className="w-full text-2xl text-stone-600 text-center">No Kubernetes resources</div>
             }
             <div className="flex items-center pb-5">
                 {
-                    clusterStore.customK8SResources.map(res =>
+                    clusterStore.k8SResources.map(res =>
                         <Block
                             key={res.name}
                             className="mr-5 px-5"
-                            selected={isSelected('CustomK8sResourceProperties', res.name)}
+                            selected={isSelected(K8S_RESOURCES_PROPERTIES_PANEL_NAME, res.name)}
                             onClick={() => {
-                                onSelectBlock('CustomK8sResourceProperties', res.name)
+                                onSelectBlock(K8S_RESOURCES_PROPERTIES_PANEL_NAME, res.name)
                             }}
                             title={res.name}/>
                     )
@@ -52,4 +53,4 @@ const CustomKubernetesResourcesSection = () => {
     );
 };
 
-export default observer(CustomKubernetesResourcesSection);
+export default observer(KubernetesResourcesSection);

@@ -6,6 +6,7 @@ import uiPropertiesPanelStore from "@/store/uiPropertiesPanelStore";
 import TableNodes from "@/views/ClusterManagement/components/Nodes/TableNodes";
 import TileNodes from "@/views/ClusterManagement/components/Nodes/TileNodes";
 import { KubernetesNodeWithStatus } from "@/store/clusterManagementStore";
+import { NODE_READ_ONLY_PROPERTIES_PANEL_NAME } from "@/components/PropertiesPanel";
 
 const viewOptions = [
     {icon: 'pi pi-list', value: true},
@@ -15,10 +16,10 @@ const viewOptionTemplate = (option: any) => {
     return <i className={option.icon}></i>;
 }
 
-const panelName = 'NodeReadOnlyProperties'
 
 type Props = {
     title: string
+    clusterName: string
     nodes: KubernetesNodeWithStatus[]
     onAddNode: ()=>void
 }
@@ -26,11 +27,11 @@ const NodesSection = (props: Props) => {
     const [nodesViewType, setNodesViewType] = useState(true);
 
     const onClickNodeHandler = (id: any) => {
-        uiPropertiesPanelStore.selectPanel(panelName, String(id))
+        uiPropertiesPanelStore.selectPanel(NODE_READ_ONLY_PROPERTIES_PANEL_NAME, String(id))
     }
 
     const getSelectedId = (): string | null => {
-        if (uiPropertiesPanelStore.selectedPropertiesPanelKey == panelName) {
+        if (uiPropertiesPanelStore.selectedPropertiesPanelKey == NODE_READ_ONLY_PROPERTIES_PANEL_NAME) {
             return uiPropertiesPanelStore.selectedPropertiesId
         } else {
             return null
@@ -54,8 +55,8 @@ const NodesSection = (props: Props) => {
     return (
         <Section title={title} titleContainerClass="-ml-5">
             {nodesViewType
-                ? <TableNodes nodes={props.nodes} selectedId={getSelectedId()} onClick={onClickNodeHandler}/>
-                : <TileNodes nodes={props.nodes} selectedId={getSelectedId()} onClick={onClickNodeHandler}/>
+                ? <TableNodes clusterName={props.clusterName} nodes={props.nodes} selectedId={getSelectedId()} onClick={onClickNodeHandler}/>
+                : <TileNodes clusterName={props.clusterName} nodes={props.nodes} selectedId={getSelectedId()} onClick={onClickNodeHandler}/>
             }
 
 

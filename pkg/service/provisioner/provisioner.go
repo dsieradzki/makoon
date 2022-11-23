@@ -7,6 +7,7 @@ import (
 	"github.com/dsieradzki/k4prox/internal/proxmox"
 	"github.com/dsieradzki/k4prox/internal/ssh"
 	"github.com/dsieradzki/k4prox/pkg/service/database"
+	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
 	"sort"
 )
@@ -14,13 +15,13 @@ import (
 func NewService(
 	projectService *database.Service,
 	proxmoxClient *proxmox.Client,
-	sshClient *ssh.Client,
-	eventCollector *event.Collector) *Service {
+	eventCollector *event.Collector,
+	k4pService *k4p.Service) *Service {
 	return &Service{
 		eventCollector: eventCollector,
 		project:        projectService,
 		proxmoxClient:  proxmoxClient,
-		k4p:            k4p.NewK4PService(proxmoxClient, sshClient, eventCollector),
+		k4p:            k4pService,
 	}
 }
 
@@ -49,6 +50,22 @@ func (p *Service) CreateCluster(provisionRequest k4p.ProvisionRequest) error {
 		log.WithError(err).Error("Cannot load database")
 		return err
 	}
+
+	for i := 0; i < len(provisionRequest.Cluster.HelmApps); i++ {
+		id, err := uuid.NewUUID()
+		if err != nil {
+			panic(err)
+		}
+		provisionRequest.Cluster.HelmApps[i].Id = id.String()
+	}
+	for i := 0; i < len(provisionRequest.Cluster.K8sResources); i++ {
+		id, err := uuid.NewUUID()
+		if err != nil {
+			panic(err)
+		}
+		provisionRequest.Cluster.K8sResources[i].Id = id.String()
+	}
+
 	loadedDatabase.Clusters = append(loadedDatabase.Clusters, provisionRequest.Cluster)
 	err = p.project.SaveDatabase(loadedDatabase)
 	if err != nil {
@@ -146,17 +163,17 @@ func (p *Service) CreateCluster(provisionRequest k4p.ProvisionRequest) error {
 		}
 	}
 
-	if provisionRequest.Stages.InstallCustomHelmApps {
-		err = p.k4p.InstallCustomHelmApps(provisionRequest.Cluster, provisionRequest.Cluster.SshKey)
+	if provisionRequest.Stages.InstallHelmApps {
+		err = p.k4p.InstallHelmApps(provisionRequest.Cluster, provisionRequest.Cluster.SshKey)
 		if err != nil {
-			log.WithError(err).Error("Cannot install custom Helm applications")
+			log.WithError(err).Error("Cannot install Helm applications")
 			return err
 		}
 	}
-	if provisionRequest.Stages.InstallCustomK8sResources {
+	if provisionRequest.Stages.InstallK8sResources {
 		err = p.k4p.InstallAdditionalK8sResources(provisionRequest.Cluster, provisionRequest.Cluster.SshKey)
 		if err != nil {
-			log.WithError(err).Error("Cannot install additional Kubernetes resources")
+			log.WithError(err).Error("Cannot install Kubernetes resources")
 			return err
 		}
 	}

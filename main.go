@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/dsieradzki/k4prox/internal/collect"
 	"github.com/dsieradzki/k4prox/internal/event"
+	"github.com/dsieradzki/k4prox/internal/k4p"
 	"github.com/dsieradzki/k4prox/internal/proxmox"
 	"github.com/dsieradzki/k4prox/internal/ssh"
 	"github.com/dsieradzki/k4prox/internal/tasklog"
@@ -21,6 +22,7 @@ import (
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/logger"
 	"github.com/wailsapp/wails/v2/pkg/options"
+	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 	"os"
 )
 
@@ -73,9 +75,10 @@ func main() {
 	// SERVICES
 	authService := auth.NewService(proxmoxClient, proxmoxSsh)
 	databaseService := database.NewService(proxmoxClient, proxmoxSsh)
-	provisionerService := provisioner.NewService(databaseService, proxmoxClient, proxmoxSsh, eventCollector)
+	k4pService := k4p.NewK4PService(proxmoxClient, proxmoxSsh, eventCollector)
+	provisionerService := provisioner.NewService(databaseService, proxmoxClient, eventCollector, k4pService)
 	taskLogService := tasklogService.NewService(eventCollector, taskLogReader)
-	managementService := management.NewService(databaseService, proxmoxClient)
+	managementService := management.NewService(databaseService, proxmoxClient, k4pService)
 	clusterGenerator := provisioner.NewGenerator(proxmoxClient)
 
 	application := app.NewApp([]custWails.ContextSetter{
@@ -84,10 +87,12 @@ func main() {
 
 	err = wails.Run(&options.App{
 
-		Title:              "K4Prox",
-		Width:              1370,
-		Height:             870,
-		Assets:             assets,
+		Title:  "K4Prox",
+		Width:  1370,
+		Height: 870,
+		AssetServer: &assetserver.Options{
+			Assets: assets,
+		},
 		OnStartup:          application.Startup,
 		OnShutdown:         application.Shutdown,
 		LogLevel:           logger.TRACE, // Level is controlled by logrus

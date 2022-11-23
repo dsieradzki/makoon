@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/dsieradzki/k4prox/internal/ssh"
 	"github.com/dsieradzki/k4prox/internal/utils/task"
-	"math"
 	"time"
 )
 
@@ -107,7 +106,7 @@ func (k *Service) JoinNodesToCluster(provisionRequest Cluster, keyPair ssh.RsaKe
 		return nil
 	}
 
-	firstNode, nodesToJoin := findFirstMasterNode(provisionRequest.Nodes)
+	firstNode, nodesToJoin := FindFirstMasterNode(provisionRequest.Nodes)
 
 	sshClientFirstNode := ssh.NewClientWithKey(provisionRequest.NodeUsername, keyPair, firstNode.IpAddress)
 
@@ -163,7 +162,7 @@ func (k *Service) JoinNodesToCluster(provisionRequest Cluster, keyPair ssh.RsaKe
 }
 
 func (k *Service) GetKubeConfigFromCluster(clusterDef Cluster, keyPair ssh.RsaKeyPair) (string, error) {
-	firstMasterNode, _ := findFirstMasterNode(clusterDef.Nodes)
+	firstMasterNode, _ := FindFirstMasterNode(clusterDef.Nodes)
 	sshMasterNode := ssh.NewClientWithKey(clusterDef.NodeUsername, keyPair, firstMasterNode.IpAddress)
 	eventSession := k.eventCollector.Start("Get Kubernetes config from cluster")
 	executionResult, err := sshMasterNode.Execute("sudo microk8s config")
@@ -177,26 +176,4 @@ func (k *Service) GetKubeConfigFromCluster(clusterDef Cluster, keyPair ssh.RsaKe
 	}
 	eventSession.Done()
 	return executionResult.Output, nil
-}
-
-func findFirstMasterNode(nodes []KubernetesNode) (KubernetesNode, []KubernetesNode) {
-	firstMasterNode := KubernetesNode{
-		Vmid: math.MaxUint16,
-	}
-
-	// Find first Master node
-	for _, v := range nodes {
-		if v.NodeType == Master && v.Vmid < firstMasterNode.Vmid {
-			firstMasterNode = v
-		}
-	}
-
-	// Filter out other nodes
-	nodesToJoin := make([]KubernetesNode, 0)
-	for _, v := range nodes {
-		if v.Vmid != firstMasterNode.Vmid {
-			nodesToJoin = append(nodesToJoin, v)
-		}
-	}
-	return firstMasterNode, nodesToJoin
 }

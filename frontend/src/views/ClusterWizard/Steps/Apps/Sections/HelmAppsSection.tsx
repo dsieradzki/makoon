@@ -5,9 +5,10 @@ import { observer } from "mobx-react-lite";
 import uiPropertiesPanelStore from "@/store/uiPropertiesPanelStore";
 import Table from "@/components/Table/Table";
 import { ClusterWizardStoreContext } from "@/views/ClusterWizard/ClusterWizardView";
+import { HELM_APP_PROPERTIES_PANEL_NAME } from "@/components/PropertiesPanel";
 
 
-const CustomHelmAppsSection = () => {
+const HelmAppsSection = () => {
     const clusterStore = useContext(ClusterWizardStoreContext)
     const isSelected = function (panelKey: string, id: string): boolean {
         return uiPropertiesPanelStore.selectedPropertiesId === id && uiPropertiesPanelStore.selectedPropertiesPanelKey === panelKey;
@@ -18,7 +19,7 @@ const CustomHelmAppsSection = () => {
     }
 
     const addCustomHelmApp = function () {
-        uiPropertiesPanelStore.selectPanel("CustomHelmAppProperties");
+        uiPropertiesPanelStore.selectPanel(HELM_APP_PROPERTIES_PANEL_NAME);
     }
 
     return (
@@ -32,34 +33,40 @@ const CustomHelmAppsSection = () => {
                 </Block>
             </>}>
 
-            { clusterStore.customHelmApps.length > 0 &&
+            {clusterStore.helmApps.length > 0 &&
                 <Table>
                     <Table.Header>Release name</Table.Header>
                     <Table.Header>Chart name</Table.Header>
+                    <Table.Header>Version</Table.Header>
                     <Table.Header>Namespace</Table.Header>
 
-                    {clusterStore.customHelmApps.map(app =>
+                    {clusterStore.helmApps.map(app =>
                         <Table.Row
                             id={app.repository}
                             key={app.releaseName}
-                            selected={isSelected('CustomHelmAppProperties', app.releaseName)}
+                            selected={isSelected(HELM_APP_PROPERTIES_PANEL_NAME, app.releaseName)}
                             onClick={() => {
-                                onSelectBlock('CustomHelmAppProperties', app.releaseName)
+                                onSelectBlock(HELM_APP_PROPERTIES_PANEL_NAME, app.releaseName)
                             }}
                         >
                             <Table.Column>{app.releaseName}</Table.Column>
                             <Table.Column>{app.chartName}</Table.Column>
+                            <Table.Column>{
+                                app.version && app.version.length > 0
+                                    ? app.version
+                                    : "latest"}
+                            </Table.Column>
                             <Table.Column>{app.namespace}</Table.Column>
                         </Table.Row>
                     )}
                 </Table>
             }
             {
-                clusterStore.customHelmApps.length == 0 &&
+                clusterStore.helmApps.length == 0 &&
                 <div className="w-full text-2xl text-stone-600 text-center">No Helm apps</div>
             }
         </Section>
     );
 };
 
-export default observer(CustomHelmAppsSection);
+export default observer(HelmAppsSection);

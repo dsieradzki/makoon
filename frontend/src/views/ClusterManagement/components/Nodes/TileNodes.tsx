@@ -3,6 +3,7 @@ import TileNode from "@/views/ClusterManagement/components/Nodes/TileNode";
 import { KubernetesNodeWithStatus } from "@/store/clusterManagementStore";
 
 type Props = {
+    clusterName: string
     nodes: KubernetesNodeWithStatus[]
     selectedId: string | null
     onClick: (id: string) => void
@@ -24,6 +25,7 @@ const TileNodes = (props: Props) => {
                 props.nodes.map((wNode, idx) =>
                     <TileNode
                         node={wNode}
+                        clusterName={props.clusterName}
                         selected={wNode.vmid.toString() === props.selectedId}
                         onClick={onSelect(wNode.vmid.toString())}
                         key={idx}

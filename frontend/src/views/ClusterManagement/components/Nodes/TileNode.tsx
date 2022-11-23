@@ -6,6 +6,7 @@ import K8sStatusComponent from "@/views/ClusterManagement/components/Nodes/K8sSt
 import { KubernetesNodeWithStatus } from "@/store/clusterManagementStore";
 
 type Props = {
+    clusterName: string
     node: KubernetesNodeWithStatus
     selected?: boolean,
     onClick?: (node: k4p.KubernetesNode) => void
@@ -22,7 +23,7 @@ const TileNode = (props: Props) => {
             props.onClick(props.node)
         }
     }
-    return <Block title={props.node.name} selected={props.selected} onClick={handeOnClick} className={props.className}>
+    return <Block title={props.clusterName+"-"+props.node.name} selected={props.selected} onClick={handeOnClick} className={props.className}>
         <div className="flex flex-col">
             <div className="bg-stone-800 rounded-xl p-4 mt-3">
                 <table className="w-full">

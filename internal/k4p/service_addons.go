@@ -1,11 +1,13 @@
 package k4p
 
 import (
+	"fmt"
 	"github.com/dsieradzki/k4prox/internal/ssh"
+	"time"
 )
 
 func (k *Service) InstallAddons(provisionRequest Cluster, keyPair ssh.RsaKeyPair) error {
-	firstMasterNode, _ := findFirstMasterNode(provisionRequest.Nodes)
+	firstMasterNode, _ := FindFirstMasterNode(provisionRequest.Nodes)
 	sshMasterNode := ssh.NewClientWithKey(provisionRequest.NodeUsername, keyPair, firstMasterNode.IpAddress)
 	eventSession := k.eventCollector.Start("Enable addon [dns]")
 	err := k.enableAddon("dns", sshMasterNode)
@@ -27,7 +29,11 @@ func (k *Service) InstallAddons(provisionRequest Cluster, keyPair ssh.RsaKeyPair
 }
 
 func (k *Service) enableAddon(name string, sshMasterNode *ssh.Client) error {
-	executionResult, err := sshMasterNode.Executef("sudo microk8s enable %s", name)
+	executionResult, err := sshMasterNode.ExecuteWithOptions(ssh.ExecuteOptions{
+		Command:            fmt.Sprintf("sudo microk8s enable %s", name),
+		Retries:            3,
+		TimeBetweenRetries: 5 * time.Second,
+	})
 	if err != nil {
 		return err
 	}

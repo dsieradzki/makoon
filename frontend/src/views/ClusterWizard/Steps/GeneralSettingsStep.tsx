@@ -15,6 +15,7 @@ import { ClusterWizardStoreContext } from "@/views/ClusterWizard/ClusterWizardVi
 import FormError from "@/components/FormError";
 import clustersListStore from "@/store/clustersListStore";
 import { apiCall } from "@/utils/api";
+import { hostnameEnd, hostnameMain, hostnameStart } from "@/utils/patterns";
 
 
 const renderDescription = (description: string) => {
@@ -29,6 +30,7 @@ const renderSectionHead = (name: string) => {
         {name}
     </div>
 }
+
 const GeneralSettingsStep = () => {
     const [networks, setNetworks] = useState<string[]>([])
     const clusterStore = useContext(ClusterWizardStoreContext)
@@ -43,15 +45,23 @@ const GeneralSettingsStep = () => {
     }
 
     const schema = Yup.object().shape({
-        clusterName: Yup.string().required().strict().trim().test({
-            name: "is-name-available",
-            message: "Cluster name is already used",
-            test: (val) => {
-                const foundCluster = getClusterNames().find(e => e === val);
-                return foundCluster == null
-            },
-            exclusive: false
-        }),
+        clusterName: Yup.string()
+            .required()
+            .strict()
+            .trim()
+            .max(128)
+            .matches(hostnameStart, {message: "Name can start with characters: a-z, A-Z, 0-9"})
+            .matches(hostnameMain, {message: "Name can contain characters: a-z, A-Z, 0-9, -"})
+            .matches(hostnameEnd, {message: "Name can end with characters: a-z, A-Z, 0-9"})
+            .test({
+                name: "is-name-available",
+                message: "Cluster name is already used",
+                test: (val) => {
+                    const foundCluster = getClusterNames().find(e => e === val);
+                    return foundCluster == null
+                },
+                exclusive: false
+            }),
         nodeUsername: Yup.string().required().strict().trim(),
         nodePassword: Yup.string().required().strict().trim(),
         nodeDiskSize: Yup.number().required(),
