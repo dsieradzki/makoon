@@ -15,7 +15,6 @@ import Header from "@/components/Header";
 import GeneralSettingsStep from "@/views/ClusterWizard/Steps/GeneralSettingsStep";
 import React from 'react';
 import { ClusterWizardStore } from "@/store/clusterWizardStore";
-import { useNavigate } from "react-router-dom";
 
 export type WizardNavigationContextType = {
     goPrevious: () => void;
@@ -33,7 +32,6 @@ const steps = [
 ];
 
 const ClusterWizardView = () => {
-    const navigate = useNavigate()
     const [activeIndex, setActiveIndex] = useState(0);
     const [selectedProvisioningSteps, setSelectedProvisioningSteps] = useState({
         createVirtualMachines: true,
