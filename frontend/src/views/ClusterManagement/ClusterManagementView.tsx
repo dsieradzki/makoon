@@ -143,7 +143,7 @@ const ClusterManagementView = () => {
                             navigate("/list")
                         }}
                                tooltip="Back to cluster list"
-                               className="flex justify-center items-center w-[76px] h-[76px]">
+                               className="flex justify-center items-center w-[76px] h-[260px]">
                             <i className="pi pi-arrow-left primary-text-color" style={{fontSize: "1.5rem"}}></i>
                         </Block>
                     </div>
@@ -192,7 +192,7 @@ const ClusterManagementView = () => {
                             </div>
                         </div>
                     </Panel>
-                    <div className="flex flex-col ml-4">
+                    <div className="flex flex-col">
                         <div className="flex">
                             <Block onClick={onSaveKubeConfig}
                                    className="mb-4 flex justify-start items-center w-[300px] mr-4">
