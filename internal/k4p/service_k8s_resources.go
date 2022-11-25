@@ -24,22 +24,24 @@ func (k *Service) InstallAdditionalK8sResources(provisionRequest Cluster, keyPai
 }
 
 func (k *Service) ApplyK8sResource(req K8sResource, client *ssh.Client) error {
-	escapedContent := strings.ReplaceAll(req.Content, `"`, `\"`)
-	executionResult, err := client.Executef("echo \"%s\" > /tmp/%s.yaml", escapedContent, req.Name)
+	resourceFileName := generateFileName(req.Name)
+	escapedContent := escapeContent(req.Content)
+
+	executionResult, err := client.Executef("echo \"%s\" > /tmp/%s.yaml", escapedContent, resourceFileName)
 	if err != nil {
 		return err
 	}
 	if executionResult.IsError() {
 		return executionResult.Error()
 	}
-	executionResult, err = client.Executef("sudo microk8s.kubectl apply -f /tmp/%s.yaml", req.Name)
+	executionResult, err = client.Executef("sudo microk8s.kubectl apply -f /tmp/%s.yaml", resourceFileName)
 	if err != nil {
 		return err
 	}
 	if executionResult.IsError() {
 		return executionResult.Error()
 	}
-	executionResult, err = client.Executef("sudo rm /tmp/%s.yaml", req.Name)
+	executionResult, err = client.Executef("sudo rm /tmp/%s.yaml", resourceFileName)
 	if err != nil {
 		return err
 	}
@@ -50,22 +52,24 @@ func (k *Service) ApplyK8sResource(req K8sResource, client *ssh.Client) error {
 }
 
 func (k *Service) DeleteK8sResource(req K8sResource, client *ssh.Client) error {
-	escapedContent := strings.ReplaceAll(req.Content, `"`, `\"`)
-	executionResult, err := client.Executef("echo \"%s\" > /tmp/%s.yaml", escapedContent, req.Name)
+	resourceFileName := generateFileName(req.Name)
+	escapedContent := escapeContent(req.Content)
+
+	executionResult, err := client.Executef("echo \"%s\" > /tmp/%s.yaml", escapedContent, resourceFileName)
 	if err != nil {
 		return err
 	}
 	if executionResult.IsError() {
 		return executionResult.Error()
 	}
-	executionResult, err = client.Executef("sudo microk8s.kubectl delete -f /tmp/%s.yaml", req.Name)
+	executionResult, err = client.Executef("sudo microk8s.kubectl delete -f /tmp/%s.yaml", resourceFileName)
 	if err != nil {
 		return err
 	}
 	if executionResult.IsError() {
 		return executionResult.Error()
 	}
-	executionResult, err = client.Executef("sudo rm /tmp/%s.yaml", req.Name)
+	executionResult, err = client.Executef("sudo rm /tmp/%s.yaml", resourceFileName)
 	if err != nil {
 		return err
 	}
@@ -73,4 +77,12 @@ func (k *Service) DeleteK8sResource(req K8sResource, client *ssh.Client) error {
 		return executionResult.Error()
 	}
 	return nil
+}
+
+func generateFileName(resName string) string {
+	return strings.TrimSpace(strings.ReplaceAll(resName, " ", "_"))
+}
+
+func escapeContent(content string) string {
+	return strings.ReplaceAll(content, `"`, `\"`)
 }
