@@ -7,11 +7,11 @@ export function AddHelmChart(arg1:string,arg2:k4p.HelmApp):Promise<string>;
 
 export function AddK8sResource(arg1:string,arg2:k4p.K8sResource):Promise<string>;
 
-export function DeleteCluster(arg1:string):Promise<Error>;
+export function DeleteCluster(arg1:string):Promise<void>;
 
-export function DeleteHelmChart(arg1:string,arg2:string):Promise<Error>;
+export function DeleteHelmChart(arg1:string,arg2:string):Promise<void>;
 
-export function DeleteK8sResource(arg1:string,arg2:string):Promise<Error>;
+export function DeleteK8sResource(arg1:string,arg2:string):Promise<void>;
 
 export function GetClusters():Promise<Array<management.ClusterHeader>>;
 
@@ -19,14 +19,14 @@ export function GetHelpAppsStatus(arg1:string):Promise<Array<management.HelmAppS
 
 export function GetNodesStatus(arg1:string):Promise<Array<management.NodeStatus>>;
 
-export function InstallHelmChart(arg1:string,arg2:string):Promise<Error>;
+export function InstallHelmChart(arg1:string,arg2:string):Promise<void>;
 
-export function InstallK8sResource(arg1:string,arg2:string):Promise<Error>;
+export function InstallK8sResource(arg1:string,arg2:string):Promise<void>;
 
-export function UninstallHelmChart(arg1:string,arg2:string):Promise<Error>;
+export function UninstallHelmChart(arg1:string,arg2:string):Promise<void>;
 
-export function UninstallK8sResource(arg1:string,arg2:string):Promise<Error>;
+export function UninstallK8sResource(arg1:string,arg2:string):Promise<void>;
 
-export function UpdateHelmChartData(arg1:string,arg2:k4p.HelmApp):Promise<Error>;
+export function UpdateHelmChartData(arg1:string,arg2:k4p.HelmApp):Promise<void>;
 
-export function UpdateK8sResourcesData(arg1:string,arg2:k4p.K8sResource):Promise<Error>;
+export function UpdateK8sResourcesData(arg1:string,arg2:k4p.K8sResource):Promise<void>;

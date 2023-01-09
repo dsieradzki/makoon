@@ -4,7 +4,7 @@ import {k4p} from '../models';
 import {database} from '../models';
 import {context} from '../models';
 
-export function AcceptAndSetupApp():Promise<Error>;
+export function AcceptAndSetupApp():Promise<void>;
 
 export function IsFirstRunOfApp():Promise<boolean>;
 
@@ -12,12 +12,12 @@ export function LoadCluster(arg1:string):Promise<k4p.Cluster>;
 
 export function LoadDatabase():Promise<database.DatabaseData>;
 
-export function SaveDatabase(arg1:database.DatabaseData):Promise<Error>;
+export function SaveDatabase(arg1:database.DatabaseData):Promise<void>;
 
-export function SaveKubeConfigDialog(arg1:string):Promise<Error>;
+export function SaveKubeConfigDialog(arg1:string):Promise<void>;
 
-export function SaveSshAuthorizationKeyDialog(arg1:string):Promise<Error>;
+export function SaveSshAuthorizationKeyDialog(arg1:string):Promise<void>;
 
-export function SaveSshPrivateKeyDialog(arg1:string):Promise<Error>;
+export function SaveSshPrivateKeyDialog(arg1:string):Promise<void>;
 
 export function SetContext(arg1:context.Context):Promise<void>;
