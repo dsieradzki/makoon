@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
@@ -16,12 +16,20 @@ import clusterManagementStore, {
 import { k4p } from "@wails/models";
 import { CLUSTER_MANAGER_K8S_RESOURCES_PROPERTIES_PANEL_NAME } from "@/components/PropertiesPanel";
 import processingIndicatorStoreUi from "@/store/processingIndicatorStoreUi";
+import Editor from "@monaco-editor/react";
+import * as monaco from "monaco-editor";
 
 const schema = Yup.object({
     name: Yup.string().required().strict().trim(),
     content: Yup.string().required()
 })
 
+const editorOptions = {
+    fontSize: 16,
+    minimap: {
+        enabled: false
+    } as monaco.editor.IEditorMinimapOptions
+} as monaco.editor.IStandaloneEditorConstructionOptions;
 const K8SResourceProperties = () => {
     const [initialValues, setInitialValues] = useState({
         id: "",
@@ -30,6 +38,7 @@ const K8SResourceProperties = () => {
     } as k4p.K8sResource)
 
     const [lastError, setLastError] = useState("")
+    const valuesEditor = useRef<monaco.editor.IStandaloneCodeEditor>();
     useEffect(() => {
         if (uiPropertiesPanelStore.selectedPropertiesId) {
             const resFromStore = clusterManagementStore.k8SResources.find(e => e.id === uiPropertiesPanelStore.selectedPropertiesId);
@@ -117,17 +126,24 @@ const K8SResourceProperties = () => {
                         </div>
                         <div className="flex flex-col mb-2">
                             <div className="mr-1 required">Content:</div>
-                            <div className="">
-                                <InputTextarea
-                                    name="content"
-                                    disabled={anyOperationInProgress}
-                                    rows={10}
-                                    value={formik.values.content}
-                                    onChange={formik.handleChange}
-                                    onBlur={formik.handleBlur}
-                                    className="w-full p-inputtext-sm font-mono"/>
-                                <FormError error={formik.errors.content} touched={formik.touched.content}/>
+                            <div className="grow border-2">
+
                             </div>
+                            {/*<Editor*/}
+                            {/*    language="yaml"*/}
+                            {/*    value={formik.values.content}*/}
+                            {/*    height="80vh"*/}
+                            {/*    theme={"vs-dark"}*/}
+                            {/*    className="editor-border"*/}
+                            {/*    onMount={editor => {*/}
+                            {/*        valuesEditor.current = editor;*/}
+                            {/*    }}*/}
+                            {/*    options={{*/}
+                            {/*        ...editorOptions,*/}
+                            {/*        readOnly: anyOperationInProgress*/}
+                            {/*    }}/>*/}
+                            {/*<FormError error={formik.errors.content}*/}
+                            {/*           touched={formik.touched.content}/>*/}
                         </div>
                     </div>
                     {
