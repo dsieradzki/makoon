@@ -1,3 +1,18 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.monaco-editor, .monaco-editor-background {
+    background: #121212 !important;
+}
+
+.monaco-editor .margin {
+    background: #121212 !important;
+}
+
+.editor-border {
+    border: 1px solid #383838;
+}
+.editor-border:has(.focused) {
+    border: 1px solid #64B5F6;
+}

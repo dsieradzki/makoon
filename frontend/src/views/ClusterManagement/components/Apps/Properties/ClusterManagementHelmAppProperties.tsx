@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
@@ -17,7 +17,9 @@ import clusterManagementStore, {
 import processingIndicatorStoreUi from "@/store/processingIndicatorStoreUi";
 import { InputSwitch } from "primereact/inputswitch";
 import { CLUSTER_MANAGEMENT_HELM_APP_PROPERTIES_PANEL_NAME } from "@/components/PropertiesPanel";
-
+import Editor from "@monaco-editor/react";
+import * as monaco from "monaco-editor";
+import HelmApp = k4p.HelmApp;
 
 const waitHelmInfo = "if set, will wait until all Pods, PVCs, Services, and minimum number of Pods of a Deployment, StatefulSet, or ReplicaSet are in a ready state before marking the release as successful."
 
@@ -29,6 +31,13 @@ const schema = Yup.object({
     namespace: Yup.string().required().trim(),
     valueFileContent: Yup.string()
 })
+
+const editorOptions = {
+    fontSize: 16,
+    minimap: {
+        enabled: false
+    } as monaco.editor.IEditorMinimapOptions
+} as monaco.editor.IStandaloneEditorConstructionOptions;
 
 const ClusterManagementHelmAppProperties = () => {
     const [initialValues, setInitialValues] = useState({
@@ -45,7 +54,6 @@ const ClusterManagementHelmAppProperties = () => {
     const [submitMode, setSubmitMode] = useState<"SAVE" | "SAVE_AND_INSTALL">()
     const [lastError, setLastError] = useState("")
     const currentStatus = clusterManagementStore.helmAppsStatus.find(e => e.id == uiPropertiesPanelStore.selectedPropertiesId)?.status || ""
-
 
     useEffect(() => {
         if (uiPropertiesPanelStore.selectedPropertiesId) {
@@ -196,18 +204,21 @@ const ClusterManagementHelmAppProperties = () => {
                             </div>
                             <div className="flex flex-col mb-2">
                                 <div className="mr-1">Values:</div>
-                                <div className="">
-                                    <InputTextarea
-                                        name="valueFileContent"
-                                        rows={7}
-                                        disabled={formik.isSubmitting || isToUninstall}
-                                        value={formik.values.valueFileContent}
-                                        onChange={formik.handleChange}
-                                        onBlur={formik.handleBlur}
-                                        className="w-full p-inputtext-sm"/>
-                                    <FormError error={formik.errors.valueFileContent}
-                                               touched={formik.touched.valueFileContent}/>
-                                </div>
+                                <Editor
+                                    language="yaml"
+                                    value={formik.values.valueFileContent}
+                                    height="80vh"
+                                    theme={"vs-dark"}
+                                    className="editor-border"
+                                    onChange={(data) => {
+                                        formik.setFieldValue("valueFileContent", data);
+                                    }}
+                                    options={{
+                                        ...editorOptions,
+                                        readOnly: formik.isSubmitting || isToUninstall
+                                    }}/>
+                                <FormError error={formik.errors.valueFileContent}
+                                           touched={formik.touched.valueFileContent}/>
                             </div>
                             <div className="flex items-center mb-2">
                                 <InputSwitch
@@ -297,7 +308,8 @@ const ClusterManagementHelmAppProperties = () => {
                 </form>
             </div>
         </div>
-    );
+    )
+        ;
 };
 
 export default observer(ClusterManagementHelmAppProperties)
