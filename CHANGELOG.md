@@ -1,3 +1,18 @@
+# [0.11.0](https://github.com/dsieradzki/k4prox/compare/v0.10.1...v0.11.0) (2023-02-04)
+
+
+### Bug Fixes
+
+* Update dependencies ([f2b72f9](https://github.com/dsieradzki/k4prox/commit/f2b72f93c4088c1478a2f94ce9e1c08afe47213c))
+* Update dependencies ([ae078b5](https://github.com/dsieradzki/k4prox/commit/ae078b5247f6f61e040ad450f0c84257cca56d6c))
+
+
+### Features
+
+* Add monaco-editor for helm values and kubernetes resources ([e254603](https://github.com/dsieradzki/k4prox/commit/e254603195029b5f85c2899a2bcb1abe9ede3013))
+
+
+
 ## [0.10.1](https://github.com/dsieradzki/k4prox/compare/v0.10.0...v0.10.1) (2022-11-25)
 
 
@@ -38,15 +53,6 @@
 ### Features
 
 * Post-install cluster management - cluster overview, nodes status ([c50219a](https://github.com/dsieradzki/k4prox/commit/c50219acced29aa920952c797ac69c56e4a042a1))
-
-
-
-## [0.7.1](https://github.com/dsieradzki/k4prox/compare/v0.7.0...v0.7.1) (2022-10-19)
-
-
-### Bug Fixes
-
-* Prevent deletion of last master node ([fd34f77](https://github.com/dsieradzki/k4prox/commit/fd34f777ce021cb4e8b9eecd74338f46b7600325))
 
 
 
