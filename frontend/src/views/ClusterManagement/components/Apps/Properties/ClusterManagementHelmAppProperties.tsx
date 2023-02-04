@@ -54,7 +54,6 @@ const ClusterManagementHelmAppProperties = () => {
     const [submitMode, setSubmitMode] = useState<"SAVE" | "SAVE_AND_INSTALL">()
     const [lastError, setLastError] = useState("")
     const currentStatus = clusterManagementStore.helmAppsStatus.find(e => e.id == uiPropertiesPanelStore.selectedPropertiesId)?.status || ""
-    const valuesEditor = useRef<monaco.editor.IStandaloneCodeEditor>();
 
     useEffect(() => {
         if (uiPropertiesPanelStore.selectedPropertiesId) {
@@ -93,16 +92,11 @@ const ClusterManagementHelmAppProperties = () => {
         initialValues: initialValues,
         validationSchema: schema,
         onSubmit: async (values) => {
-            const request = {
-                ...values,
-                valueFileContent: valuesEditor.current?.getValue() ?? ""
-            } as HelmApp;
-
             if (!initialValues.id) {
-                const id = await clusterManagementStore.addHelmChart(request)
+                const id = await clusterManagementStore.addHelmChart(values)
                 uiPropertiesPanelStore.selectPanel(CLUSTER_MANAGEMENT_HELM_APP_PROPERTIES_PANEL_NAME, String(id))
             } else {
-                await clusterManagementStore.updateHelmChart(request);
+                await clusterManagementStore.updateHelmChart(values);
                 if (submitMode == "SAVE_AND_INSTALL") {
                     try {
                         setLastError("")
@@ -216,8 +210,8 @@ const ClusterManagementHelmAppProperties = () => {
                                     height="80vh"
                                     theme={"vs-dark"}
                                     className="editor-border"
-                                    onMount={editor => {
-                                        valuesEditor.current = editor;
+                                    onChange={(data) => {
+                                        formik.setFieldValue("valueFileContent", data);
                                     }}
                                     options={{
                                         ...editorOptions,

@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
-import { InputTextarea } from "primereact/inputtextarea";
 import uiPropertiesPanelStore from "@/store/uiPropertiesPanelStore";
 import { useFormik } from "formik";
 import { LogError } from "@wails-runtime/runtime";
@@ -38,7 +37,7 @@ const K8SResourceProperties = () => {
     } as k4p.K8sResource)
 
     const [lastError, setLastError] = useState("")
-    const valuesEditor = useRef<monaco.editor.IStandaloneCodeEditor>();
+
     useEffect(() => {
         if (uiPropertiesPanelStore.selectedPropertiesId) {
             const resFromStore = clusterManagementStore.k8SResources.find(e => e.id === uiPropertiesPanelStore.selectedPropertiesId);
@@ -107,10 +106,9 @@ const K8SResourceProperties = () => {
         <div className="flex flex-col w-full h-full items-center">
 
             <div className="grow w-full">
-                <form onSubmit={formik.handleSubmit}>
+                <form onSubmit={formik.handleSubmit} className="h-full flex flex-col">
                     <div className="text-3xl text-center font-bold mt-5">Kubernetes Resource</div>
-                    <div className="p-10">
-
+                    <div className="pt-10 px-10 flex flex-col">
                         <div className="flex flex-col mb-2">
                             <div className="mr-1 required">Name:</div>
                             <div className="">
@@ -124,26 +122,25 @@ const K8SResourceProperties = () => {
                                 <FormError error={formik.errors.name} touched={formik.touched.name}/>
                             </div>
                         </div>
-                        <div className="flex flex-col mb-2">
+                        <div className="grow flex flex-col mb-2">
                             <div className="mr-1 required">Content:</div>
-                            <div className="grow border-2">
-
+                            <div className="grow">
+                                <Editor
+                                    language="yaml"
+                                    value={formik.values.content}
+                                    theme={"vs-dark"}
+                                    height={"400px"}
+                                    className="editor-border "
+                                    onChange={(data) => {
+                                        formik.setFieldValue("content", data);
+                                    }}
+                                    options={{
+                                        ...editorOptions,
+                                        readOnly: anyOperationInProgress
+                                    }}/>
+                                <FormError error={formik.errors.content}
+                                           touched={formik.touched.content}/>
                             </div>
-                            {/*<Editor*/}
-                            {/*    language="yaml"*/}
-                            {/*    value={formik.values.content}*/}
-                            {/*    height="80vh"*/}
-                            {/*    theme={"vs-dark"}*/}
-                            {/*    className="editor-border"*/}
-                            {/*    onMount={editor => {*/}
-                            {/*        valuesEditor.current = editor;*/}
-                            {/*    }}*/}
-                            {/*    options={{*/}
-                            {/*        ...editorOptions,*/}
-                            {/*        readOnly: anyOperationInProgress*/}
-                            {/*    }}/>*/}
-                            {/*<FormError error={formik.errors.content}*/}
-                            {/*           touched={formik.touched.content}/>*/}
                         </div>
                     </div>
                     {
@@ -154,7 +151,7 @@ const K8SResourceProperties = () => {
                             </div>
                         </div>
                     }
-                    <div className="mt-10 flex flex-col items-center">
+                    <div className="mt-2 flex flex-col items-center">
                         <div className="flex justify-center items-center">
                             <div className="mr-2">
                                 <Button
