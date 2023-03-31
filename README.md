@@ -7,6 +7,21 @@
   </a>
 </p>
 
+> **Announce**
+> 
+> Hello, I decided that now is a good time for migrating K4Prox from the desktop to the web. Web application opens more possibilities for cluster management. Also, I have changed technology under the hood, the new version will be powered by Rust language.
+> 
+> Even though the first release will have the same features as the old app at the start,  the new version will bring better integration with Proxmox.    
+> 
+> No more interacting with your Proxmox server via SSH, all operations will be made using only Proxmox API. SSH will be used only for interacting with Kubernetes nodes due to the agentless nature of communication with your K8S nodes.   
+> 
+> K4Prox database file will be placed in Docker Volume instead on your Proxmox host filesystem, so the user has to take care about not losing volume(kubeconfig, private/public key). Of course, it is possible to get kubeconfig directly from VM, SSH can be generated on your own and replaced manually on VMs in case of disaster. By default, the database will not be backward compatible. 
+> 
+> The application also will change the name, K4Prox is hard to pronounce, which means this GitHub repository will be renamed too. Currently, I'm considering naming the application "Makoon"  
+> 
+> The application will be distributed via Docker image.   
+> 
+> I plan to drop the new version by the end of April 2023.   
 ## Table of contents
 
 - [:grey_question: What is this?](#grey_question-what-is-this)
