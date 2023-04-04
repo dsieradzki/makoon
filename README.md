@@ -7,7 +7,7 @@
   </a>
 </p>
 
-> **Announce**
+> **Announcement**
 > 
 > Hello, I decided that now is a good time for migrating K4Prox from the desktop to the web. Web application opens more possibilities for cluster management. Also, I have changed technology under the hood, the new version will be powered by Rust language.
 > 
