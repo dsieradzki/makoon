@@ -1,6 +1,0 @@
-.idea
-*.iml
-frontend/dist
-build/bin/
-.semrel/
-frontend/node_modules
