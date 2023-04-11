@@ -1,0 +1,9 @@
+services:
+  makoon:
+    image: sieradzki/makoon:latest
+    ports:
+      - 80:8080
+    volumes:
+      - makoon_db:/app/data
+volumes:
+  makoon_db:
