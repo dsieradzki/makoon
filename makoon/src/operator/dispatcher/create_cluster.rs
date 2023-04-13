@@ -23,10 +23,7 @@ pub(crate) fn execute(
     proxmox_client: Arc<Client>,
     repo: Arc<Repository>,
     access: AccessData,
-    cluster_name: String,
-    kube_version: String,
-    os_image: String,
-    os_image_storage: String) -> Result<(), String> {
+    cluster_name: String) -> Result<(), String> {
     info!("Cluster creation request has been received");
     let proxmox_client = proxmox_client.operations(access);
 
@@ -37,13 +34,16 @@ pub(crate) fn execute(
     cluster.ssh_key = keys;
     repo.save_cluster(cluster.clone())?;
 
-    let path_to_image = download_os_image(os_image, os_image_storage, &proxmox_client, &cluster, repo.clone())?;
+    let path_to_image = download_os_image(
+        cluster.os_image.clone().unwrap_or("https://cloud-images.ubuntu.com/kinetic/current/kinetic-server-cloudimg-amd64.img".to_owned()),
+        cluster.os_image_storage.clone().unwrap_or("local".to_owned()),
+        &proxmox_client, &cluster, repo.clone())?;
     create_vms(&proxmox_client, &cluster, repo.clone(), path_to_image)?;
     start_vms(&proxmox_client, &cluster, repo.clone())?;
     wait_for_vms_start(&proxmox_client, &cluster, repo.clone())?;
     restart_vms_if_necessary(&proxmox_client, &cluster, repo.clone())?;
     setup_vms(repo.clone(), &cluster)?;
-    install_kubernetes(repo.clone(), &cluster, kube_version)?;
+    install_kubernetes(repo.clone(), &cluster)?;
     wait_for_ready_kubernetes(repo.clone(), &cluster)?;
     join_nodes_to_cluster(repo.clone(), &cluster)?;
     add_kubeconfig_to_project(repo.clone(), &mut cluster)?;
@@ -219,12 +219,12 @@ fn join_nodes_to_cluster(repo: Arc<Repository>, cluster: &Cluster) -> Result<(),
     Ok(())
 }
 
-fn install_kubernetes(repo: Arc<Repository>, cluster: &Cluster, kube_version: String) -> Result<(), String> {
+fn install_kubernetes(repo: Arc<Repository>, cluster: &Cluster) -> Result<(), String> {
     for node in cluster.nodes.iter() {
         repo.save_log(ActionLogEntry::info(cluster.cluster_name.clone(), format!("Install Kubernetes on VM [{}]", node.vm_id)))?;
         let mut ssh_client = ssh::Client::new();
         ssh_client.connect(&node.ip_address, &cluster.node_username, &cluster.ssh_key.private_key, &cluster.ssh_key.public_key)?;
-        ssh_client.execute(format!("sudo snap install microk8s --channel={} --classic", kube_version).as_str())?;
+        ssh_client.execute(format!("sudo snap install microk8s --channel={} --classic", cluster.kube_version.clone().unwrap_or("1.24/stable".to_owned())).as_str())?;
     }
     Ok(())
 }

@@ -88,6 +88,9 @@ impl Operator {
         let cluster = Cluster {
             node: cluster_request.node,
             cluster_name: cluster_request.cluster_name.clone(),
+            kube_version: Some(cluster_request.kube_version),
+            os_image: Some(cluster_request.os_image),
+            os_image_storage: Some(cluster_request.os_image_storage),
             cluster_config: "".to_string(),
             ssh_key: cluster_request.ssh_key,
             node_username: cluster_request.node_username,
@@ -110,9 +113,6 @@ impl Operator {
         self.tx.send(Event::CreateCluster {
             access,
             cluster_name,
-            kube_version: cluster_request.kube_version,
-            os_image: cluster_request.os_image,
-            os_image_storage: cluster_request.os_image_storage,
         })?;
 
         Ok(())

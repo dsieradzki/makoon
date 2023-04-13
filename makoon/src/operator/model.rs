@@ -126,6 +126,12 @@ impl ActionLogEntry {
 pub struct Cluster {
     pub node: String,
     pub cluster_name: String,
+    //TODO: Option is for backward compatibility, will be deleted in next release
+    pub os_image: Option<String>,
+    //TODO: Option is for backward compatibility, will be deleted in next release
+    pub os_image_storage: Option<String>,
+    //TODO: Option is for backward compatibility, will be deleted in next release
+    pub kube_version: Option<String>,
     pub cluster_config: String,
     pub ssh_key: KeyPair,
     pub node_username: String,
