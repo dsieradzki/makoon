@@ -10,8 +10,8 @@ use serde::{Deserialize, Serialize};
 
 use proxmox::{Client, ClientOperations, to_url_encoded};
 use proxmox::model::{AccessData, CreateVirtualMachine, DownloadImage, DownloadImageContentType, OsType, ParamBuilder, ResizeDisk, ScsiHw, StorageContent};
-use crate::helm;
 
+use crate::helm;
 use crate::operator::dispatcher::common;
 use crate::operator::model::{ActionLogEntry, Cluster, ClusterNode, ClusterNodeType, ClusterResource, HelmApp, KeyPair};
 use crate::operator::repository::Repository;
@@ -177,9 +177,9 @@ fn add_kubeconfig_to_project(repo: Arc<Repository>, cluster: &mut Cluster) -> Re
 }
 
 #[derive(Serialize, Deserialize)]
-struct JoinNode {
-    token: String,
-    urls: Vec<String>,
+pub(crate) struct JoinNode {
+    pub(crate) token: String,
+    pub(crate) urls: Vec<String>,
 }
 
 fn join_nodes_to_cluster(repo: Arc<Repository>, cluster: &Cluster) -> Result<(), String> {
@@ -197,6 +197,12 @@ fn join_nodes_to_cluster(repo: Arc<Repository>, cluster: &Cluster) -> Result<(),
 
     let mut master_ssh_client = ssh::Client::new();
     master_ssh_client.connect(&master_node.ip_address, &cluster.node_username, &cluster.ssh_key.private_key, &cluster.ssh_key.public_key)?;
+    // master_ssh_client.execute(
+    //     format!("sudo microk8s.kubectl label node {}-{} node-role.kubernetes.io/{}={}",
+    //             cluster.cluster_name,
+    //             master_node.name,
+    //             master_node.node_type,
+    //             master_node.node_type).as_str())?;
 
     for node_to_join in nodes_to_join.iter() {
         repo.save_log(ActionLogEntry::info(cluster.cluster_name.clone(), format!("Generate join token on VM [{}] ", master_node.vm_id)))?;
@@ -213,13 +219,20 @@ fn join_nodes_to_cluster(repo: Arc<Repository>, cluster: &Cluster) -> Result<(),
             ClusterNodeType::Master => command,
             ClusterNodeType::Worker => format!("{} --worker", command)
         };
-        repo.save_log(ActionLogEntry::info(cluster.cluster_name.clone(), format!("Join node [{}] to cluster", node_to_join.vm_id)))?;
+
+        repo.save_log(ActionLogEntry::info(cluster.cluster_name.clone(), format!("Join node [{}] with role [{}] to cluster", node_to_join.vm_id, node_to_join.node_type)))?;
         worker_ssh_client.execute(command.as_str())?;
+        // master_ssh_client.execute(
+        //     format!("sudo microk8s.kubectl label node {}-{} node-role.kubernetes.io/{}={}",
+        //             cluster.cluster_name,
+        //             node_to_join.name,
+        //             node_to_join.node_type,
+        //             node_to_join.node_type).as_str())?;
     }
     Ok(())
 }
 
-fn install_kubernetes(repo: Arc<Repository>, cluster: &Cluster) -> Result<(), String> {
+pub(crate) fn install_kubernetes(repo: Arc<Repository>, cluster: &Cluster) -> Result<(), String> {
     for node in cluster.nodes.iter() {
         repo.save_log(ActionLogEntry::info(cluster.cluster_name.clone(), format!("Install Kubernetes on VM [{}]", node.vm_id)))?;
         let mut ssh_client = ssh::Client::new();
@@ -229,7 +242,7 @@ fn install_kubernetes(repo: Arc<Repository>, cluster: &Cluster) -> Result<(), St
     Ok(())
 }
 
-fn wait_for_ready_kubernetes(repo: Arc<Repository>, cluster: &Cluster) -> Result<(), String> {
+pub(crate) fn wait_for_ready_kubernetes(repo: Arc<Repository>, cluster: &Cluster) -> Result<(), String> {
     for node in cluster.nodes.iter() {
         repo.save_log(ActionLogEntry::info(cluster.cluster_name.clone(), format!("Wait for Kubernetes on VM [{}]", node.vm_id)))?;
         let mut ssh_client = ssh::Client::new();
@@ -239,9 +252,9 @@ fn wait_for_ready_kubernetes(repo: Arc<Repository>, cluster: &Cluster) -> Result
     Ok(())
 }
 
-fn restart_vms_if_necessary(proxmox_client: &ClientOperations,
-                            cluster: &Cluster,
-                            repo: Arc<Repository>) -> Result<(), String> {
+pub(crate) fn restart_vms_if_necessary(proxmox_client: &ClientOperations,
+                                       cluster: &Cluster,
+                                       repo: Arc<Repository>) -> Result<(), String> {
     for node in cluster.nodes.iter() {
         let mut ssh_client = ssh::Client::new();
         ssh_client.connect(&node.ip_address, &cluster.node_username, &cluster.ssh_key.private_key, &cluster.ssh_key.public_key)?;
@@ -272,7 +285,7 @@ fn restart_vms_if_necessary(proxmox_client: &ClientOperations,
     Ok(())
 }
 
-fn wait_for_vms_start(proxmox_client: &ClientOperations, cluster: &Cluster, repo: Arc<Repository>) -> Result<(), String> {
+pub(crate) fn wait_for_vms_start(proxmox_client: &ClientOperations, cluster: &Cluster, repo: Arc<Repository>) -> Result<(), String> {
     let all_vm_started = cluster.nodes.iter()
         .map(|i| -> bool{
             match common::wait_for_start(proxmox_client, cluster, i) {
@@ -331,7 +344,7 @@ fn generate_ssh_keys() -> Result<KeyPair, String> {
     })
 }
 
-fn download_os_image(
+pub(crate) fn download_os_image(
     os_image: String,
     os_image_storage: String,
     proxmox_client: &ClientOperations,
@@ -426,10 +439,10 @@ fn download_os_image(
     Ok(storage_content_details.path)
 }
 
-fn create_vms(proxmox_client: &ClientOperations,
-              cluster: &Cluster,
-              repo: Arc<Repository>,
-              os_image_path: String) -> Result<(), String> {
+pub(crate) fn create_vms(proxmox_client: &ClientOperations,
+                         cluster: &Cluster,
+                         repo: Arc<Repository>,
+                         os_image_path: String) -> Result<(), String> {
     let mut used_vm_ids: Vec<u32> = proxmox_client
         .virtual_machines(cluster.node.clone(), None)?.iter()
         .map(|i| i.vm_id)
@@ -577,9 +590,9 @@ fn create_vms(proxmox_client: &ClientOperations,
     Ok(())
 }
 
-fn start_vms(proxmox_client: &ClientOperations,
-             cluster: &Cluster,
-             repo: Arc<Repository>) -> Result<(), String> {
+pub(crate) fn start_vms(proxmox_client: &ClientOperations,
+                        cluster: &Cluster,
+                        repo: Arc<Repository>) -> Result<(), String> {
     for node in cluster.nodes.iter() {
         match proxmox_client.start_vm(cluster.node.clone(), node.vm_id) {
             Ok(_) => {

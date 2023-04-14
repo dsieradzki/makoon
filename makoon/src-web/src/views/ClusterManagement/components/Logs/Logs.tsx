@@ -1,11 +1,16 @@
-import React, { useEffect, useRef } from 'react';
+import React, {useEffect, useRef} from 'react';
 import Table from "@/components/Table/Table";
 import LogLevel from "@/views/ClusterManagement/components/Logs/LogLevel";
 import clusterManagementStore from "@/store/clusterManagementStore";
-import { observer } from "mobx-react-lite";
+import {observer} from "mobx-react-lite";
+import {useOnFirstMount} from "@/utils/hooks";
 
 const Logs = () => {
     const nodesStatusRequestFinish = useRef(true);
+    useOnFirstMount(async () => {
+        await clusterManagementStore.loadLogs(clusterManagementStore.cluster.clusterName);
+    })
+    
     useEffect(() => {
         const readTaskLogInterval = setInterval(async () => {
             if (nodesStatusRequestFinish.current) {

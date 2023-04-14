@@ -33,7 +33,7 @@ const schema = Yup.object().shape({
     ipAddress: Yup.string().min(7).required(),
     storagePool: Yup.string().required()
 })
-const NodeReadOnlyProperties = () => {
+const ManagementNodeReadOnlyProperties = () => {
 
     const [storages, setStorages] = useState<AvailableStorage[]>([])
     useOnFirstMount(async () => {
@@ -158,4 +158,4 @@ const NodeReadOnlyProperties = () => {
 }
 
 
-export default observer(NodeReadOnlyProperties)
+export default observer(ManagementNodeReadOnlyProperties)

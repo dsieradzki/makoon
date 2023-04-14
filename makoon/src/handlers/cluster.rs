@@ -7,7 +7,21 @@ use crate::{logged_in, operator};
 use crate::handlers::actix::inject;
 use crate::handlers::error::HandlerError;
 use crate::handlers::model::ClusterNodeVmStatus;
-use crate::operator::model::{ActionLogEntry, Cluster, ClusterRequest};
+use crate::operator::model::{ActionLogEntry, Cluster, ClusterNode, ClusterRequest};
+
+#[post("/api/v1/clusters/{cluster_name}/nodes")]
+pub async fn add_node_to_cluster(body: web::Json<ClusterNode>,
+                            path: web::Path<String>,
+                            session: Session,
+                            operator: inject::Operator,
+                            proxmox_client: inject::ProxmoxClient) -> actix_web::Result<impl Responder, HandlerError> {
+    let access = logged_in!(session, proxmox_client);
+    let cluster_name = path.into_inner();
+
+    let operator = operator.lock()?;
+    operator.add_node_cluster(access, cluster_name, body.0)?;
+    Ok(HttpResponse::Created().finish())
+}
 
 #[post("/api/v1/clusters")]
 pub async fn create_cluster(body: web::Json<ClusterRequest>,
@@ -51,6 +65,16 @@ pub async fn delete_cluster(path: web::Path<String>, session: Session, operator:
     let name = path.into_inner();
 
     operator.delete_cluster(access, name.clone())?;
+    Ok(HttpResponse::Ok().finish())
+}
+
+#[delete("/api/v1/clusters/{cluster_name}/nodes/{node_name}")]
+pub async fn delete_node_from_cluster(path: web::Path<(String, String)>, session: Session, operator: inject::Operator, proxmox_client: inject::ProxmoxClient) -> actix_web::Result<impl Responder, HandlerError> {
+    let access = logged_in!(session, proxmox_client);
+    let operator = operator.lock()?;
+    let (cluster_name, node_name) = path.into_inner();
+
+    operator.delete_node_from_cluster(access, cluster_name, node_name)?;
     Ok(HttpResponse::Ok().finish())
 }
 

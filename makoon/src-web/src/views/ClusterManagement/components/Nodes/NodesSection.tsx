@@ -6,7 +6,8 @@ import uiPropertiesPanelStore from "@/store/uiPropertiesPanelStore";
 import TableNodes from "@/views/ClusterManagement/components/Nodes/TableNodes";
 import TileNodes from "@/views/ClusterManagement/components/Nodes/TileNodes";
 import { NodeWithStatus } from "@/store/clusterManagementStore";
-import { NODE_READ_ONLY_PROPERTIES_PANEL_NAME } from "@/components/PropertiesPanel";
+import { MANAGEMENT_NODE_READ_ONLY_PROPERTIES_PANEL_NAME } from "@/components/PropertiesPanel";
+import Block from "@/components/Block";
 
 const viewOptions = [
     {icon: 'pi pi-list', value: true},
@@ -27,11 +28,11 @@ const NodesSection = (props: Props) => {
     const [nodesViewType, setNodesViewType] = useState(true);
 
     const onClickNodeHandler = (id: any) => {
-        uiPropertiesPanelStore.selectPanel(NODE_READ_ONLY_PROPERTIES_PANEL_NAME, String(id))
+        uiPropertiesPanelStore.selectPanel(MANAGEMENT_NODE_READ_ONLY_PROPERTIES_PANEL_NAME, String(id))
     }
 
     const getSelectedId = (): string | null => {
-        if (uiPropertiesPanelStore.selectedPropertiesPanelKey == NODE_READ_ONLY_PROPERTIES_PANEL_NAME) {
+        if (uiPropertiesPanelStore.selectedPropertiesPanelKey == MANAGEMENT_NODE_READ_ONLY_PROPERTIES_PANEL_NAME) {
             return uiPropertiesPanelStore.selectedPropertiesId
         } else {
             return null
@@ -40,10 +41,10 @@ const NodesSection = (props: Props) => {
     const title = <div className="w-full font-bold text-2xl flex items-center justify-between">
         <div className="flex items-center">
             <div className="mr-5">{props.title}</div>
-            {/*<Block className="flex justify-center items-center w-[56px] h-[56px]"*/}
-            {/*       onClick={props.onAddNode}>*/}
-            {/*    <i className="pi pi-plus primary-text-color"></i>*/}
-            {/*</Block>*/}
+            <Block className="flex justify-center items-center w-[56px] h-[56px]"
+                   onClick={props.onAddNode}>
+                <i className="pi pi-plus primary-text-color"></i>
+            </Block>
         </div>
 
         <div>

@@ -1,8 +1,8 @@
 import {
     ActionLogEntry,
-    AppStatus,
     Cluster,
     ClusterHeader,
+    ClusterNode,
     ClusterNodeStatus,
     ClusterNodeVmStatus,
     ClusterRequest
@@ -23,10 +23,17 @@ export namespace clusters {
         return axios.delete(`/api/v1/clusters/${name}`).then(e => e.data);
     }
 
+    export function deleteNodeFromCluster(clusterName: string, nodeName: string): Promise<Cluster> {
+        return axios.delete(`/api/v1/clusters/${clusterName}/nodes/${nodeName}`).then(e => e.data);
+    }
+
     export function createCluster(request: ClusterRequest): Promise<void> {
         return axios.post("/api/v1/clusters", request);
     }
 
+    export function addNodeToCluster(clusterName: string, request: ClusterNode): Promise<void> {
+        return axios.post(`/api/v1/clusters/${clusterName}/nodes`, request);
+    }
 
     export function generateDefaultClusterConfiguration(): Promise<ClusterRequest> {
         return axios.get("/api/v1/clusters/generate").then(e => e.data);

@@ -1,3 +1,4 @@
+use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 
 use chrono::{NaiveDateTime, Utc};
@@ -37,6 +38,15 @@ pub struct ClusterResource {
 pub enum ClusterNodeType {
     Master,
     Worker,
+}
+
+impl Display for ClusterNodeType {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ClusterNodeType::Master => write!(f, "master"),
+            ClusterNodeType::Worker => write!(f, "worker")
+        }
+    }
 }
 
 #[typeshare]

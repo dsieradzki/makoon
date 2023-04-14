@@ -89,6 +89,9 @@ impl Client {
             _ => {
                 let mut err_out = String::new();
                 channel.stderr().read_to_string(&mut err_out).map_err(|e| e.to_string())?;
+                if err_out.is_empty() {
+                    err_out = out;
+                }
                 Err(format!("Exit code: [{}], output: [{}]", exit_code, err_out))
             }
         }
