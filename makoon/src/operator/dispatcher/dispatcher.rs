@@ -29,6 +29,7 @@ impl Dispatcher {
                     cluster_name.clone()) {
                     Ok(_) => {
                         let _ = update_cluster_status(&self.repo, cluster_name.clone(), ClusterStatus::Sync);
+                        let _ = self.repo.save_log(ActionLogEntry::info(cluster_name.clone(), "Cluster has been created".to_string()));
                         info!("Cluster has been created")
                     }
                     Err(e) => {
@@ -62,6 +63,7 @@ impl Dispatcher {
                     cluster_name.clone(),
                     node_name.clone()) {
                     Ok(_) => {
+                        let _ = self.repo.save_log(ActionLogEntry::info(cluster_name.clone(), "Node has been added".to_string()));
                         info!("Cluster node has been created")
                     }
                     Err(e) => {
@@ -79,7 +81,8 @@ impl Dispatcher {
                     cluster_name.clone(),
                     node_name.clone()) {
                     Ok(_) => {
-                        info!("Cluster node has been deleted")
+                        let _ = self.repo.save_log(ActionLogEntry::info(cluster_name.clone(), format!("Node [{}-{}] has been deleted", cluster_name, node_name)));
+                        info!("Cluster node [{}-{}] has been deleted", cluster_name, node_name);
                     }
                     Err(e) => {
                         let _ = update_cluster_status(&self.repo, cluster_name.clone(), ClusterStatus::Error);

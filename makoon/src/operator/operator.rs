@@ -62,7 +62,9 @@ impl Operator {
                 loop {
                     match rx.try_recv() {
                         Ok(e) => {
+                            info!("Event received");
                             dispatcher.dispatch(e);
+                            info!("Event processing finished successfully");
                         }
                         Err(_) => {
                             std::thread::sleep(Duration::from_millis(config.worker_thread_probe_duration));

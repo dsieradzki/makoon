@@ -51,7 +51,6 @@ pub(crate) fn execute(
     wait_for_ready_kubernetes(repo.clone(), &cluster)?;
     join_nodes_to_cluster(repo.clone(), &cluster, master_node)?;
 
-    repo.save_log(ActionLogEntry::info(cluster_name.clone(), "Node has been added".to_string()))?;
     Ok(())
 }
 
@@ -113,7 +112,7 @@ fn join_nodes_to_cluster(repo: Arc<Repository>, cluster: &Cluster, master_node: 
             ClusterNodeType::Master => command,
             ClusterNodeType::Worker => format!("{} --worker", command)
         };
-        repo.save_log(ActionLogEntry::info(cluster.cluster_name.clone(), format!("Join node [{}] with role [{}] to cluster", node_to_join.vm_id, node_to_join.node_type)))?;
+        repo.save_log(ActionLogEntry::info(cluster.cluster_name.clone(), format!("Join node [{}-{}] with role [{}] to cluster", cluster.cluster_name, node_to_join.name, node_to_join.node_type)))?;
         worker_ssh_client.execute(command.as_str())?;
         // master_ssh_client.execute(
         //     format!("sudo microk8s.kubectl label node {}-{} node-role.kubernetes.io/{}={}",
@@ -121,7 +120,6 @@ fn join_nodes_to_cluster(repo: Arc<Repository>, cluster: &Cluster, master_node: 
         //             node_to_join.name,
         //             node_to_join.node_type,
         //             node_to_join.node_type).as_str())?;
-
     }
     Ok(())
 }

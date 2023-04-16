@@ -1,11 +1,10 @@
-use std::sync::{Arc, RwLock};
+use std::sync::Arc;
 
 use proxmox::ClientOperations;
 use proxmox::model::AccessData;
 
 use crate::operator::dispatcher::common;
 use crate::operator::model::{ActionLogEntry, Cluster, ClusterNode};
-use crate::operator::Operator;
 use crate::operator::repository::Repository;
 
 pub(crate) fn execute(
@@ -24,18 +23,18 @@ pub(crate) fn execute(
     Ok(())
 }
 
-fn delete_vms(repo: Arc<Repository>, proxmox_client: &ClientOperations, cluster: &Cluster, existing_nodes: &Vec<ClusterNode>) -> Result<(), String> {
+pub(crate) fn delete_vms(repo: Arc<Repository>, proxmox_client: &ClientOperations, cluster: &Cluster, existing_nodes: &Vec<ClusterNode>) -> Result<(), String> {
     for node in existing_nodes.iter() {
-        proxmox_client.delete_vm(cluster.node.clone(), node.vm_id).map_err(|e| format!("Delete VM {}, error: {}", node.vm_id, e))?;
-        repo.save_log(ActionLogEntry::info(cluster.cluster_name.clone(), format!("Node deleted: {}", node.vm_id)))?;
+        proxmox_client.delete_vm(cluster.node.clone(), node.vm_id).map_err(|e| format!("Delete VM [{}], error: [{}]", node.vm_id, e))?;
+        repo.save_log(ActionLogEntry::info(cluster.cluster_name.clone(), format!("VM [{}] has been deleted", node.vm_id)))?;
     }
     Ok(())
 }
 
-fn stop_vms(repo: &Arc<Repository>, proxmox_client: &ClientOperations, cluster: &Cluster, existing_nodes: &Vec<ClusterNode>) -> Result<(), String> {
+pub(crate) fn stop_vms(repo: &Arc<Repository>, proxmox_client: &ClientOperations, cluster: &Cluster, existing_nodes: &Vec<ClusterNode>) -> Result<(), String> {
     for node in existing_nodes.iter() {
-        proxmox_client.shutdown_vm(cluster.node.clone(), node.vm_id).map_err(|e| format!("Shutdown VM {}, error: {}", node.vm_id, e))?;
-        repo.save_log(ActionLogEntry::info(cluster.cluster_name.clone(), format!("Requested node shutdown: {}", node.vm_id)))?;
+        proxmox_client.shutdown_vm(cluster.node.clone(), node.vm_id).map_err(|e| format!("Shutdown VM [{}], error: [{}]", node.vm_id, e))?;
+        repo.save_log(ActionLogEntry::info(cluster.cluster_name.clone(), format!("Requested VM [{}] to shutdown", node.vm_id)))?;
     }
 
     for node in existing_nodes.iter() {
@@ -48,7 +47,7 @@ fn stop_vms(repo: &Arc<Repository>, proxmox_client: &ClientOperations, cluster: 
     Ok(())
 }
 
-fn get_existing_vms(proxmox_client: &ClientOperations, cluster: &Cluster) -> Result<Vec<ClusterNode>, String> {
+pub(crate) fn get_existing_vms(proxmox_client: &ClientOperations, cluster: &Cluster) -> Result<Vec<ClusterNode>, String> {
     let vms = proxmox_client
         .virtual_machines(cluster.node.clone(), None)?
         .into_iter()

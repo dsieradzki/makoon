@@ -50,8 +50,6 @@ pub(crate) fn execute(
     enable_microk8s_addons(repo.clone(), &cluster)?;
     install_helm_apps(repo.clone(), &cluster)?;
     install_cluster_resources(repo.clone(), &cluster)?;
-
-    repo.save_log(ActionLogEntry::info(cluster_name.clone(), "Cluster has been created".to_string()))?;
     Ok(())
 }
 
