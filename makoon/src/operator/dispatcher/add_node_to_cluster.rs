@@ -6,6 +6,7 @@ use proxmox::model::AccessData;
 
 use crate::operator::{Repository, ssh};
 use crate::operator::dispatcher::create_cluster::*;
+use crate::operator::dispatcher::delete_cluster::get_existing_vms;
 use crate::operator::model::{ActionLogEntry, Cluster, ClusterNode, ClusterNodeType};
 
 pub(crate) fn execute(
@@ -22,7 +23,7 @@ pub(crate) fn execute(
 
     let mut cluster = repo.get_cluster(cluster_name.clone())?.ok_or("Cannot find cluster")?;
     let master_node = cluster.nodes.iter()
-        .find(|i| i.node_type == ClusterNodeType::Master)
+        .find(|i| i.node_type == ClusterNodeType::Master && i.name != node_name)
         .map(|i| i.clone()).ok_or("Cannot find any master node".to_string())?;
 
     let exising_cluster_hosts = cluster.nodes.iter()
@@ -30,7 +31,7 @@ pub(crate) fn execute(
         .map(|i| (format!("{}-{}", cluster.cluster_name, i.name), i.ip_address.clone()))
         .collect::<HashMap<String, String>>();
 
-    let existing_nodes = cluster.nodes.iter().cloned()
+    let existing_nodes = get_existing_vms(&proxmox_client, &cluster)?.into_iter()
         .filter(|i| i.name != node_name)
         .collect();
 
