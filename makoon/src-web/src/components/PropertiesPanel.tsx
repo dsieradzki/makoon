@@ -6,14 +6,14 @@ export const HELM_APP_PROPERTIES_PANEL_NAME = "HelmAppProperties"
 export const K8S_RESOURCES_PROPERTIES_PANEL_NAME = "K8sResourceProperties"
 export const NODE_PROPERTIES_PANEL_NAME = "NodeProperties"
 export const MANAGEMENT_ADD_NODE_PROPERTIES_PANEL_NAME = "ManagementAddNodeProperties"
-export const MANAGEMENT_NODE_READ_ONLY_PROPERTIES_PANEL_NAME = "ManagementNodeReadOnlyProperties"
+export const MANAGEMENT_EDIT_NODE_PROPERTIES_PANEL_NAME = "ManagementEditNodeProperties"
 
 const panels: { [key: string]: React.LazyExoticComponent<React.FC> } = {
     "HelmAppProperties": React.lazy(() => import("../views/ClusterWizard/Steps/Apps/Sections/Properties/HelmAppProperties")),
     "K8sResourceProperties": React.lazy(() => import("../views/ClusterWizard/Steps/Apps/Sections/Properties/K8sResourceProperties")),
     "NodeProperties": React.lazy(() => import("../views/ClusterWizard/Steps/Nodes/Sections/Properties/NodeProperties")),
     "ManagementAddNodeProperties": React.lazy(() => import("../views/ClusterManagement/components/Nodes/Properties/ManagementAddNodeProperties")),
-    "ManagementNodeReadOnlyProperties": React.lazy(() => import("../views/ClusterManagement/components/Nodes/Properties/ManagementNodeReadOnlyProperties")),
+    "ManagementEditNodeProperties": React.lazy(() => import("../views/ClusterManagement/components/Nodes/Properties/ManagementEditNodeProperties")),
     "ClusterManagementHelmAppProperties": React.lazy(() => import("../views/ClusterManagement/components/Apps/Properties/ClusterManagementHelmAppProperties")),
     "ClusterManagerK8sResourceProperties": React.lazy(() => import("../views/ClusterManagement/components/Apps/Properties/ClusterManagerK8sResourceProperties")),
 };

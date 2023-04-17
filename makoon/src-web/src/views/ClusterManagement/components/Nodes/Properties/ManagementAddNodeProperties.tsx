@@ -84,9 +84,7 @@ const ManagementAddNodeProperties = () => {
                     storagePool: values.storagePool,
                     nodeType: uiPropertiesPanelStore.selectedPropertiesId == "master" ? ClusterNodeType.Master : ClusterNodeType.Worker
                 } as ClusterNode;
-
-                await api.clusters.addNodeToCluster(clusterName, nodeToAdd);
-                clusterManagementStore.cluster.nodes.push(nodeToAdd)
+                await clusterManagementStore.addNodeToCluster(nodeToAdd);
                 formik.resetForm()
                 uiPropertiesPanelStore.hidePanel()
             } else {

@@ -52,6 +52,15 @@ impl Display for ClusterNodeType {
 #[typeshare]
 #[derive(Clone, Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
+pub enum ClusterNodeLock {
+    Create,
+    Delete,
+    ChangeResources,
+}
+
+#[typeshare]
+#[derive(Clone, Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct ClusterNode {
     pub vm_id: u32,
     pub name: String,
@@ -60,6 +69,7 @@ pub struct ClusterNode {
     pub ip_address: String,
     pub storage_pool: String,
     pub node_type: ClusterNodeType,
+    pub lock: Option<ClusterNodeLock>,
 }
 
 #[typeshare]

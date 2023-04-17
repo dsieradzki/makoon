@@ -18,7 +18,7 @@ impl Dispatcher {
         }
     }
 
-    pub fn dispatch(&self, event: Event) {
+    pub fn dispatch(&self, event: Event) -> Result<(), String> {
         match event {
             Event::CreateCluster { access, cluster_name } => {
                 let _ = update_cluster_status(&self.repo, cluster_name.clone(), ClusterStatus::Creating);
@@ -28,14 +28,15 @@ impl Dispatcher {
                     access,
                     cluster_name.clone()) {
                     Ok(_) => {
-                        let _ = update_cluster_status(&self.repo, cluster_name.clone(), ClusterStatus::Sync);
-                        let _ = self.repo.save_log(ActionLogEntry::info(cluster_name.clone(), "Cluster has been created".to_string()));
-                        info!("Cluster has been created")
+                        update_cluster_status(&self.repo, cluster_name.clone(), ClusterStatus::Sync)?;
+                        self.repo.save_log(ActionLogEntry::info(cluster_name.clone(), "Cluster has been created".to_string()))?;
+                        info!("Cluster has been created");
+                        Ok(())
                     }
                     Err(e) => {
-                        let _ = update_cluster_status(&self.repo, cluster_name.clone(), ClusterStatus::Error);
-                        let _ = self.repo.save_log(ActionLogEntry::error(cluster_name.clone(), e.clone()));
-                        error!("{}", e)
+                        update_cluster_status(&self.repo, cluster_name.clone(), ClusterStatus::Error)?;
+                        self.repo.save_log(ActionLogEntry::error(cluster_name.clone(), e.clone()))?;
+                        Err(e)
                     }
                 }
             }
@@ -46,12 +47,13 @@ impl Dispatcher {
                     access,
                     cluster_name.clone()) {
                     Ok(_) => {
-                        info!("Cluster has been deleted")
+                        info!("Cluster has been deleted");
+                        Ok(())
                     }
                     Err(e) => {
-                        let _ = update_cluster_status(&self.repo, cluster_name.clone(), ClusterStatus::Error);
-                        let _ = self.repo.save_log(ActionLogEntry::error(cluster_name.clone(), e.clone()));
-                        error!("{}", e);
+                        update_cluster_status(&self.repo, cluster_name.clone(), ClusterStatus::Error)?;
+                        self.repo.save_log(ActionLogEntry::error(cluster_name.clone(), e.clone()))?;
+                        Err(e)
                     }
                 }
             }
@@ -63,13 +65,22 @@ impl Dispatcher {
                     cluster_name.clone(),
                     node_name.clone()) {
                     Ok(_) => {
-                        let _ = self.repo.save_log(ActionLogEntry::info(cluster_name.clone(), "Node has been added".to_string()));
-                        info!("Cluster node has been created")
+                        self.repo.save_log(ActionLogEntry::info(cluster_name.clone(), format!("Node [{}] has been created", node_name)))?;
+
+                        let mut cluster = self.repo.get_cluster(cluster_name.clone())?.ok_or(format!("Cannot find cluster [{}]", cluster_name))?;
+                        cluster.nodes.iter_mut()
+                            .find(|i| i.name == node_name)
+                            .map(|i| i.lock = None)
+                            .ok_or(format!("Cannot find node [{}]", node_name))?;
+
+                        self.repo.save_cluster(cluster)?;
+                        info!("Cluster node has been created");
+                        Ok(())
                     }
                     Err(e) => {
-                        let _ = update_cluster_status(&self.repo, cluster_name.clone(), ClusterStatus::Error);
-                        let _ = self.repo.save_log(ActionLogEntry::error(cluster_name.clone(), e.clone()));
-                        error!("{}", e);
+                        update_cluster_status(&self.repo, cluster_name.clone(), ClusterStatus::Error)?;
+                        self.repo.save_log(ActionLogEntry::error(cluster_name.clone(), e.clone()))?;
+                        Err(e)
                     }
                 }
             }
@@ -81,13 +92,14 @@ impl Dispatcher {
                     cluster_name.clone(),
                     node_name.clone()) {
                     Ok(_) => {
-                        let _ = self.repo.save_log(ActionLogEntry::info(cluster_name.clone(), format!("Node [{}-{}] has been deleted", cluster_name, node_name)));
+                        self.repo.save_log(ActionLogEntry::info(cluster_name.clone(), format!("Node [{}-{}] has been deleted", cluster_name, node_name)))?;
                         info!("Cluster node [{}-{}] has been deleted", cluster_name, node_name);
+                        Ok(())
                     }
                     Err(e) => {
-                        let _ = update_cluster_status(&self.repo, cluster_name.clone(), ClusterStatus::Error);
-                        let _ = self.repo.save_log(ActionLogEntry::error(cluster_name.clone(), e.clone()));
-                        error!("{}", e);
+                        update_cluster_status(&self.repo, cluster_name.clone(), ClusterStatus::Error)?;
+                        self.repo.save_log(ActionLogEntry::error(cluster_name.clone(), e.clone()))?;
+                        Err(e)
                     }
                 }
             }

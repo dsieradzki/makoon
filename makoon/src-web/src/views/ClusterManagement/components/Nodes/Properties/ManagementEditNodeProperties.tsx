@@ -10,13 +10,11 @@ import {useOnFirstMount} from "@/utils/hooks";
 import React, {useState} from "react";
 import * as Yup from 'yup';
 import FormError from "@/components/FormError";
-import clusterManagementStore, {LOADING_INDICATOR_DELETE_HELM_CHART} from "@/store/clusterManagementStore";
+import clusterManagementStore from "@/store/clusterManagementStore";
 import {apiCall} from "@/utils/api";
 import api from "@/api/api";
 import {AvailableStorage} from "@/api/model";
-import * as cluster from "cluster";
 import {Dialog} from "primereact/dialog";
-import processingIndicatorStoreUi from "@/store/processingIndicatorStoreUi";
 
 interface NodeFormModel {
     name: string
@@ -35,14 +33,13 @@ const schema = Yup.object().shape({
     ipAddress: Yup.string().min(7).required(),
     storagePool: Yup.string().required()
 })
-const ManagementNodeReadOnlyProperties = () => {
+const ManagementEditNodeProperties = () => {
 
     const [storages, setStorages] = useState<AvailableStorage[]>([])
     const [deleteNodeConfirm, setDeleteNodeConfirm] = useState(false);
     useOnFirstMount(async () => {
         setStorages(await apiCall(() => api.storage.storage(clusterManagementStore.cluster.node, api.storage.StorageContentType.Images)))
     })
-
     const storedNode = computed(() => {
         if (uiPropertiesPanelStore.selectedPropertiesId) {
             return clusterManagementStore.findNode(Number(uiPropertiesPanelStore.selectedPropertiesId))
@@ -50,6 +47,10 @@ const ManagementNodeReadOnlyProperties = () => {
             return null
         }
     })
+
+    const cannotDelete = computed(() => {
+        return (!!storedNode.get()?.lock) || clusterManagementStore.cluster.nodes.filter(i => !i.lock).length < 2;
+    });
 
     const fullNodeName = `${clusterManagementStore.cluster.clusterName}-${storedNode.get()?.name}`;
 
@@ -81,7 +82,7 @@ const ManagementNodeReadOnlyProperties = () => {
                             onClick={async () => {
                                 let node = storedNode.get();
                                 if (node) {
-                                    await api.clusters.deleteNodeFromCluster(clusterManagementStore.cluster.clusterName, node.name);
+                                    await clusterManagementStore.deleteNodeFromCluster(node.name);
                                     setDeleteNodeConfirm(false);
                                     uiPropertiesPanelStore.hidePanel();
                                 }
@@ -181,7 +182,7 @@ const ManagementNodeReadOnlyProperties = () => {
                                     className="p-button-primary"/>
                             <div className="ml-2">
                                 <Button
-                                    disabled={clusterManagementStore.cluster.nodes.length < 2}
+                                    disabled={cannotDelete.get()}
                                     type="button"
                                     onClick={() => {
                                         setDeleteNodeConfirm(true);
@@ -200,4 +201,4 @@ const ManagementNodeReadOnlyProperties = () => {
 }
 
 
-export default observer(ManagementNodeReadOnlyProperties)
+export default observer(ManagementEditNodeProperties)

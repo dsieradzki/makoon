@@ -48,6 +48,7 @@ impl DefaultClusterConfigurationGenerator {
                 ip_address: "".to_string(),
                 storage_pool: default_disk_storage,
                 node_type: ClusterNodeType::Master,
+                lock: None,
             }],
             network: Network {
                 gateway: default_network.gateway.clone().unwrap_or_default(),

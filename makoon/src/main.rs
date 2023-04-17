@@ -77,6 +77,7 @@ async fn main() -> std::io::Result<()> {
             .service(handlers::cluster::generate_default_cluster_configuration)
             .service(handlers::cluster::get_clusters)
             .service(handlers::cluster::get_cluster)
+            .service(handlers::cluster::get_nodes)
             .service(handlers::cluster::create_cluster)
             .service(handlers::cluster::delete_cluster)
             .service(handlers::cluster::logs_for_cluster)

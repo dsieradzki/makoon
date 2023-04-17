@@ -19,6 +19,7 @@ const Nodes = () => {
                 refresh.current = false;
                 await clusterManagementStore.updateClusterNodeVmStatuses();
                 await clusterManagementStore.updateClusterKubeStatuses();
+                await clusterManagementStore.updateNodesIfThereIsAnyLock();
                 refresh.current = true;
             } else {
             }

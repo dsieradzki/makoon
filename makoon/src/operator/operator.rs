@@ -11,7 +11,7 @@ use crate::operator::{Error, Result, ssh};
 use crate::operator::Dispatcher;
 use crate::operator::dispatcher::HELM_CMD;
 use crate::operator::event::Event;
-use crate::operator::model::{ActionLogEntry, AppStatus, AppStatusType, Cluster, ClusterHeader, ClusterNode, ClusterNodeStatus, ClusterNodeType, ClusterRequest, ClusterResource, ClusterStatus, HelmApp, kube, KubeStatus};
+use crate::operator::model::{ActionLogEntry, AppStatus, AppStatusType, Cluster, ClusterHeader, ClusterNode, ClusterNodeLock, ClusterNodeStatus, ClusterNodeType, ClusterRequest, ClusterResource, ClusterStatus, HelmApp, kube, KubeStatus};
 use crate::operator::model::helm::InstalledRelease;
 use crate::operator::repository::Repository;
 
@@ -58,13 +58,19 @@ impl Operator {
             shutdown: shutdown.clone(),
             tx,
             executor: Some(std::thread::spawn(move || {
-                info!("Operator worker thread started");
+                info!("Operator worker thread has been started");
                 loop {
                     match rx.try_recv() {
                         Ok(e) => {
                             info!("Event received");
-                            dispatcher.dispatch(e);
-                            info!("Event processing finished successfully");
+                            match dispatcher.dispatch(e) {
+                                Ok(_) => {
+                                    info!("Event processing finished successfully");
+                                }
+                                Err(e) => {
+                                    error!("Event processing finished with error: [{}]", e);
+                                }
+                            };
                         }
                         Err(_) => {
                             std::thread::sleep(Duration::from_millis(config.worker_thread_probe_duration));
@@ -121,10 +127,13 @@ impl Operator {
     }
 
 
-    pub fn add_node_cluster(&self, access: AccessData, cluster_name: String, node_request: ClusterNode) -> Result<()> {
+    pub fn add_node_cluster(&self, access: AccessData, cluster_name: String, node_request: ClusterNode) -> Result<ClusterNode> {
         let mut cluster = self.repository
             .get_cluster(cluster_name.clone())?
             .ok_or(Error::Generic("Cannot get cluster".to_string()))?;
+
+        let mut node_request = node_request.clone();
+        node_request.lock = Some(ClusterNodeLock::Create);
 
         cluster.nodes.push(node_request.clone());
         self.repository.save_cluster(cluster)?;
@@ -136,7 +145,7 @@ impl Operator {
             node_name: node_request.name.clone(),
         })?;
 
-        Ok(())
+        Ok(node_request)
     }
 
     pub fn delete_cluster(&self, access: AccessData, cluster_name: String) -> Result<()> {
@@ -155,14 +164,24 @@ impl Operator {
         Ok(())
     }
 
-    pub fn delete_node_from_cluster(&self, access: AccessData, cluster_name: String, node_name: String) -> Result<()> {
-        self.repository.save_log(ActionLogEntry::info(cluster_name.clone(), format!("Deleting node [{}] from cluster [{}] has been started", node_name, cluster_name)))?;
+    pub fn delete_node_from_cluster(&self, access: AccessData, cluster_name: String, node_name: String) -> Result<ClusterNode> {
+        self.repository.save_log(ActionLogEntry::info(cluster_name.clone(), format!("Deleting node [{}] from cluster has been started", node_name)))?;
+
+        let mut cluster = self.repository.get_cluster(cluster_name.clone())?.ok_or(Error::ResourceNotFound)?;
+        let node_to_delete = cluster.nodes.iter_mut()
+            .find(|i| i.name == node_name).ok_or(Error::ResourceNotFound)?;
+        node_to_delete.lock = Some(ClusterNodeLock::Delete);
+
+        let result = node_to_delete.clone();
+
+        self.repository.save_cluster(cluster)?;
+
         self.tx.send(Event::DeleteNodeFromCluster {
             access,
             cluster_name,
             node_name,
         })?;
-        Ok(())
+        Ok(result)
     }
 
     pub fn get_clusters(&self) -> Result<Vec<ClusterHeader>> {
@@ -296,6 +315,10 @@ impl Operator {
 
     pub fn get_cluster(&self, cluster_name: String) -> Result<Option<Cluster>> {
         Ok(self.repository.get_cluster(cluster_name)?)
+    }
+
+    pub fn get_nodes(&self, cluster_name: String) -> Result<Vec<ClusterNode>> {
+        Ok(self.repository.get_cluster(cluster_name)?.ok_or(Error::ResourceNotFound)?.nodes)
     }
 
     pub fn save_helm_app(&self, cluster_name: &str, app: HelmApp) -> Result<String> {
