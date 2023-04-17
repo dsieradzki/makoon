@@ -15,6 +15,7 @@ import api from "@/api/api";
 import StorageDropdownOption from "@/components/StorageDropdownOption";
 import clusterManagementStore from "@/store/clusterManagementStore";
 import {Button} from "primereact/button";
+import {generateNode} from "@/utils/nodes";
 
 interface NodeFormModel {
     name: string
@@ -48,17 +49,28 @@ const ManagementAddNodeProperties = () => {
     })
 
     const clusterName = clusterManagementStore.cluster.clusterName;
-
+    const generatedNextNode = generateNode(
+        clusterManagementStore.cluster.nodes,
+        uiPropertiesPanelStore.selectedPropertiesId == "master" ? ClusterNodeType.Master : ClusterNodeType.Worker,
+        {
+            cores: 2,
+            ipAddress: "",
+            memory: 2048,
+            name: "master-1",
+            nodeType: ClusterNodeType.Master,
+            storagePool: "",
+            vmId: 100
+        } as ClusterNode);
     const formik = useFormik({
         validateOnMount: true,
         validationSchema: schema,
         initialValues: {
-            vmId: 999,
-            name: "",
-            cores: 2,
-            memory: 2048,
-            ipAddress: "",
-            storagePool: "",
+            vmId: generatedNextNode.vmId,
+            name: generatedNextNode.name,
+            cores: generatedNextNode.cores,
+            memory: generatedNextNode.memory,
+            ipAddress: generatedNextNode.ipAddress,
+            storagePool: generatedNextNode.storagePool,
         } as NodeFormModel,
 
         onSubmit: async (values, formikHelpers) => {
