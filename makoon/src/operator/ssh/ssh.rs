@@ -2,6 +2,7 @@ use std::io::Read;
 use std::io::Write;
 use std::net::TcpStream;
 use std::path::Path;
+
 use serde::Deserialize;
 
 pub struct Client {
@@ -51,6 +52,7 @@ impl Client {
                 if e.message() == "no such file" {
                     Ok(false)
                 } else {
+                    error!("Cannot check file due to unknown error {}", e);
                     Ok(false)
                 }
             }
