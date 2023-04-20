@@ -4,7 +4,7 @@ use proxmox::ClientOperations;
 use proxmox::model::{NetworkType, StorageContentType};
 
 use crate::operator::{Error, Result};
-use crate::operator::model::{ClusterNode, ClusterNodeType, ClusterRequest, HelmApp, KeyPair, Network};
+use crate::operator::model::{ClusterNode, ClusterNodeType, ClusterRequest, KeyPair, Network};
 
 const EMPTY: String = String::new();
 

@@ -268,7 +268,7 @@ impl Operator {
             .find(|i| i.node_type == ClusterNodeType::Master)
             .map(|i| i.clone()).ok_or(Error::ResourceNotFound)?;
 
-        let mut result = cluster.helm_apps.iter().map(|i| AppStatus {
+        let result = cluster.helm_apps.iter().map(|i| AppStatus {
             id: i.id.clone(),
             status: AppStatusType::Unknown,
         }).collect::<Vec<AppStatus>>();
@@ -364,7 +364,7 @@ impl Operator {
         Ok(())
     }
     pub fn install_helm_app(&self, cluster_name: &str, app_id: &str) -> Result<()> {
-        let mut cluster = self.repository
+        let cluster = self.repository
             .get_cluster(cluster_name.to_string())?
             .ok_or(Error::ResourceNotFound)?;
 
@@ -384,7 +384,7 @@ impl Operator {
         Ok(())
     }
     pub fn uninstall_helm_app(&self, cluster_name: &str, app_id: &str) -> Result<()> {
-        let mut cluster = self.repository
+        let cluster = self.repository
             .get_cluster(cluster_name.to_string())?
             .ok_or(Error::ResourceNotFound)?;
 
@@ -439,7 +439,7 @@ impl Operator {
     }
 
     pub fn install_cluster_resource(&self, cluster_name: &str, res_id: &str) -> Result<()> {
-        let mut cluster = self.repository
+        let cluster = self.repository
             .get_cluster(cluster_name.to_string())?
             .ok_or(Error::ResourceNotFound)?;
 
@@ -459,7 +459,7 @@ impl Operator {
         Ok(())
     }
     pub fn uninstall_cluster_resource(&self, cluster_name: &str, res_id: &str) -> Result<()> {
-        let mut cluster = self.repository
+        let cluster = self.repository
             .get_cluster(cluster_name.to_string())?
             .ok_or(Error::ResourceNotFound)?;
 

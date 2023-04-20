@@ -6,7 +6,7 @@ use proxmox::model::AccessData;
 
 use crate::operator::{Repository, ssh};
 use crate::operator::dispatcher::delete_cluster::{delete_vms, get_existing_vms, stop_vms};
-use crate::operator::model::{ActionLogEntry, ClusterNode, ClusterNodeType};
+use crate::operator::model::{ActionLogEntry, ClusterNodeType};
 
 pub(crate) fn execute(
     proxmox_client: Arc<Client>,

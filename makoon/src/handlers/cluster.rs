@@ -1,4 +1,4 @@
-use std::ptr::addr_of;
+
 use actix_session::Session;
 use actix_web::{delete, get, HttpResponse, post, Responder, web};
 
