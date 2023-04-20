@@ -5,7 +5,6 @@ use std::time::Duration;
 
 use openssl::rsa::Rsa;
 use pem::{encode, Pem};
-use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
 
 use proxmox::{Client, ClientOperations, to_url_encoded};
@@ -29,7 +28,7 @@ pub(crate) fn execute(
 
     repo.save_log(ActionLogEntry::info(cluster_name.clone(), "Start creating cluster".to_string()))?;
 
-    let mut cluster = repo.get_cluster(cluster_name.clone())?.ok_or("Cannot find cluster")?;
+    let mut cluster = repo.get_cluster(cluster_name)?.ok_or("Cannot find cluster")?;
     let keys = generate_ssh_keys()?;
     cluster.ssh_key = keys;
     repo.save_cluster(cluster.clone())?;
@@ -82,8 +81,7 @@ fn install_helm_apps(repo: Arc<Repository>, cluster: &Cluster) -> Result<(), Str
     repo.save_log(ActionLogEntry::info(cluster.cluster_name.clone(), "Install Helm apps".to_string()))?;
 
     let master_node = cluster.nodes.iter()
-        .find(|i| i.node_type == ClusterNodeType::Master)
-        .map(|i| i.clone()).ok_or("Cannot find any master node".to_string())?;
+        .find(|i| i.node_type == ClusterNodeType::Master).cloned().ok_or("Cannot find any master node".to_string())?;
 
     let mut ssh_client = ssh::Client::new();
     ssh_client.connect(&master_node.ip_address, &cluster.node_username, &cluster.ssh_key.private_key, &cluster.ssh_key.public_key)?;
@@ -144,8 +142,7 @@ pub fn install_helm_app(ssh_client: &ssh::Client, app: &HelmApp) -> Result<(), S
 fn enable_microk8s_addons(repo: Arc<Repository>, cluster: &Cluster) -> Result<(), String> {
     repo.save_log(ActionLogEntry::info(cluster.cluster_name.clone(), "Enable MicroK8s addons: [dns, helm3]".to_string()))?;
     let master_node = cluster.nodes.iter()
-        .find(|i| i.node_type == ClusterNodeType::Master)
-        .map(|i| i.clone()).ok_or("Cannot find any master node".to_string())?;
+        .find(|i| i.node_type == ClusterNodeType::Master).cloned().ok_or("Cannot find any master node".to_string())?;
 
     let mut ssh_client = ssh::Client::new();
     ssh_client.connect(&master_node.ip_address, &cluster.node_username, &cluster.ssh_key.private_key, &cluster.ssh_key.public_key)?;
@@ -157,8 +154,7 @@ fn enable_microk8s_addons(repo: Arc<Repository>, cluster: &Cluster) -> Result<()
 fn add_kubeconfig_to_project(repo: Arc<Repository>, cluster: &mut Cluster) -> Result<(), String> {
     repo.save_log(ActionLogEntry::info(cluster.cluster_name.clone(), format!("Add kube config to project")))?;
     let mut master_nodes = cluster.nodes.iter()
-        .filter(|i| i.node_type == ClusterNodeType::Master)
-        .map(|i| i.clone())
+        .filter(|i| i.node_type == ClusterNodeType::Master).cloned()
         .collect::<Vec<ClusterNode>>();
     master_nodes.sort_by(|a, b| a.vm_id.cmp(&b.vm_id));
     let first_master_node = master_nodes.first().ok_or("Cannot get first master node".to_string())?;
@@ -186,8 +182,7 @@ fn join_nodes_to_cluster(repo: Arc<Repository>, cluster: &Cluster) -> Result<(),
     }
 
     let master_node = cluster.nodes.iter()
-        .find(|i| i.node_type == ClusterNodeType::Master)
-        .map(|i| i.clone()).ok_or("Cannot find any master node".to_string())?;
+        .find(|i| i.node_type == ClusterNodeType::Master).cloned().ok_or("Cannot find any master node".to_string())?;
 
     let nodes_to_join = cluster.nodes.clone().into_iter()
         .filter(|i| i.vm_id != master_node.vm_id)
@@ -359,8 +354,7 @@ pub(crate) fn download_os_image(
         Ok(
             proxmox_client.storage_content(cluster.node.clone(), os_image_storage.clone())?
                 .iter()
-                .find(|i| i.volid.ends_with(file_name.as_str()))
-                .map(|i| i.clone())
+                .find(|i| i.volid.ends_with(file_name.as_str())).cloned()
         )
     };
     let existing_image = get_storage_content();
@@ -368,7 +362,7 @@ pub(crate) fn download_os_image(
         Ok(v) => v,
         Err(e) => {
             repo.save_log(ActionLogEntry::error(cluster.cluster_name.clone(), format!("Cannot check image availability [{}]", e.to_string())))?;
-            return Err(e.to_string());
+            return Err(e);
         }
     };
     if existing_image.is_none() {
@@ -399,7 +393,7 @@ pub(crate) fn download_os_image(
                 Ok(v) => v,
                 Err(e) => {
                     repo.save_log(ActionLogEntry::error(cluster.cluster_name.clone(), format!("Cannot image availability [{}]", e.to_string())))?;
-                    return Err(e.to_string());
+                    return Err(e);
                 }
             };
 

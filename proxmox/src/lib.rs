@@ -13,7 +13,7 @@ pub use client::*;
 pub use client_operations::*;
 
 //TODO: cleanup using this outside proxmox crate
-pub fn to_url_encoded(val: &String) -> String {
+pub fn to_url_encoded(val: &str) -> String {
     let result = urlencoding::encode(val);
     result.to_string()
 }

@@ -57,8 +57,7 @@ async fn main() -> std::io::Result<()> {
     let operator = Operator::new(
         Config::default(),
         Dispatcher::new(proxmox_client.clone(), repo.clone()),
-        repo.clone(),
-        proxmox_client.clone());
+        repo.clone());
 
     let operator = inject::Operator::new(Mutex::new(operator));
     let session_encryption_key = Key::generate();

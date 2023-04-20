@@ -22,12 +22,12 @@ pub async fn export_cluster_data(path: web::Path<(String, ExportType)>, session:
     let _ = logged_in!(session, proxmox_client);
     let (cluster_name, export_type) = path.into_inner();
 
-    let cluster = operator.lock().map_err(|e| HandlerError::from(e))?
+    let cluster = operator.lock().map_err(HandlerError::from)?
         .get_cluster(cluster_name.clone())?
         .ok_or(HandlerError::NotFound("Cluster not found".to_string()))?;
 
     let (key, file_name) = match export_type {
-        ExportType::PrivateKey => (cluster.ssh_key.private_key, format!("{}", cluster_name)),
+        ExportType::PrivateKey => (cluster.ssh_key.private_key, cluster_name),
         ExportType::PublicKey => (cluster.ssh_key.public_key, format!("{}.pub", cluster_name)),
         ExportType::KubeConfig => (cluster.cluster_config, "config".to_string()),
     };

@@ -78,7 +78,7 @@ pub async fn delete_cluster(path: web::Path<String>, session: Session, operator:
     let operator = operator.lock()?;
     let name = path.into_inner();
 
-    operator.delete_cluster(access, name.clone())?;
+    operator.delete_cluster(access, name)?;
     Ok(HttpResponse::Ok().finish())
 }
 

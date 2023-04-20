@@ -33,7 +33,6 @@ pub struct Operator {
     tx: Sender<Event>,
     shutdown: Arc<AtomicBool>,
     repository: Arc<Repository>,
-    proxmox_client: Arc<proxmox::Client>,
 }
 
 impl Drop for Operator {
@@ -48,12 +47,11 @@ impl Drop for Operator {
 }
 
 impl Operator {
-    pub fn new(config: Config, dispatcher: Dispatcher, repository: Arc<Repository>, proxmox_client: Arc<proxmox::Client>) -> Self {
+    pub fn new(config: Config, dispatcher: Dispatcher, repository: Arc<Repository>) -> Self {
         let (tx, rx): (Sender<Event>, Receiver<Event>) = mpsc::channel();
         let shutdown = Arc::new(AtomicBool::from(false));
 
         Operator {
-            proxmox_client,
             repository,
             shutdown: shutdown.clone(),
             tx,
@@ -88,8 +86,7 @@ impl Operator {
     pub fn create_cluster(&self, access: AccessData, cluster_request: ClusterRequest) -> Result<()> {
         let cluster_name = cluster_request.cluster_name.clone();
 
-        if let Some(_) = self.repository
-            .get_cluster(cluster_name.clone())? {
+        if (self.repository.get_cluster(cluster_name.clone())?).is_some() {
             return Err(Error::ResourceAlreadyExists);
         }
 
@@ -132,7 +129,7 @@ impl Operator {
             .get_cluster(cluster_name.clone())?
             .ok_or(Error::Generic("Cannot get cluster".to_string()))?;
 
-        let mut node_request = node_request.clone();
+        let mut node_request = node_request;
         node_request.lock = Some(ClusterNodeLock::Create);
 
         cluster.nodes.push(node_request.clone());
@@ -221,8 +218,7 @@ impl Operator {
             .ok_or(Error::ResourceNotFound)?;
 
         let master_node = cluster.nodes.iter()
-            .find(|i| i.node_type == ClusterNodeType::Master)
-            .map(|i| i.clone()).ok_or(Error::ResourceNotFound)?;
+            .find(|i| i.node_type == ClusterNodeType::Master).cloned().ok_or(Error::ResourceNotFound)?;
 
 
         let mut result: Vec<ClusterNodeStatus> = cluster.nodes.iter().map(|i| ClusterNodeStatus {
@@ -232,12 +228,9 @@ impl Operator {
 
 
         let mut ssh_client = ssh::Client::new();
-        match ssh_client.connect(&master_node.ip_address, &cluster.node_username, &cluster.ssh_key.private_key, &cluster.ssh_key.public_key) {
-            Err(_) => {
-                return Ok(result);
-            }
-            _ => ()
-        };
+        if ssh_client.connect(&master_node.ip_address, &cluster.node_username, &cluster.ssh_key.private_key, &cluster.ssh_key.public_key).is_err() {
+            return Ok(result);
+        } else {};
         let nodes_status = ssh_client.execute("sudo microk8s kubectl get nodes -o json --request-timeout='5s'");
         let nodes_status = match nodes_status {
             Ok(v) => v,
@@ -265,8 +258,7 @@ impl Operator {
             .ok_or(Error::ResourceNotFound)?;
 
         let master_node = cluster.nodes.iter()
-            .find(|i| i.node_type == ClusterNodeType::Master)
-            .map(|i| i.clone()).ok_or(Error::ResourceNotFound)?;
+            .find(|i| i.node_type == ClusterNodeType::Master).cloned().ok_or(Error::ResourceNotFound)?;
 
         let result = cluster.helm_apps.iter().map(|i| AppStatus {
             id: i.id.clone(),
@@ -274,13 +266,10 @@ impl Operator {
         }).collect::<Vec<AppStatus>>();
 
         let mut ssh_client = ssh::Client::new();
-        match ssh_client.connect(&master_node.ip_address, &cluster.node_username, &cluster.ssh_key.private_key, &cluster.ssh_key.public_key) {
-            Err(_) => {
-                return Ok(result);
-            }
-            _ => ()
+        if ssh_client.connect(&master_node.ip_address, &cluster.node_username, &cluster.ssh_key.private_key, &cluster.ssh_key.public_key).is_err() {
+            return Ok(result);
         }
-        let installed_releases = ssh_client.execute_to(&helm::new(crate::operator::dispatcher::HELM_CMD)
+        let installed_releases = ssh_client.execute_to(&helm::new(HELM_CMD)
             .sudo()
             .list()
             .all()
@@ -307,10 +296,6 @@ impl Operator {
 
     pub fn logs_for_cluster(&self, name: String) -> Result<Vec<ActionLogEntry>> {
         Ok(self.repository.logs(name)?)
-    }
-
-    pub fn add_log(&self, log: ActionLogEntry) -> Result<()> {
-        Ok(self.repository.save_log(log)?)
     }
 
     pub fn get_cluster(&self, cluster_name: String) -> Result<Option<Cluster>> {
@@ -373,8 +358,7 @@ impl Operator {
             .ok_or(Error::ResourceNotFound)?;
 
         let master_node = cluster.nodes.iter()
-            .find(|i| i.node_type == ClusterNodeType::Master)
-            .map(|i| i.clone()).ok_or(Error::ResourceNotFound)?;
+            .find(|i| i.node_type == ClusterNodeType::Master).cloned().ok_or(Error::ResourceNotFound)?;
 
         let mut ssh_client = ssh::Client::new();
         ssh_client.connect(&master_node.ip_address, &cluster.node_username, &cluster.ssh_key.private_key, &cluster.ssh_key.public_key)?;
@@ -393,8 +377,7 @@ impl Operator {
             .ok_or(Error::ResourceNotFound)?;
 
         let master_node = cluster.nodes.iter()
-            .find(|i| i.node_type == ClusterNodeType::Master)
-            .map(|i| i.clone()).ok_or(Error::ResourceNotFound)?;
+            .find(|i| i.node_type == ClusterNodeType::Master).cloned().ok_or(Error::ResourceNotFound)?;
 
         let mut ssh_client = ssh::Client::new();
         ssh_client.connect(&master_node.ip_address, &cluster.node_username, &cluster.ssh_key.private_key, &cluster.ssh_key.public_key)?;
@@ -448,8 +431,7 @@ impl Operator {
             .ok_or(Error::ResourceNotFound)?;
 
         let master_node = cluster.nodes.iter()
-            .find(|i| i.node_type == ClusterNodeType::Master)
-            .map(|i| i.clone()).ok_or(Error::ResourceNotFound)?;
+            .find(|i| i.node_type == ClusterNodeType::Master).cloned().ok_or(Error::ResourceNotFound)?;
 
         let mut ssh_client = ssh::Client::new();
         ssh_client.connect(&master_node.ip_address, &cluster.node_username, &cluster.ssh_key.private_key, &cluster.ssh_key.public_key)?;
@@ -468,14 +450,13 @@ impl Operator {
             .ok_or(Error::ResourceNotFound)?;
 
         let master_node = cluster.nodes.iter()
-            .find(|i| i.node_type == ClusterNodeType::Master)
-            .map(|i| i.clone()).ok_or(Error::ResourceNotFound)?;
+            .find(|i| i.node_type == ClusterNodeType::Master).cloned().ok_or(Error::ResourceNotFound)?;
 
         let mut ssh_client = ssh::Client::new();
         ssh_client.connect(&master_node.ip_address, &cluster.node_username, &cluster.ssh_key.private_key, &cluster.ssh_key.public_key)?;
 
 
-        let file_name = format!("{}_cluster_resource", res.name.trim().replace(" ", "_"));
+        let file_name = format!("{}_cluster_resource", res.name.trim().replace(' ', "_"));
         ssh_client.upload_file(format!("/tmp/{}.yaml", file_name).as_str(), res.content.as_str())?;
         ssh_client.execute(format!("sudo microk8s.kubectl delete -f /tmp/{}.yaml", file_name).as_str())?;
         ssh_client.execute(format!("sudo rm /tmp/{}.yaml", file_name).as_str())?;

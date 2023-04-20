@@ -92,7 +92,7 @@ impl YamlRepository {
                     DbData {
                         clusters: vec![],
                         action_log: vec![],
-                    }).expect(format!("cannot save database to [{}], error: [{:?}]", path, e).as_str());
+                    }).unwrap_or_else(|_| panic!("cannot save database to [{}], error: [{:?}]", path, e));
             }
         };
         repo
@@ -113,7 +113,7 @@ impl YamlRepository {
         let file = File::open(self.path.clone()).map_err(|e| Error::ReadingError(e.to_string()))?;
         let reader = BufReader::new(file);
         let result = serde_json::from_reader(reader).map_err(|e| Error::ReadingError(e.to_string()))?;
-        return Ok(result);
+        Ok(result)
     }
 
     pub fn get_clusters(&self) -> Result<Vec<Cluster>> {
@@ -129,16 +129,16 @@ impl YamlRepository {
     pub fn delete_cluster(&self, name: String) -> Result<()> {
         let mut data = self.load()?;
 
-        data.clusters = data.clusters.into_iter().filter(|e| e.cluster_name != name).collect();
-        data.action_log = data.action_log.into_iter().filter(|e| e.cluster_name != name).collect();
+        data.clusters.retain(|e| e.cluster_name != name);
+        data.action_log.retain(|e| e.cluster_name != name);
 
-        Ok(self.save(data)?)
+        self.save(data)
     }
 
     pub fn save_cluster(&self, cluster_to_save: Cluster) -> Result<()> {
         let mut data = self.load()?;
 
-        let to_update = data.clusters.iter().find(|i| i.cluster_name == cluster_to_save.cluster_name).is_some();
+        let to_update = data.clusters.iter().any(|i| i.cluster_name == cluster_to_save.cluster_name);
         if to_update {
             let clusters = data.clusters.into_iter()
                 .map(move |i| {

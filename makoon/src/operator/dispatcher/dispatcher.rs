@@ -29,13 +29,13 @@ impl Dispatcher {
                     cluster_name.clone()) {
                     Ok(_) => {
                         update_cluster_status(&self.repo, cluster_name.clone(), ClusterStatus::Sync)?;
-                        self.repo.save_log(ActionLogEntry::info(cluster_name.clone(), "Cluster has been created".to_string()))?;
+                        self.repo.save_log(ActionLogEntry::info(cluster_name, "Cluster has been created".to_string()))?;
                         info!("Cluster has been created");
                         Ok(())
                     }
                     Err(e) => {
                         update_cluster_status(&self.repo, cluster_name.clone(), ClusterStatus::Error)?;
-                        self.repo.save_log(ActionLogEntry::error(cluster_name.clone(), e.clone()))?;
+                        self.repo.save_log(ActionLogEntry::error(cluster_name, e.clone()))?;
                         Err(e)
                     }
                 }
@@ -52,7 +52,7 @@ impl Dispatcher {
                     }
                     Err(e) => {
                         update_cluster_status(&self.repo, cluster_name.clone(), ClusterStatus::Error)?;
-                        self.repo.save_log(ActionLogEntry::error(cluster_name.clone(), e.clone()))?;
+                        self.repo.save_log(ActionLogEntry::error(cluster_name, e.clone()))?;
                         Err(e)
                     }
                 }
@@ -79,7 +79,7 @@ impl Dispatcher {
                     }
                     Err(e) => {
                         update_cluster_status(&self.repo, cluster_name.clone(), ClusterStatus::Error)?;
-                        self.repo.save_log(ActionLogEntry::error(cluster_name.clone(), e.clone()))?;
+                        self.repo.save_log(ActionLogEntry::error(cluster_name, e.clone()))?;
                         Err(e)
                     }
                 }
@@ -98,7 +98,7 @@ impl Dispatcher {
                     }
                     Err(e) => {
                         update_cluster_status(&self.repo, cluster_name.clone(), ClusterStatus::Error)?;
-                        self.repo.save_log(ActionLogEntry::error(cluster_name.clone(), e.clone()))?;
+                        self.repo.save_log(ActionLogEntry::error(cluster_name, e.clone()))?;
                         Err(e)
                     }
                 }
