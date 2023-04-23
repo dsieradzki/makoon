@@ -1,3 +1,17 @@
+# [0.13.0](https://github.com/dsieradzki/makoon/compare/v0.12.0...v0.13.0) (2023-04-23)
+
+
+### Bug Fixes
+
+* Remove default apps in cluster creator ([6e21bea](https://github.com/dsieradzki/makoon/commit/6e21beaa37e015f167ea96f604e846ffc5df65c6))
+
+
+### Features
+
+* Add and delete nodes from existing cluster ([e005bda](https://github.com/dsieradzki/makoon/commit/e005bda95ad9e58d94563909ea32a136414a1868))
+
+
+
 # [0.12.0](https://github.com/dsieradzki/makoon/compare/v0.11.0...v0.12.0) (2023-04-11)
 
 
@@ -44,15 +58,6 @@
 ### Features
 
 * Helm Chart management ([f2cb3b3](https://github.com/dsieradzki/makoon/commit/f2cb3b32c744913a9846280a872b1dc9478fe8cf))
-
-
-
-# [0.9.0](https://github.com/dsieradzki/makoon/compare/v0.8.0...v0.9.0) (2022-11-12)
-
-
-### Features
-
-* multi cluster support ([2ce8508](https://github.com/dsieradzki/makoon/commit/2ce8508e5551ecf523ca3a815713371f468ddb23))
 
 
 
