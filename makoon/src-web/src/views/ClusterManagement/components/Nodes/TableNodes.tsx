@@ -2,8 +2,9 @@ import React from 'react';
 import Table from "@/components/Table/Table";
 import VmStatusComponent from "@/views/ClusterManagement/components/Nodes/VmStatusComponent";
 import K8sStatusComponent from "@/views/ClusterManagement/components/Nodes/K8sStatusComponent";
-import { NodeWithStatus } from "@/store/clusterManagementStore";
+import {NodeWithStatus} from "@/store/clusterManagementStore";
 import {VmStatus} from "@/api/model";
+import {ProgressSpinner} from "primereact/progressspinner";
 
 
 type Props = {
@@ -33,7 +34,11 @@ const TableNodes = (props: Props) => {
                                 selected={kNode.vmId.toString() === props.selectedId}
                                 onClick={props.onClick}>
                                 <Table.Column className="font-bold">
-                                    {props.clusterName}-{kNode.name}
+                                    {kNode.lock &&
+                                        <span className="mr-2">
+                                            <ProgressSpinner style={{width: '15px', height: '15px'}} strokeWidth="10"/>
+                                        </span>}
+                                    <span>{props.clusterName}-{kNode.name}</span>
                                 </Table.Column>
                                 <Table.Column>
                                     {kNode.vmId}
@@ -51,7 +56,8 @@ const TableNodes = (props: Props) => {
                                     <VmStatusComponent status={kNode.vmStatus}/>
                                 </Table.Column>
                                 <Table.Column className="max-h-[58px]">
-                                    <K8sStatusComponent status={kNode.kubeStatus} vmStatusProblem={kNode.vmStatus == VmStatus.Stopped}/>
+                                    <K8sStatusComponent status={kNode.kubeStatus}
+                                                        vmStatusProblem={kNode.vmStatus == VmStatus.Stopped}/>
                                 </Table.Column>
                             </Table.Row>
                         )

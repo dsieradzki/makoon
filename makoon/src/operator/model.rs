@@ -1,3 +1,4 @@
+use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 
 use chrono::{NaiveDateTime, Utc};
@@ -39,6 +40,24 @@ pub enum ClusterNodeType {
     Worker,
 }
 
+impl Display for ClusterNodeType {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ClusterNodeType::Master => write!(f, "master"),
+            ClusterNodeType::Worker => write!(f, "worker")
+        }
+    }
+}
+
+#[typeshare]
+#[derive(Clone, Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub enum ClusterNodeLock {
+    Create,
+    Delete,
+    ChangeResources,
+}
+
 #[typeshare]
 #[derive(Clone, Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -50,6 +69,7 @@ pub struct ClusterNode {
     pub ip_address: String,
     pub storage_pool: String,
     pub node_type: ClusterNodeType,
+    pub lock: Option<ClusterNodeLock>,
 }
 
 #[typeshare]
@@ -94,27 +114,29 @@ pub enum ActionLogLevel {
 #[typeshare]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct ActionLogEntry {
+pub struct LogEntry {
     pub date: NaiveDateTime,
     pub cluster_name: String,
     pub message: String,
     pub level: ActionLogLevel,
 }
 
-impl ActionLogEntry {
-    pub fn info(cluster_name: String, message: String) -> Self {
-        ActionLogEntry {
+impl LogEntry {
+    pub fn info<T>(cluster_name: &str, message: T) -> Self
+        where T: ToString {
+        LogEntry {
             date: Utc::now().naive_local(),
-            cluster_name,
-            message,
+            cluster_name: cluster_name.to_string(),
+            message: message.to_string(),
             level: ActionLogLevel::Info,
         }
     }
-    pub fn error(cluster_name: String, message: String) -> Self {
-        ActionLogEntry {
+    pub fn error<T>(cluster_name: &str, message: T) -> Self
+        where T: ToString {
+        LogEntry {
             date: Utc::now().naive_local(),
-            cluster_name,
-            message,
+            cluster_name: cluster_name.to_string(),
+            message: message.to_string(),
             level: ActionLogLevel::Error,
         }
     }
@@ -126,6 +148,12 @@ impl ActionLogEntry {
 pub struct Cluster {
     pub node: String,
     pub cluster_name: String,
+    //TODO: Option is for backward compatibility, will be deleted in next release
+    pub os_image: Option<String>,
+    //TODO: Option is for backward compatibility, will be deleted in next release
+    pub os_image_storage: Option<String>,
+    //TODO: Option is for backward compatibility, will be deleted in next release
+    pub kube_version: Option<String>,
     pub cluster_config: String,
     pub ssh_key: KeyPair,
     pub node_username: String,

@@ -1,5 +1,5 @@
 use log::trace;
-use reqwest;
+
 use reqwest::blocking::RequestBuilder;
 use reqwest::header::{ACCEPT, CONTENT_TYPE};
 use serde::{Deserialize, Serialize};
@@ -104,10 +104,8 @@ impl HttpClient {
             }
         };
 
-        Ok(
-            serde_json::from_str(&result)
-                .map_err(|e| Error::BodyMalformed(e.to_string()))?
-        )
+        serde_json::from_str(&result)
+                .map_err(|e| Error::BodyMalformed(e.to_string()))
     }
 }
 

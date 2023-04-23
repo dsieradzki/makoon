@@ -2,6 +2,7 @@ use std::io::Read;
 use std::io::Write;
 use std::net::TcpStream;
 use std::path::Path;
+
 use serde::Deserialize;
 
 pub struct Client {
@@ -17,6 +18,7 @@ impl Client {
         }
     }
 
+    #[allow(dead_code)]
     pub fn set_port(&mut self, port: u16) -> Result<(), String> {
         match &self.session {
             Some(_) => Err("Cannot chage port when connection is established".to_string()),
@@ -27,7 +29,7 @@ impl Client {
         }
     }
     pub fn connect(&mut self, ip_address: &str, username: &str, private_key: &str, public_key: &str) -> Result<(), String> {
-        let tcp = TcpStream::connect(format!("{}:22", ip_address)).map_err(|e| e.to_string())?;
+        let tcp = TcpStream::connect(format!("{}:{}", ip_address, self.port)).map_err(|e| e.to_string())?;
         let mut session = ssh2::Session::new().map_err(|e| e.to_string())?;
         session.set_tcp_stream(tcp);
         session.handshake().map_err(|e| e.to_string())?;
@@ -51,6 +53,7 @@ impl Client {
                 if e.message() == "no such file" {
                     Ok(false)
                 } else {
+                    error!("Cannot check file due to unknown error {}", e);
                     Ok(false)
                 }
             }
@@ -83,12 +86,15 @@ impl Client {
         channel.read_to_string(&mut out).map_err(|e| e.to_string())?;
         channel.wait_close().map_err(|e| e.to_string())?;
 
-        let exit_code = channel.exit_status().map_err(|e| e.to_string()).map_err(|e| e.to_string())?;
+        let exit_code = channel.exit_status().map_err(|e| e.to_string()).map_err(|e| e)?;
         match exit_code {
             0 => Ok(out),
             _ => {
                 let mut err_out = String::new();
                 channel.stderr().read_to_string(&mut err_out).map_err(|e| e.to_string())?;
+                if err_out.is_empty() {
+                    err_out = out;
+                }
                 Err(format!("Exit code: [{}], output: [{}]", exit_code, err_out))
             }
         }

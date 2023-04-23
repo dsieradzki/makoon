@@ -57,8 +57,7 @@ async fn main() -> std::io::Result<()> {
     let operator = Operator::new(
         Config::default(),
         Dispatcher::new(proxmox_client.clone(), repo.clone()),
-        repo.clone(),
-        proxmox_client.clone());
+        repo.clone());
 
     let operator = inject::Operator::new(Mutex::new(operator));
     let session_encryption_key = Key::generate();
@@ -77,11 +76,14 @@ async fn main() -> std::io::Result<()> {
             .service(handlers::cluster::generate_default_cluster_configuration)
             .service(handlers::cluster::get_clusters)
             .service(handlers::cluster::get_cluster)
+            .service(handlers::cluster::get_nodes)
             .service(handlers::cluster::create_cluster)
             .service(handlers::cluster::delete_cluster)
             .service(handlers::cluster::logs_for_cluster)
             .service(handlers::cluster::cluster_vm_status)
             .service(handlers::cluster::cluster_kube_status)
+            .service(handlers::cluster::add_node_to_cluster)
+            .service(handlers::cluster::delete_node_from_cluster)
             .service(handlers::apps::apps_status)
             .service(handlers::apps::save_helm_app)
             .service(handlers::apps::update_helm_app)

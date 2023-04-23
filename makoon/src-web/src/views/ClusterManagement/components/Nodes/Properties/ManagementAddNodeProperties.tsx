@@ -1,22 +1,21 @@
-import { InputNumber } from "primereact/inputnumber";
-import { InputText } from "primereact/inputtext";
-import { Dropdown } from "primereact/dropdown";
-import { Button } from "primereact/button";
-import { observer } from "mobx-react-lite";
-import { useFormik } from "formik";
+import {InputNumber} from "primereact/inputnumber";
+import {InputText} from "primereact/inputtext";
+import {Dropdown} from "primereact/dropdown";
+import {observer} from "mobx-react-lite";
+import {useFormik} from "formik";
 import uiPropertiesPanelStore from "@/store/uiPropertiesPanelStore";
-import { computed } from "mobx";
-import { useOnFirstMount } from "@/utils/hooks";
-import React, { useContext, useState } from "react";
+import {useOnFirstMount} from "@/utils/hooks";
+import React, {useState} from "react";
 import * as Yup from 'yup';
 import FormError from "@/components/FormError";
-import { ClusterWizardStoreContext } from "@/views/ClusterWizard/ClusterWizardView";
-import { apiCall } from "@/utils/api";
-import { hostnameEnd, hostnameMain, hostnameStart } from "@/utils/patterns";
-import { AvailableStorage, ClusterNode } from "@/api/model";
+import {apiCall} from "@/utils/api";
+import {hostnameEnd, hostnameMain, hostnameStart} from "@/utils/patterns";
+import {AvailableStorage, ClusterNode, ClusterNodeType} from "@/api/model";
 import api from "@/api/api";
-import { toHumanReadableSize } from "@/utils/size";
 import StorageDropdownOption from "@/components/StorageDropdownOption";
+import clusterManagementStore from "@/store/clusterManagementStore";
+import {Button} from "primereact/button";
+import {generateNode} from "@/utils/nodes";
 
 interface NodeFormModel {
     name: string
@@ -42,76 +41,63 @@ const schema = Yup.object().shape({
     ipAddress: Yup.string().min(7).required(),
     storagePool: Yup.string().required()
 })
-const NodeProperties = () => {
-    const clusterStore = useContext(ClusterWizardStoreContext)
+const ManagementAddNodeProperties = () => {
     const [storages, setStorages] = useState<AvailableStorage[]>([])
 
     useOnFirstMount(async () => {
-        setStorages(await apiCall(() => api.storage.storage(clusterStore.cluster.node, api.storage.StorageContentType.Images)))
+        setStorages(await apiCall(() => api.storage.storage(clusterManagementStore.cluster.node, api.storage.StorageContentType.Images)))
     })
 
-    const storedNode = computed(() => {
-        if (uiPropertiesPanelStore.selectedPropertiesId) {
-            return clusterStore.findNode(Number(uiPropertiesPanelStore.selectedPropertiesId))
-        } else {
-            return null
-        }
-    })
-
-    const clusterName = clusterStore.cluster.clusterName;
-
+    const clusterName = clusterManagementStore.cluster.clusterName;
+    const generatedNextNode = generateNode(
+        clusterManagementStore.cluster.nodes,
+        uiPropertiesPanelStore.selectedPropertiesId == "master" ? ClusterNodeType.Master : ClusterNodeType.Worker,
+        {
+            cores: 2,
+            ipAddress: "",
+            memory: 2048,
+            name: "master-1",
+            nodeType: ClusterNodeType.Master,
+            storagePool: "",
+            vmId: 100
+        } as ClusterNode);
     const formik = useFormik({
         validateOnMount: true,
         validationSchema: schema,
         initialValues: {
-            vmId: storedNode.get()?.vmId,
-            name: storedNode.get()?.name,
-            cores: storedNode.get()?.cores,
-            memory: storedNode.get()?.memory,
-            ipAddress: storedNode.get()?.ipAddress,
-            storagePool: storedNode.get()?.storagePool
+            vmId: generatedNextNode.vmId,
+            name: generatedNextNode.name,
+            cores: generatedNextNode.cores,
+            memory: generatedNextNode.memory,
+            ipAddress: generatedNextNode.ipAddress,
+            storagePool: generatedNextNode.storagePool,
         } as NodeFormModel,
 
-        onSubmit: (values, formikHelpers) => {
+        onSubmit: async (values, formikHelpers) => {
             if (uiPropertiesPanelStore.selectedPropertiesId) {
-                clusterStore.updateNode(
-                    Number(uiPropertiesPanelStore.selectedPropertiesId),
-                    {
-                        vmId: values.vmId,
-                        name: values.name,
-                        cores: values.cores,
-                        memory: values.memory,
-                        ipAddress: values.ipAddress,
-                        storagePool: values.storagePool,
-                        nodeType: storedNode.get()?.nodeType
-                    } as ClusterNode)
+                let nodeToAdd = {
+                    vmId: values.vmId,
+                    name: values.name,
+                    cores: values.cores,
+                    memory: values.memory,
+                    ipAddress: values.ipAddress,
+                    storagePool: values.storagePool,
+                    nodeType: uiPropertiesPanelStore.selectedPropertiesId == "master" ? ClusterNodeType.Master : ClusterNodeType.Worker
+                } as ClusterNode;
+                await clusterManagementStore.addNodeToCluster(nodeToAdd);
                 formik.resetForm()
                 uiPropertiesPanelStore.hidePanel()
             } else {
                 console.error("cannot save node because selected node is null, this shouldn't happen")
             }
+            formikHelpers.setSubmitting(false);
         }
     })
-
-    const canBeDeleted = () => {
-        if (clusterStore.findNode(Number(uiPropertiesPanelStore.selectedPropertiesId))?.nodeType === "master") {
-            return clusterStore.masterNodes.length > 1;
-        } else {
-            return true;
-        }
-    }
-    const onDelete = () => {
-        if (uiPropertiesPanelStore.selectedPropertiesId) {
-            const id = uiPropertiesPanelStore.selectedPropertiesId;
-            uiPropertiesPanelStore.hidePanel()
-            clusterStore.deleteNode(Number(id))
-        }
-    }
 
     return <form onSubmit={formik.handleSubmit}>
         <div className="flex flex-col w-full h-full items-center">
             <div className="grow w-full">
-                <div className="text-3xl text-center font-bold mt-5">Node Properties</div>
+                <div className="text-3xl text-center font-bold mt-5">Add Node</div>
                 <div className="p-10">
                     <div>
                         <div className="text-stone-400 required">VM id</div>
@@ -129,7 +115,8 @@ const NodeProperties = () => {
                     <div className="mt-3">
                         <div className="text-stone-400 required">Node name</div>
                         <div className="flex items-center">
-                            <div className="text-stone-400 font-bold nowrap whitespace-nowrap">{clusterName}<span className="mx-1">-</span></div>
+                            <div className="text-stone-400 font-bold nowrap whitespace-nowrap">{clusterName}<span
+                                className="mx-1">-</span></div>
                             <InputText name="name"
                                        value={formik.values.name}
                                        onChange={formik.handleChange}
@@ -193,18 +180,13 @@ const NodeProperties = () => {
                                      min={0}></InputNumber>
                         <FormError error={formik.errors.memory} touched={formik.touched.memory}/>
                     </div>
-
-
                     <div className="mt-10 flex flex-col items-center">
                         <div className="flex justify-center items-center">
                             <div className="mr-5">
-                                <Button disabled={!formik.isValid} type="submit" label="SAVE"
+                                <Button disabled={!formik.isValid} type="submit" label="ADD"
                                         className="p-button-primary"/>
                             </div>
-                            <Button onClick={onDelete}
-                                    disabled={!canBeDeleted()}
-                                    label="Delete"
-                                    className="p-button-raised p-button-danger p-button-text"/>
+
                         </div>
                     </div>
                 </div>
@@ -214,4 +196,4 @@ const NodeProperties = () => {
 }
 
 
-export default observer(NodeProperties)
+export default observer(ManagementAddNodeProperties)

@@ -1,7 +1,7 @@
-import { makeAutoObservable, runInAction } from "mobx";
+import {makeAutoObservable, runInAction} from "mobx";
 
-import { apiCall } from "@/utils/api";
-import { wrapWithProcessingIndicator } from "@/store/processingIndicatorStoreUi";
+import {apiCall} from "@/utils/api";
+import {wrapWithProcessingIndicator} from "@/store/processingIndicatorStoreUi";
 import {
     ActionLogEntry,
     AppStatus,
@@ -145,6 +145,24 @@ class ClusterManagementStore {
         })
     }
 
+    async updateNodesIfThereIsAnyLock() {
+        if (!this.cluster?.clusterName) {
+            return
+        }
+        const noLocks = !this.cluster.nodes
+            .map(i => i.lock)
+            .reduce((a, b) => a || b);
+
+        if (noLocks) {
+            return;
+        }
+        const nodes = await apiCall(() => api.clusters.getClusterNodes(this.cluster.clusterName))
+        runInAction(() => {
+            this.cluster.nodes = nodes;
+        })
+
+    }
+
     async updateAppsStatus() {
         let result = await apiCall(() => api.apps.appsStatus(this.cluster.clusterName), LOADING_INDICATOR_UPDATE_HELM_CHARTS_STATUS)
         runInAction(() => {
@@ -234,6 +252,21 @@ class ClusterManagementStore {
         runInAction(() => {
             this.cluster.clusterResources = this.cluster.clusterResources.filter((e: ClusterResource) => e.id !== id);
         })
+    }
+
+    async deleteNodeFromCluster(nodeName: string) {
+        const deletedNode = await api.clusters.deleteNodeFromCluster(this.cluster.clusterName, nodeName);
+        runInAction(() => {
+            const index = this.cluster.nodes.findIndex((e: ClusterNode) => e.name == nodeName);
+            this.cluster.nodes[index] = deletedNode;
+        });
+    }
+
+    async addNodeToCluster(node: ClusterNode) {
+        const addedNode = await api.clusters.addNodeToCluster(this.cluster.clusterName, node);
+        runInAction(() => {
+            this.cluster.nodes.push(addedNode);
+        });
     }
 }
 

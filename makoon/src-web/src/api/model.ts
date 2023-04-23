@@ -33,6 +33,12 @@ export interface ClusterResource {
     content: string;
 }
 
+export enum ClusterNodeLock {
+    Create = "create",
+    Delete = "delete",
+    ChangeResources = "changeResources",
+}
+
 export interface ClusterNode {
     vmId: number;
     name: string;
@@ -41,6 +47,7 @@ export interface ClusterNode {
     ipAddress: string;
     storagePool: string;
     nodeType: ClusterNodeType;
+    lock?: ClusterNodeLock;
 }
 
 export interface Network {

@@ -1,5 +1,5 @@
-import { makeAutoObservable, runInAction } from "mobx";
-import { apiCall } from "@/utils/api";
+import {makeAutoObservable, runInAction} from "mobx";
+import {apiCall} from "@/utils/api";
 import {
     ClusterRequest,
     ClusterResource,
@@ -9,6 +9,7 @@ import {
     ClusterNodeType,
 } from "@/api/model";
 import api from "@/api/api";
+import {generateNode} from "@/utils/nodes";
 
 export const PROCESSING_INDICATOR_GENERATE_DEFAULT_CLUSTER = "PROCESSING_INDICATOR_GENERATE_DEFAULT_CLUSTER"
 
@@ -63,25 +64,6 @@ export interface ClusterSettingsModel {
     diskSize: number;
 }
 
-function createNextNodeDefinition(node: ClusterNode, step = 1): ClusterNode {
-    const namePrefix = node.name.substring(0, node.name.lastIndexOf("-"))
-    const nameNumber = node.name.substring(node.name.lastIndexOf("-") + 1)
-
-    const lastOctetIdx = node.ipAddress.lastIndexOf(".");
-    const firstOctets = node.ipAddress.substring(0, lastOctetIdx + 1);
-    const lastOctet = node.ipAddress.substring(lastOctetIdx + 1);
-    return {
-        vmId: node.vmId + step,
-        storagePool: node.storagePool,
-        cores: node.cores,
-        memory: node.memory,
-        nodeType: node.nodeType,
-        name: namePrefix + "-" + (Number(nameNumber) + step).toString(),
-        ipAddress: firstOctets + (Number(lastOctet) + step).toString()
-    }
-}
-
-
 export class ClusterWizardStore {
     cluster: ClusterRequest = initialProjectData
     defaultMasterNode: ClusterNode = {} as ClusterNode
@@ -119,39 +101,8 @@ export class ClusterWizardStore {
     }
 
     addNode(nodeType: ClusterNodeType) {
-        let nodes = this.cluster.nodes
-        const defaultMasterNode = this.defaultMasterNode
-        const latestNodeWithNodeType: ClusterNode | null = nodes
-                .sort(vmIdDesc)
-                .find((e: ClusterNode) => e.nodeType === nodeType)
-            || null;
-
-        if (latestNodeWithNodeType == null) {
-            const anyNode: ClusterNode | null =
-                nodes.length > 0
-                    ? nodes.sort(vmIdAsc)[0]
-                    : null;
-            if (anyNode == null) {
-                nodes.push({...defaultMasterNode})
-                return
-            } else {
-                const nodeBaseOnAnotherType = createNextNodeDefinition(
-                    anyNode,
-                    nodeType == "worker"
-                        ? nodes.length > 5 ? nodes.length : 5
-                        : -5);
-                nodeBaseOnAnotherType.name = nodeType + "-1"
-
-                nodeBaseOnAnotherType.nodeType = nodeType;
-                nodes.push(nodeBaseOnAnotherType);
-                return
-            }
-
-        }
-        nodes.push(createNextNodeDefinition(latestNodeWithNodeType));
-        this.cluster.nodes = nodes.sort(vmIdAsc)
+        this.cluster.nodes.push(generateNode(this.cluster.nodes, nodeType, this.defaultMasterNode));
     }
-
 
     updateNode(id: number, newNode: ClusterNode) {
         const idx = this.cluster.nodes.findIndex((e: ClusterNode) => e.vmId === id);

@@ -1,20 +1,20 @@
-import { InputNumber } from "primereact/inputnumber";
-import { InputText } from "primereact/inputtext";
-import { Dropdown } from "primereact/dropdown";
-import { Button } from "primereact/button";
-import { observer } from "mobx-react-lite";
-import { useFormik } from "formik";
+import {InputNumber} from "primereact/inputnumber";
+import {InputText} from "primereact/inputtext";
+import {Dropdown} from "primereact/dropdown";
+import {Button} from "primereact/button";
+import {observer} from "mobx-react-lite";
+import {useFormik} from "formik";
 import uiPropertiesPanelStore from "@/store/uiPropertiesPanelStore";
-import { computed } from "mobx";
-import { useOnFirstMount } from "@/utils/hooks";
-import { useState } from "react";
+import {computed} from "mobx";
+import {useOnFirstMount} from "@/utils/hooks";
+import React, {useState} from "react";
 import * as Yup from 'yup';
 import FormError from "@/components/FormError";
 import clusterManagementStore from "@/store/clusterManagementStore";
-import { apiCall } from "@/utils/api";
+import {apiCall} from "@/utils/api";
 import api from "@/api/api";
-import { AvailableStorage } from "@/api/model";
-import * as cluster from "cluster";
+import {AvailableStorage} from "@/api/model";
+import {Dialog} from "primereact/dialog";
 
 interface NodeFormModel {
     name: string
@@ -33,13 +33,13 @@ const schema = Yup.object().shape({
     ipAddress: Yup.string().min(7).required(),
     storagePool: Yup.string().required()
 })
-const NodeReadOnlyProperties = () => {
+const ManagementEditNodeProperties = () => {
 
     const [storages, setStorages] = useState<AvailableStorage[]>([])
+    const [deleteNodeConfirm, setDeleteNodeConfirm] = useState(false);
     useOnFirstMount(async () => {
         setStorages(await apiCall(() => api.storage.storage(clusterManagementStore.cluster.node, api.storage.StorageContentType.Images)))
     })
-
     const storedNode = computed(() => {
         if (uiPropertiesPanelStore.selectedPropertiesId) {
             return clusterManagementStore.findNode(Number(uiPropertiesPanelStore.selectedPropertiesId))
@@ -48,11 +48,17 @@ const NodeReadOnlyProperties = () => {
         }
     })
 
+    const cannotDelete = computed(() => {
+        return (!!storedNode.get()?.lock) || clusterManagementStore.cluster.nodes.filter(i => !i.lock).length < 2;
+    });
+
+    const fullNodeName = `${clusterManagementStore.cluster.clusterName}-${storedNode.get()?.name}`;
+
     const formik = useFormik({
         validationSchema: schema,
         initialValues: {
             vmid: storedNode.get()?.vmId,
-            name: `${clusterManagementStore.cluster.clusterName}-${storedNode.get()?.name}`,
+            name: fullNodeName,
             cores: storedNode.get()?.cores,
             memory: storedNode.get()?.memory,
             ipAddress: storedNode.get()?.ipAddress,
@@ -64,9 +70,35 @@ const NodeReadOnlyProperties = () => {
     })
 
     return <form onSubmit={formik.handleSubmit}>
+        <Dialog
+            header="Are you sure?"
+            footer={
+                <div>
+                    <Button label="No" className="p-button-text" icon="pi pi-times"
+                            onClick={() => {
+                                setDeleteNodeConfirm(false)
+                            }}/>
+                    <Button label="Yes" icon="pi pi-check"
+                            onClick={async () => {
+                                let node = storedNode.get();
+                                if (node) {
+                                    await clusterManagementStore.deleteNodeFromCluster(node.name);
+                                    setDeleteNodeConfirm(false);
+                                    uiPropertiesPanelStore.hidePanel();
+                                }
+                            }}/>
+                </div>}
+            modal
+            draggable={false}
+            visible={deleteNodeConfirm}
+            onHide={() => {
+                setDeleteNodeConfirm(false);
+            }}>
+            Do you want to delete [{fullNodeName}] node?
+        </Dialog>
         <div className="flex flex-col w-full h-full items-center">
             <div className="grow w-full">
-                <div className="text-3xl text-center font-bold mt-5">Node Properties</div>
+                <div className="text-3xl text-center font-bold mt-5"> Node Properties</div>
                 <div className="p-10">
                     <div>
                         <div className="text-stone-400 required">VM id</div>
@@ -148,6 +180,17 @@ const NodeReadOnlyProperties = () => {
                                     type="button"
                                     label="Close"
                                     className="p-button-primary"/>
+                            <div className="ml-2">
+                                <Button
+                                    disabled={cannotDelete.get()}
+                                    type="button"
+                                    onClick={() => {
+                                        setDeleteNodeConfirm(true);
+                                    }}
+                                    className="p-button-raised p-button-danger p-button-text">
+                                    Delete
+                                </Button>
+                            </div>
 
                         </div>
                     </div>
@@ -158,4 +201,4 @@ const NodeReadOnlyProperties = () => {
 }
 
 
-export default observer(NodeReadOnlyProperties)
+export default observer(ManagementEditNodeProperties)

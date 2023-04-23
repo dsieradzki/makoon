@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
-use crate::operator::dispatcher::{create_cluster, delete_cluster};
+use crate::operator::dispatcher::usecase;
 use crate::operator::event::Event;
-use crate::operator::model::{ActionLogEntry, ClusterStatus};
+use crate::operator::model::{LogEntry, ClusterStatus};
 use crate::operator::repository::Repository;
 
 pub struct Dispatcher {
@@ -18,42 +18,90 @@ impl Dispatcher {
         }
     }
 
-    pub fn dispatch(&self, event: Event) {
+    pub fn dispatch(&self, event: Event) -> Result<(), String> {
         match event {
-            Event::CreateCluster { access, cluster_name, kube_version, os_image, os_image_storage } => {
-                let _ = update_cluster_status(&self.repo, cluster_name.clone(), ClusterStatus::Creating);
-                match create_cluster::execute(
-                    self.proxmox_client.clone(),
-                    self.repo.clone(),
-                    access,
-                    cluster_name.clone(),
-                    kube_version,
-                    os_image,
-                    os_image_storage) {
-                    Ok(_) => {
-                        let _ = update_cluster_status(&self.repo, cluster_name.clone(), ClusterStatus::Sync);
-                        info!("Cluster has been created")
-                    }
-                    Err(e) => {
-                        let _ = update_cluster_status(&self.repo, cluster_name.clone(), ClusterStatus::Error);
-                        let _ = self.repo.save_log(ActionLogEntry::error(cluster_name.clone(), e.clone()));
-                        error!("{}", e)
-                    }
-                }
-            }
-            Event::DeleteCluster { access, cluster_name } => {
-                match delete_cluster::execute(
+            Event::CreateCluster { access, cluster_name } => {
+                update_cluster_status(&self.repo, cluster_name.clone(), ClusterStatus::Creating)?;
+                match usecase::create_cluster::execute(
                     self.proxmox_client.clone(),
                     self.repo.clone(),
                     access,
                     cluster_name.clone()) {
                     Ok(_) => {
-                        info!("Cluster has been deleted")
+                        update_cluster_status(&self.repo, cluster_name.clone(), ClusterStatus::Sync)?;
+                        self.repo.save_log(LogEntry::info(&cluster_name, "Cluster has been created".to_string()))?;
+                        info!("Cluster has been created");
+                        Ok(())
                     }
                     Err(e) => {
-                        let _ = update_cluster_status(&self.repo, cluster_name.clone(), ClusterStatus::Error);
-                        let _ = self.repo.save_log(ActionLogEntry::error(cluster_name.clone(), e.clone()));
-                        error!("{}", e);
+                        update_cluster_status(&self.repo, cluster_name.clone(), ClusterStatus::Error)?;
+                        self.repo.save_log(LogEntry::error(&cluster_name, e.clone()))?;
+                        Err(e)
+                    }
+                }
+            }
+            Event::DeleteCluster { access, cluster_name } => {
+                match usecase::delete_cluster::execute(
+                    self.proxmox_client.clone(),
+                    self.repo.clone(),
+                    access,
+                    cluster_name.clone()) {
+                    Ok(_) => {
+                        info!("Cluster has been deleted");
+                        Ok(())
+                    }
+                    Err(e) => {
+                        update_cluster_status(&self.repo, cluster_name.clone(), ClusterStatus::Error)?;
+                        self.repo.save_log(LogEntry::error(&cluster_name, e.clone()))?;
+                        Err(e)
+                    }
+                }
+            }
+            Event::AddNodeToCluster { access, cluster_name, node_name } => {
+                match usecase::add_node_to_cluster::execute(
+                    self.proxmox_client.clone(),
+                    self.repo.clone(),
+                    access,
+                    cluster_name.clone(),
+                    node_name.clone()) {
+                    Ok(_) => {
+                        self.repo.save_log(LogEntry::info(&cluster_name, format!("Node [{}] has been created", node_name)))?;
+
+                        let mut cluster = self.repo.get_cluster(cluster_name.clone())?.ok_or(format!("Cannot find cluster [{}]", cluster_name))?;
+                        cluster.nodes.iter_mut()
+                            .find(|i| i.name == node_name)
+                            .map(|i| i.lock = None)
+                            .ok_or(format!("Cannot find node [{}]", node_name))?;
+
+                        self.repo.save_cluster(cluster)?;
+                        update_cluster_status(&self.repo, cluster_name, ClusterStatus::Sync)?;
+                        info!("Cluster node has been created");
+                        Ok(())
+                    }
+                    Err(e) => {
+                        update_cluster_status(&self.repo, cluster_name.clone(), ClusterStatus::Error)?;
+                        self.repo.save_log(LogEntry::error(&cluster_name, e.clone()))?;
+                        Err(e)
+                    }
+                }
+            }
+            Event::DeleteNodeFromCluster { access, cluster_name, node_name } => {
+                match usecase::delete_node_from_cluster::execute(
+                    self.proxmox_client.clone(),
+                    self.repo.clone(),
+                    access,
+                    cluster_name.clone(),
+                    node_name.clone()) {
+                    Ok(_) => {
+                        self.repo.save_log(LogEntry::info(&cluster_name, format!("Node [{}-{}] has been deleted", cluster_name, node_name)))?;
+                        update_cluster_status(&self.repo, cluster_name.clone(), ClusterStatus::Sync)?;
+                        info!("Cluster node [{}-{}] has been deleted", cluster_name, node_name);
+                        Ok(())
+                    }
+                    Err(e) => {
+                        update_cluster_status(&self.repo, cluster_name.clone(), ClusterStatus::Error)?;
+                        self.repo.save_log(LogEntry::error(&cluster_name, e.clone()))?;
+                        Err(e)
                     }
                 }
             }

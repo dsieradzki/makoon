@@ -44,6 +44,8 @@ impl CommandBuilder {
         self.sudo = true;
         self
     }
+
+    #[allow(dead_code)]
     pub fn install(&self) -> InstallCommand {
         let mut parts = self.build();
         parts.push("install".to_string());

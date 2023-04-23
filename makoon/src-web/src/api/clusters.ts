@@ -1,8 +1,8 @@
 import {
     ActionLogEntry,
-    AppStatus,
     Cluster,
     ClusterHeader,
+    ClusterNode,
     ClusterNodeStatus,
     ClusterNodeVmStatus,
     ClusterRequest
@@ -11,22 +11,32 @@ import axios from "axios";
 
 export namespace clusters {
     export function getClusters(): Promise<ClusterHeader[]> {
-        return axios.get<ClusterHeader[]>("/api/v1/clusters")
-            .then(e => e.data);
+        return axios.get("/api/v1/clusters").then(e => e.data);
     }
 
     export function getCluster(name: string): Promise<Cluster> {
-        return axios.get<Cluster>(`/api/v1/clusters/${name}`).then(e => e.data);
+        return axios.get(`/api/v1/clusters/${name}`).then(e => e.data);
     }
 
-    export function deleteCluster(name: string): Promise<Cluster> {
+    export function getClusterNodes(name: string): Promise<ClusterNode[]> {
+        return axios.get(`/api/v1/clusters/${name}/nodes`).then(e => e.data);
+    }
+
+    export function deleteCluster(name: string): Promise<void> {
         return axios.delete(`/api/v1/clusters/${name}`).then(e => e.data);
+    }
+
+    export function deleteNodeFromCluster(clusterName: string, nodeName: string): Promise<ClusterNode> {
+        return axios.delete(`/api/v1/clusters/${clusterName}/nodes/${nodeName}`).then(e => e.data);
     }
 
     export function createCluster(request: ClusterRequest): Promise<void> {
         return axios.post("/api/v1/clusters", request);
     }
 
+    export function addNodeToCluster(clusterName: string, request: ClusterNode): Promise<ClusterNode> {
+        return axios.post(`/api/v1/clusters/${clusterName}/nodes`, request).then(e => e.data);
+    }
 
     export function generateDefaultClusterConfiguration(): Promise<ClusterRequest> {
         return axios.get("/api/v1/clusters/generate").then(e => e.data);

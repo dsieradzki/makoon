@@ -11,7 +11,7 @@ use crate::operator::{Error, Result, ssh};
 use crate::operator::Dispatcher;
 use crate::operator::dispatcher::HELM_CMD;
 use crate::operator::event::Event;
-use crate::operator::model::{ActionLogEntry, AppStatus, AppStatusType, Cluster, ClusterHeader, ClusterNodeStatus, ClusterNodeType, ClusterRequest, ClusterResource, ClusterStatus, HelmApp, kube, KubeStatus};
+use crate::operator::model::{LogEntry, AppStatus, AppStatusType, Cluster, ClusterHeader, ClusterNode, ClusterNodeLock, ClusterNodeStatus, ClusterNodeType, ClusterRequest, ClusterResource, ClusterStatus, HelmApp, kube, KubeStatus};
 use crate::operator::model::helm::InstalledRelease;
 use crate::operator::repository::Repository;
 
@@ -33,7 +33,6 @@ pub struct Operator {
     tx: Sender<Event>,
     shutdown: Arc<AtomicBool>,
     repository: Arc<Repository>,
-    proxmox_client: Arc<proxmox::Client>,
 }
 
 impl Drop for Operator {
@@ -48,21 +47,28 @@ impl Drop for Operator {
 }
 
 impl Operator {
-    pub fn new(config: Config, dispatcher: Dispatcher, repository: Arc<Repository>, proxmox_client: Arc<proxmox::Client>) -> Self {
+    pub fn new(config: Config, dispatcher: Dispatcher, repository: Arc<Repository>) -> Self {
         let (tx, rx): (Sender<Event>, Receiver<Event>) = mpsc::channel();
         let shutdown = Arc::new(AtomicBool::from(false));
 
         Operator {
-            proxmox_client,
             repository,
             shutdown: shutdown.clone(),
             tx,
             executor: Some(std::thread::spawn(move || {
-                info!("Operator worker thread started");
+                info!("Operator worker thread has been started");
                 loop {
                     match rx.try_recv() {
                         Ok(e) => {
-                            dispatcher.dispatch(e);
+                            info!("Event received");
+                            match dispatcher.dispatch(e) {
+                                Ok(_) => {
+                                    info!("Event processing finished successfully");
+                                }
+                                Err(e) => {
+                                    error!("Event processing finished with error: [{}]", e);
+                                }
+                            };
                         }
                         Err(_) => {
                             std::thread::sleep(Duration::from_millis(config.worker_thread_probe_duration));
@@ -80,14 +86,16 @@ impl Operator {
     pub fn create_cluster(&self, access: AccessData, cluster_request: ClusterRequest) -> Result<()> {
         let cluster_name = cluster_request.cluster_name.clone();
 
-        if let Some(_) = self.repository
-            .get_cluster(cluster_name.clone())? {
+        if (self.repository.get_cluster(cluster_name.clone())?).is_some() {
             return Err(Error::ResourceAlreadyExists);
         }
 
         let cluster = Cluster {
             node: cluster_request.node,
             cluster_name: cluster_request.cluster_name.clone(),
+            kube_version: Some(cluster_request.kube_version),
+            os_image: Some(cluster_request.os_image),
+            os_image_storage: Some(cluster_request.os_image_storage),
             cluster_config: "".to_string(),
             ssh_key: cluster_request.ssh_key,
             node_username: cluster_request.node_username,
@@ -110,12 +118,31 @@ impl Operator {
         self.tx.send(Event::CreateCluster {
             access,
             cluster_name,
-            kube_version: cluster_request.kube_version,
-            os_image: cluster_request.os_image,
-            os_image_storage: cluster_request.os_image_storage,
         })?;
 
         Ok(())
+    }
+
+
+    pub fn add_node_cluster(&self, access: AccessData, cluster_name: String, node_request: ClusterNode) -> Result<ClusterNode> {
+        let mut cluster = self.repository
+            .get_cluster(cluster_name.clone())?
+            .ok_or(Error::Generic("Cannot get cluster".to_string()))?;
+
+        let mut node_request = node_request;
+        node_request.lock = Some(ClusterNodeLock::Create);
+
+        cluster.nodes.push(node_request.clone());
+        self.repository.save_cluster(cluster)?;
+        self.repository.save_log(LogEntry::info(&cluster_name, format!("Adding node [{}] to cluster [{}] has been started", node_request.name, cluster_name)))?;
+
+        self.tx.send(Event::AddNodeToCluster {
+            access,
+            cluster_name,
+            node_name: node_request.name.clone(),
+        })?;
+
+        Ok(node_request)
     }
 
     pub fn delete_cluster(&self, access: AccessData, cluster_name: String) -> Result<()> {
@@ -124,7 +151,7 @@ impl Operator {
             .ok_or(Error::Generic("Cannot get cluster".to_string()))?;
         cluster.status = ClusterStatus::Destroying;
         self.repository.save_cluster(cluster)?;
-        self.repository.save_log(ActionLogEntry::info(cluster_name.clone(), "Cluster deletion started".to_string()))?;
+        self.repository.save_log(LogEntry::info(&cluster_name, "Cluster deletion started".to_string()))?;
 
         self.tx.send(Event::DeleteCluster {
             access,
@@ -132,6 +159,26 @@ impl Operator {
         })?;
 
         Ok(())
+    }
+
+    pub fn delete_node_from_cluster(&self, access: AccessData, cluster_name: String, node_name: String) -> Result<ClusterNode> {
+        self.repository.save_log(LogEntry::info(&cluster_name, format!("Deleting node [{}] from cluster has been started", node_name)))?;
+
+        let mut cluster = self.repository.get_cluster(cluster_name.clone())?.ok_or(Error::ResourceNotFound)?;
+        let node_to_delete = cluster.nodes.iter_mut()
+            .find(|i| i.name == node_name).ok_or(Error::ResourceNotFound)?;
+        node_to_delete.lock = Some(ClusterNodeLock::Delete);
+
+        let result = node_to_delete.clone();
+
+        self.repository.save_cluster(cluster)?;
+
+        self.tx.send(Event::DeleteNodeFromCluster {
+            access,
+            cluster_name,
+            node_name,
+        })?;
+        Ok(result)
     }
 
     pub fn get_clusters(&self) -> Result<Vec<ClusterHeader>> {
@@ -171,8 +218,7 @@ impl Operator {
             .ok_or(Error::ResourceNotFound)?;
 
         let master_node = cluster.nodes.iter()
-            .find(|i| i.node_type == ClusterNodeType::Master)
-            .map(|i| i.clone()).ok_or(Error::ResourceNotFound)?;
+            .find(|i| i.node_type == ClusterNodeType::Master).cloned().ok_or(Error::ResourceNotFound)?;
 
 
         let mut result: Vec<ClusterNodeStatus> = cluster.nodes.iter().map(|i| ClusterNodeStatus {
@@ -182,12 +228,9 @@ impl Operator {
 
 
         let mut ssh_client = ssh::Client::new();
-        match ssh_client.connect(&master_node.ip_address, &cluster.node_username, &cluster.ssh_key.private_key, &cluster.ssh_key.public_key) {
-            Err(_) => {
-                return Ok(result);
-            }
-            _ => ()
-        };
+        if ssh_client.connect(&master_node.ip_address, &cluster.node_username, &cluster.ssh_key.private_key, &cluster.ssh_key.public_key).is_err() {
+            return Ok(result);
+        } else {};
         let nodes_status = ssh_client.execute("sudo microk8s kubectl get nodes -o json --request-timeout='5s'");
         let nodes_status = match nodes_status {
             Ok(v) => v,
@@ -215,22 +258,18 @@ impl Operator {
             .ok_or(Error::ResourceNotFound)?;
 
         let master_node = cluster.nodes.iter()
-            .find(|i| i.node_type == ClusterNodeType::Master)
-            .map(|i| i.clone()).ok_or(Error::ResourceNotFound)?;
+            .find(|i| i.node_type == ClusterNodeType::Master).cloned().ok_or(Error::ResourceNotFound)?;
 
-        let mut result = cluster.helm_apps.iter().map(|i| AppStatus {
+        let result = cluster.helm_apps.iter().map(|i| AppStatus {
             id: i.id.clone(),
             status: AppStatusType::Unknown,
         }).collect::<Vec<AppStatus>>();
 
         let mut ssh_client = ssh::Client::new();
-        match ssh_client.connect(&master_node.ip_address, &cluster.node_username, &cluster.ssh_key.private_key, &cluster.ssh_key.public_key) {
-            Err(_) => {
-                return Ok(result);
-            }
-            _ => ()
+        if ssh_client.connect(&master_node.ip_address, &cluster.node_username, &cluster.ssh_key.private_key, &cluster.ssh_key.public_key).is_err() {
+            return Ok(result);
         }
-        let installed_releases = ssh_client.execute_to(&helm::new(crate::operator::dispatcher::HELM_CMD)
+        let installed_releases = ssh_client.execute_to(&helm::new(HELM_CMD)
             .sudo()
             .list()
             .all()
@@ -255,16 +294,16 @@ impl Operator {
         }).collect())
     }
 
-    pub fn logs_for_cluster(&self, name: String) -> Result<Vec<ActionLogEntry>> {
+    pub fn logs_for_cluster(&self, name: String) -> Result<Vec<LogEntry>> {
         Ok(self.repository.logs(name)?)
-    }
-
-    pub fn add_log(&self, log: ActionLogEntry) -> Result<()> {
-        Ok(self.repository.save_log(log)?)
     }
 
     pub fn get_cluster(&self, cluster_name: String) -> Result<Option<Cluster>> {
         Ok(self.repository.get_cluster(cluster_name)?)
+    }
+
+    pub fn get_nodes(&self, cluster_name: String) -> Result<Vec<ClusterNode>> {
+        Ok(self.repository.get_cluster(cluster_name)?.ok_or(Error::ResourceNotFound)?.nodes)
     }
 
     pub fn save_helm_app(&self, cluster_name: &str, app: HelmApp) -> Result<String> {
@@ -310,7 +349,7 @@ impl Operator {
         Ok(())
     }
     pub fn install_helm_app(&self, cluster_name: &str, app_id: &str) -> Result<()> {
-        let mut cluster = self.repository
+        let cluster = self.repository
             .get_cluster(cluster_name.to_string())?
             .ok_or(Error::ResourceNotFound)?;
 
@@ -319,8 +358,7 @@ impl Operator {
             .ok_or(Error::ResourceNotFound)?;
 
         let master_node = cluster.nodes.iter()
-            .find(|i| i.node_type == ClusterNodeType::Master)
-            .map(|i| i.clone()).ok_or(Error::ResourceNotFound)?;
+            .find(|i| i.node_type == ClusterNodeType::Master).cloned().ok_or(Error::ResourceNotFound)?;
 
         let mut ssh_client = ssh::Client::new();
         ssh_client.connect(&master_node.ip_address, &cluster.node_username, &cluster.ssh_key.private_key, &cluster.ssh_key.public_key)?;
@@ -330,7 +368,7 @@ impl Operator {
         Ok(())
     }
     pub fn uninstall_helm_app(&self, cluster_name: &str, app_id: &str) -> Result<()> {
-        let mut cluster = self.repository
+        let cluster = self.repository
             .get_cluster(cluster_name.to_string())?
             .ok_or(Error::ResourceNotFound)?;
 
@@ -339,8 +377,7 @@ impl Operator {
             .ok_or(Error::ResourceNotFound)?;
 
         let master_node = cluster.nodes.iter()
-            .find(|i| i.node_type == ClusterNodeType::Master)
-            .map(|i| i.clone()).ok_or(Error::ResourceNotFound)?;
+            .find(|i| i.node_type == ClusterNodeType::Master).cloned().ok_or(Error::ResourceNotFound)?;
 
         let mut ssh_client = ssh::Client::new();
         ssh_client.connect(&master_node.ip_address, &cluster.node_username, &cluster.ssh_key.private_key, &cluster.ssh_key.public_key)?;
@@ -385,7 +422,7 @@ impl Operator {
     }
 
     pub fn install_cluster_resource(&self, cluster_name: &str, res_id: &str) -> Result<()> {
-        let mut cluster = self.repository
+        let cluster = self.repository
             .get_cluster(cluster_name.to_string())?
             .ok_or(Error::ResourceNotFound)?;
 
@@ -394,8 +431,7 @@ impl Operator {
             .ok_or(Error::ResourceNotFound)?;
 
         let master_node = cluster.nodes.iter()
-            .find(|i| i.node_type == ClusterNodeType::Master)
-            .map(|i| i.clone()).ok_or(Error::ResourceNotFound)?;
+            .find(|i| i.node_type == ClusterNodeType::Master).cloned().ok_or(Error::ResourceNotFound)?;
 
         let mut ssh_client = ssh::Client::new();
         ssh_client.connect(&master_node.ip_address, &cluster.node_username, &cluster.ssh_key.private_key, &cluster.ssh_key.public_key)?;
@@ -405,7 +441,7 @@ impl Operator {
         Ok(())
     }
     pub fn uninstall_cluster_resource(&self, cluster_name: &str, res_id: &str) -> Result<()> {
-        let mut cluster = self.repository
+        let cluster = self.repository
             .get_cluster(cluster_name.to_string())?
             .ok_or(Error::ResourceNotFound)?;
 
@@ -414,14 +450,13 @@ impl Operator {
             .ok_or(Error::ResourceNotFound)?;
 
         let master_node = cluster.nodes.iter()
-            .find(|i| i.node_type == ClusterNodeType::Master)
-            .map(|i| i.clone()).ok_or(Error::ResourceNotFound)?;
+            .find(|i| i.node_type == ClusterNodeType::Master).cloned().ok_or(Error::ResourceNotFound)?;
 
         let mut ssh_client = ssh::Client::new();
         ssh_client.connect(&master_node.ip_address, &cluster.node_username, &cluster.ssh_key.private_key, &cluster.ssh_key.public_key)?;
 
 
-        let file_name = format!("{}_cluster_resource", res.name.trim().replace(" ", "_"));
+        let file_name = format!("{}_cluster_resource", res.name.trim().replace(' ', "_"));
         ssh_client.upload_file(format!("/tmp/{}.yaml", file_name).as_str(), res.content.as_str())?;
         ssh_client.execute(format!("sudo microk8s.kubectl delete -f /tmp/{}.yaml", file_name).as_str())?;
         ssh_client.execute(format!("sudo rm /tmp/{}.yaml", file_name).as_str())?;

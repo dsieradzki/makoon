@@ -24,7 +24,7 @@ impl Client {
     pub fn login(&self, options: LoginRequest) -> Result<AccessData> {
         let http = HttpClient::new(
             options.host.clone(),
-            options.port.clone(),
+            options.port,
             options.base_path.clone());
 
         let response = http.client()
