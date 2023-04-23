@@ -114,27 +114,29 @@ pub enum ActionLogLevel {
 #[typeshare]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct ActionLogEntry {
+pub struct LogEntry {
     pub date: NaiveDateTime,
     pub cluster_name: String,
     pub message: String,
     pub level: ActionLogLevel,
 }
 
-impl ActionLogEntry {
-    pub fn info(cluster_name: String, message: String) -> Self {
-        ActionLogEntry {
+impl LogEntry {
+    pub fn info<T>(cluster_name: &str, message: T) -> Self
+        where T: ToString {
+        LogEntry {
             date: Utc::now().naive_local(),
-            cluster_name,
-            message,
+            cluster_name: cluster_name.to_string(),
+            message: message.to_string(),
             level: ActionLogLevel::Info,
         }
     }
-    pub fn error(cluster_name: String, message: String) -> Self {
-        ActionLogEntry {
+    pub fn error<T>(cluster_name: &str, message: T) -> Self
+        where T: ToString {
+        LogEntry {
             date: Utc::now().naive_local(),
-            cluster_name,
-            message,
+            cluster_name: cluster_name.to_string(),
+            message: message.to_string(),
             level: ActionLogLevel::Error,
         }
     }

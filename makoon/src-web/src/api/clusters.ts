@@ -35,7 +35,7 @@ export namespace clusters {
     }
 
     export function addNodeToCluster(clusterName: string, request: ClusterNode): Promise<ClusterNode> {
-        return axios.post(`/api/v1/clusters/${clusterName}/nodes`, request);
+        return axios.post(`/api/v1/clusters/${clusterName}/nodes`, request).then(e => e.data);
     }
 
     export function generateDefaultClusterConfiguration(): Promise<ClusterRequest> {

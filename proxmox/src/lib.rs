@@ -12,7 +12,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 pub use client::*;
 pub use client_operations::*;
 
-//TODO: cleanup using this outside proxmox crate
+//TODO: cleanup using this outside
 pub fn to_url_encoded(val: &str) -> String {
     let result = urlencoding::encode(val);
     result.to_string()

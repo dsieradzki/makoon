@@ -5,8 +5,8 @@ use proxmox::{Client, ClientOperations};
 use proxmox::model::AccessData;
 
 use crate::operator::{Repository, ssh};
-use crate::operator::dispatcher::delete_cluster::{delete_vms, get_existing_vms, stop_vms};
-use crate::operator::model::{ActionLogEntry, ClusterNodeType};
+use crate::operator::dispatcher::usecase::common;
+use crate::operator::model::{ClusterNodeType, LogEntry};
 
 pub(crate) fn execute(
     proxmox_client: Arc<Client>,
@@ -15,11 +15,11 @@ pub(crate) fn execute(
     cluster_name: String,
     node_name: String) -> Result<(), String> {
     let proxmox_client = proxmox_client.operations(access);
-    repo.save_log(ActionLogEntry::info(cluster_name.clone(), format!("Start deleting node [{}-{}]", cluster_name, node_name)))?;
+    repo.save_log(LogEntry::info(&cluster_name, format!("Start deleting node [{}-{}]", cluster_name, node_name)))?;
 
     let mut cluster = repo.get_cluster(cluster_name.clone())?.ok_or("Cannot find cluster")?;
     if cluster.nodes.len() == 1 {
-        repo.save_log(ActionLogEntry::error(cluster_name.clone(), format!("Cannot delete last node, delete whole cluster instead")))?;
+        repo.save_log(LogEntry::error(&cluster_name, format!("Cannot delete last node, delete whole cluster instead")))?;
         return Ok(());
     }
 
@@ -32,7 +32,7 @@ pub(crate) fn execute(
         .map(|i| i.clone()).ok_or("Cannot find node to delete".to_string())?;
 
 
-    if get_existing_vms(&proxmox_client, &cluster)?.iter()
+    if common::vm::get_existing_vms(&proxmox_client, &cluster)?.iter()
         .find(|i| i.vm_id == node_to_delete.vm_id)
         .is_none() {
         remove_node_from_project(repo.clone(), &cluster_name, &node_name)?;
@@ -44,12 +44,12 @@ pub(crate) fn execute(
     master_ssh_client.connect(&master_node.ip_address, &cluster.node_username, &cluster.ssh_key.private_key, &cluster.ssh_key.public_key)?;
 
 
-    repo.save_log(ActionLogEntry::info(cluster_name.clone(), format!("Drain a node [{}-{}]", cluster_name, node_name)))?;
+    repo.save_log(LogEntry::info(&cluster_name, format!("Drain a node [{}-{}]", cluster_name, node_name)))?;
     master_ssh_client.execute(format!("sudo microk8s.kubectl drain {}-{} --ignore-daemonsets --grace-period=30 --timeout=60s", cluster_name, node_name).as_str())?;
-    repo.save_log(ActionLogEntry::info(cluster_name.clone(), "Wait 30s to gracefully shutdown pods".to_string()))?;
+    repo.save_log(LogEntry::info(&cluster_name, "Wait 30s to gracefully shutdown pods".to_string()))?;
     std::thread::sleep(Duration::from_secs(30));
 
-    repo.save_log(ActionLogEntry::info(cluster_name.clone(), format!("Detach a node [{}-{}] from the cluster", cluster_name, node_name)))?;
+    repo.save_log(LogEntry::info(&cluster_name, format!("Detach a node [{}-{}] from the cluster", cluster_name, node_name)))?;
     let mut node_to_delete_ssh_client = ssh::Client::new();
     node_to_delete_ssh_client.connect(&node_to_delete.ip_address, &cluster.node_username, &cluster.ssh_key.private_key, &cluster.ssh_key.public_key)?;
     node_to_delete_ssh_client.execute("sudo microk8s leave")?;
@@ -58,11 +58,23 @@ pub(crate) fn execute(
 
 
     cluster.nodes.retain_mut(|i| i.name == node_name);
-    let existing_vms_to_delete = get_existing_vms(&proxmox_client, &cluster)?;
+    let vm_exists = common::vm::get_existing_vms(&proxmox_client, &cluster)?.iter().any(|i| i.vm_id == node_to_delete.vm_id);
 
-    repo.save_log(ActionLogEntry::info(cluster_name.clone(), format!("Removing VM [{}]", node_to_delete.vm_id)))?;
-    stop_vms(&repo, &proxmox_client, &cluster, &existing_vms_to_delete)?;
-    delete_vms(repo.clone(), &proxmox_client, &cluster, &existing_vms_to_delete)?;
+    if vm_exists {
+        repo.save_log(LogEntry::info(&cluster_name, format!("Removing VM [{}]", node_to_delete.vm_id)))?;
+
+        proxmox_client.shutdown_vm(cluster.node.clone(), node_to_delete.vm_id).map_err(|e| format!("Shutdown VM [{}], error: [{}]", node_to_delete.vm_id, e))?;
+        repo.save_log(LogEntry::info(&cluster.cluster_name, format!("Requested VM [{}] to shutdown", node_to_delete.vm_id)))?;
+        let is_shutdown = common::vm::wait_for_shutdown(&proxmox_client, cluster.node.clone(), node_to_delete.vm_id)?;
+        if !is_shutdown {
+            proxmox_client.stop_vm(cluster.node.clone(), node_to_delete.vm_id)?;
+            common::vm::wait_for_shutdown(&proxmox_client, cluster.node.clone(), node_to_delete.vm_id)?;
+        }
+
+        proxmox_client.delete_vm(cluster.node.clone(), node_to_delete.vm_id).map_err(|e| format!("Delete VM [{}], error: [{}]", node_to_delete.vm_id, e))?;
+        repo.save_log(LogEntry::info(&cluster.cluster_name, format!("VM [{}] has been deleted", node_to_delete.vm_id)))?;
+    }
+
 
     remove_node_from_project(repo.clone(), &cluster_name, &node_name)?;
     remove_hosts_from_rest_of_nodes(repo.clone(), &proxmox_client, &cluster_name, &node_name)?;
@@ -79,7 +91,7 @@ fn remove_node_from_project(repo: Arc<Repository>, cluster_name: &str, node_name
 
 fn remove_hosts_from_rest_of_nodes(repo: Arc<Repository>, proxmox_client: &ClientOperations, cluster_name: &str, node_name: &str) -> Result<(), String> {
     let cluster = repo.get_cluster(cluster_name.to_string())?.ok_or("Cannot find cluster")?;
-    let existing_nodes = get_existing_vms(&proxmox_client, &cluster)?;
+    let existing_nodes = common::vm::get_existing_vms(&proxmox_client, &cluster)?;
     for node in existing_nodes.iter() {
         let mut ssh_client = ssh::Client::new();
         ssh_client.connect(&node.ip_address, &cluster.node_username, &cluster.ssh_key.private_key, &cluster.ssh_key.public_key)?;

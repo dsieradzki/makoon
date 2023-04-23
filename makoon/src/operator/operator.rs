@@ -11,7 +11,7 @@ use crate::operator::{Error, Result, ssh};
 use crate::operator::Dispatcher;
 use crate::operator::dispatcher::HELM_CMD;
 use crate::operator::event::Event;
-use crate::operator::model::{ActionLogEntry, AppStatus, AppStatusType, Cluster, ClusterHeader, ClusterNode, ClusterNodeLock, ClusterNodeStatus, ClusterNodeType, ClusterRequest, ClusterResource, ClusterStatus, HelmApp, kube, KubeStatus};
+use crate::operator::model::{LogEntry, AppStatus, AppStatusType, Cluster, ClusterHeader, ClusterNode, ClusterNodeLock, ClusterNodeStatus, ClusterNodeType, ClusterRequest, ClusterResource, ClusterStatus, HelmApp, kube, KubeStatus};
 use crate::operator::model::helm::InstalledRelease;
 use crate::operator::repository::Repository;
 
@@ -134,7 +134,7 @@ impl Operator {
 
         cluster.nodes.push(node_request.clone());
         self.repository.save_cluster(cluster)?;
-        self.repository.save_log(ActionLogEntry::info(cluster_name.clone(), format!("Adding node [{}] to cluster [{}] has been started", node_request.name, cluster_name)))?;
+        self.repository.save_log(LogEntry::info(&cluster_name, format!("Adding node [{}] to cluster [{}] has been started", node_request.name, cluster_name)))?;
 
         self.tx.send(Event::AddNodeToCluster {
             access,
@@ -151,7 +151,7 @@ impl Operator {
             .ok_or(Error::Generic("Cannot get cluster".to_string()))?;
         cluster.status = ClusterStatus::Destroying;
         self.repository.save_cluster(cluster)?;
-        self.repository.save_log(ActionLogEntry::info(cluster_name.clone(), "Cluster deletion started".to_string()))?;
+        self.repository.save_log(LogEntry::info(&cluster_name, "Cluster deletion started".to_string()))?;
 
         self.tx.send(Event::DeleteCluster {
             access,
@@ -162,7 +162,7 @@ impl Operator {
     }
 
     pub fn delete_node_from_cluster(&self, access: AccessData, cluster_name: String, node_name: String) -> Result<ClusterNode> {
-        self.repository.save_log(ActionLogEntry::info(cluster_name.clone(), format!("Deleting node [{}] from cluster has been started", node_name)))?;
+        self.repository.save_log(LogEntry::info(&cluster_name, format!("Deleting node [{}] from cluster has been started", node_name)))?;
 
         let mut cluster = self.repository.get_cluster(cluster_name.clone())?.ok_or(Error::ResourceNotFound)?;
         let node_to_delete = cluster.nodes.iter_mut()
@@ -294,7 +294,7 @@ impl Operator {
         }).collect())
     }
 
-    pub fn logs_for_cluster(&self, name: String) -> Result<Vec<ActionLogEntry>> {
+    pub fn logs_for_cluster(&self, name: String) -> Result<Vec<LogEntry>> {
         Ok(self.repository.logs(name)?)
     }
 

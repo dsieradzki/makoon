@@ -8,7 +8,7 @@ use crate::{logged_in, operator};
 use crate::handlers::actix::inject;
 use crate::handlers::error::HandlerError;
 use crate::handlers::model::ClusterNodeVmStatus;
-use crate::operator::model::{ActionLogEntry, Cluster, ClusterNode, ClusterRequest};
+use crate::operator::model::{LogEntry, Cluster, ClusterNode, ClusterRequest};
 
 #[get("/api/v1/clusters/{cluster_name}/nodes")]
 pub async fn get_nodes(path: web::Path<String>, session: Session, operator: inject::Operator, proxmox_client: inject::ProxmoxClient) -> actix_web::Result<impl Responder, HandlerError> {
@@ -114,7 +114,7 @@ pub async fn logs_for_cluster(path: web::Path<String>, session: Session, proxmox
     let result = web::block(
         move || {
             let operator = operator.lock()?;
-            Ok::<Vec<ActionLogEntry>, HandlerError>(operator.logs_for_cluster(name)?)
+            Ok::<Vec<LogEntry>, HandlerError>(operator.logs_for_cluster(name)?)
         }).await??;
 
     Ok(HttpResponse::Ok().json(result))

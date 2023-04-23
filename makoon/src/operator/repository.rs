@@ -5,7 +5,7 @@ use std::sync::RwLock;
 
 use serde::{Deserialize, Serialize};
 
-use crate::operator::model::{ActionLogEntry, Cluster};
+use crate::operator::model::{LogEntry, Cluster};
 
 #[derive(Debug)]
 pub enum Error {
@@ -35,7 +35,7 @@ pub type Result<T> = std::result::Result<T, Error>;
 #[serde(rename_all = "camelCase")]
 struct DbData {
     clusters: Vec<Cluster>,
-    action_log: Vec<ActionLogEntry>,
+    action_log: Vec<LogEntry>,
 }
 
 pub struct Repository {
@@ -66,11 +66,11 @@ impl Repository {
         self.repo.write().unwrap().save_cluster(cluster_to_save)
     }
 
-    pub fn logs(&self, cluster_name: String) -> Result<Vec<ActionLogEntry>> {
+    pub fn logs(&self, cluster_name: String) -> Result<Vec<LogEntry>> {
         self.repo.read().unwrap().logs(cluster_name)
     }
 
-    pub fn save_log(&self, entry: ActionLogEntry) -> Result<()> {
+    pub fn save_log(&self, entry: LogEntry) -> Result<()> {
         self.repo.write().unwrap().save_log(entry)
     }
 }
@@ -157,9 +157,9 @@ impl YamlRepository {
         self.save(data)
     }
 
-    pub fn logs(&self, cluster_name: String) -> Result<Vec<ActionLogEntry>> {
+    pub fn logs(&self, cluster_name: String) -> Result<Vec<LogEntry>> {
         let data = self.load()?;
-        let mut result: Vec<ActionLogEntry> = data.action_log
+        let mut result: Vec<LogEntry> = data.action_log
             .into_iter()
             .filter(|i| i.cluster_name == cluster_name)
             .collect();
@@ -167,7 +167,7 @@ impl YamlRepository {
         Ok(result)
     }
 
-    pub fn save_log(&self, entry: ActionLogEntry) -> Result<()> {
+    pub fn save_log(&self, entry: LogEntry) -> Result<()> {
         let mut data = self.load()?;
         data.action_log.push(entry);
         self.save(data)

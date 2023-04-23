@@ -199,7 +199,6 @@ const ClusterManagementView = () => {
                                 </Block>
                             </a>
                             <Block onClick={onClusterDeleteConfirmation}
-                                   notActive={blockingOperationInProgress}
                                    tooltip="Delete cluster"
                                    className="flex justify-center items-center w-[76px] mb-4">
                                 <i className={`pi pi-trash ${blockingOperationInProgress ? "text-stone-400" : "danger"}`}
