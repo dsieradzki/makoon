@@ -26,7 +26,7 @@ pub(crate) fn execute(
 
 pub(crate) fn stop_vms(repo: &Arc<Repository>, proxmox_client: &ClientOperations, cluster: &Cluster, existing_nodes: &[ClusterNode]) -> Result<(), String> {
     for node in existing_nodes.iter() {
-        proxmox_client.shutdown_vm(cluster.node.clone(), node.vm_id).map_err(|e| format!("Shutdown VM [{}], error: [{}]", node.vm_id, e))?;
+        proxmox_client.shutdown_vm(&cluster.node, node.vm_id).map_err(|e| format!("Shutdown VM [{}], error: [{}]", node.vm_id, e))?;
         repo.save_log(LogEntry::info(&cluster.cluster_name, format!("Requested VM [{}] to shutdown", node.vm_id)))?;
     }
 
@@ -35,7 +35,7 @@ pub(crate) fn stop_vms(repo: &Arc<Repository>, proxmox_client: &ClientOperations
         let is_shutdown = common::vm::wait_for_shutdown(proxmox_client, cluster.node.clone(), node.vm_id)?;
         if !is_shutdown {
             repo.save_log(LogEntry::info(&cluster.cluster_name, format!("VM [{}] cannot be shouted down gracefully, stop VM imminently", node.vm_id)))?;
-            proxmox_client.stop_vm(cluster.node.clone(), node.vm_id)?;
+            proxmox_client.stop_vm(&cluster.node, node.vm_id)?;
             common::vm::wait_for_shutdown(proxmox_client, cluster.node.clone(), node.vm_id)?;
         }
     }
@@ -44,7 +44,7 @@ pub(crate) fn stop_vms(repo: &Arc<Repository>, proxmox_client: &ClientOperations
 
 pub(crate) fn delete_vms(repo: Arc<Repository>, proxmox_client: &ClientOperations, cluster: &Cluster, existing_nodes: &[ClusterNode]) -> Result<(), String> {
     for node in existing_nodes.iter() {
-        proxmox_client.delete_vm(cluster.node.clone(), node.vm_id).map_err(|e| format!("Delete VM [{}], error: [{}]", node.vm_id, e))?;
+        proxmox_client.delete_vm(&cluster.node, node.vm_id).map_err(|e| format!("Delete VM [{}], error: [{}]", node.vm_id, e))?;
         repo.save_log(LogEntry::info(&cluster.cluster_name, format!("VM [{}] has been deleted", node.vm_id)))?;
     }
     Ok(())

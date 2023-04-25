@@ -29,7 +29,7 @@ impl DefaultClusterConfigurationGenerator {
             os_image: "https://cloud-images.ubuntu.com/kinetic/current/kinetic-server-cloudimg-amd64.img".to_string(),
             os_image_storage: default_iso_storage,
             kube_version: "1.24/stable".to_string(),
-            node: default_proxmox_node.clone(),
+            node: default_proxmox_node,
             cluster_name: EMPTY,
             ssh_key: KeyPair {
                 private_key: EMPTY,
@@ -60,7 +60,7 @@ impl DefaultClusterConfigurationGenerator {
     }
 }
 
-fn get_default_start_vm_id(proxmox_client: &ClientOperations, node: &String) -> Result<u32> {
+fn get_default_start_vm_id(proxmox_client: &ClientOperations, node: &str) -> Result<u32> {
     let mut used_vm_ids: Vec<u32> = proxmox_client
         .virtual_machines(node.clone(), None)?.iter()
         .map(|i| i.vm_id)
@@ -72,10 +72,10 @@ fn get_default_start_vm_id(proxmox_client: &ClientOperations, node: &String) -> 
 
     used_vm_ids.sort();
 
-    find_empty_slot_for_vm_ids(&mut used_vm_ids)
+    find_empty_slot_for_vm_ids(&used_vm_ids)
 }
 
-fn find_empty_slot_for_vm_ids(used_vm_ids: &Vec<u32>) -> Result<u32> {
+fn find_empty_slot_for_vm_ids(used_vm_ids: &[u32]) -> Result<u32> {
     for x in (100..999_999_999).step_by(10) {
         let range_already_used = used_vm_ids.iter().filter(|i| **i >= x && **i <= x + 10).count() > 0;
         if range_already_used {
@@ -89,7 +89,7 @@ fn find_empty_slot_for_vm_ids(used_vm_ids: &Vec<u32>) -> Result<u32> {
 
 
 fn get_default_network(proxmox_client: &ClientOperations, node: &str) -> Result<proxmox::model::Network> {
-    let bridges = proxmox_client.networks(node.to_string(), Some(NetworkType::Bridge))?;
+    let bridges = proxmox_client.networks(&node, Some(NetworkType::Bridge))?;
     Ok(bridges.into_iter()
         .find(|i| {
             let address = i.address.clone().unwrap_or_default();
@@ -99,7 +99,7 @@ fn get_default_network(proxmox_client: &ClientOperations, node: &str) -> Result<
 }
 
 fn get_default_iso_storage(proxmox_client: &ClientOperations, node: &str) -> Result<String> {
-    let result = proxmox_client.storage(node.to_string(), Some(StorageContentType::Iso))?;
+    let result = proxmox_client.storage(&node, Some(StorageContentType::Iso))?;
     result.get(0)
         .map(|i| i.storage.clone())
         .ok_or(Error::ResourceNotFound)
@@ -107,7 +107,7 @@ fn get_default_iso_storage(proxmox_client: &ClientOperations, node: &str) -> Res
 
 
 fn get_default_disk_storage(proxmox_client: &ClientOperations, node: &str) -> Result<String> {
-    let result = proxmox_client.storage(node.to_string(), Some(StorageContentType::Images))?;
+    let result = proxmox_client.storage(&node, Some(StorageContentType::Images))?;
     result.get(0)
         .map(|i| i.storage.clone())
         .ok_or(Error::ResourceNotFound)
@@ -126,26 +126,26 @@ mod test {
 
     #[test]
     fn find_slot_with_first_taken() {
-        let result = find_empty_slot_for_vm_ids(&vec![100]).unwrap();
+        let result = find_empty_slot_for_vm_ids(&[100]).unwrap();
         assert_eq!(result, 110);
     }
 
     #[test]
     fn find_slot_with_taken_in_first_slot() {
-        let result = find_empty_slot_for_vm_ids(&vec![105]).unwrap();
+        let result = find_empty_slot_for_vm_ids(&[105]).unwrap();
         assert_eq!(result, 110);
     }
 
     #[test]
     fn find_slot_with_taken_in_first_and_second_slot() {
-        let result = find_empty_slot_for_vm_ids(&vec![105, 112]).unwrap();
+        let result = find_empty_slot_for_vm_ids(&[105, 112]).unwrap();
         assert_eq!(result, 120);
     }
 
 
     #[test]
     fn find_slot_with_taken_in_three_slots() {
-        let result = find_empty_slot_for_vm_ids(&vec![105, 112, 129]).unwrap();
+        let result = find_empty_slot_for_vm_ids(&[105, 112, 129]).unwrap();
         assert_eq!(result, 130);
     }
 }

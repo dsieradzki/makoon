@@ -15,7 +15,7 @@ pub async fn storage(path: web::Path<(String, proxmox::model::StorageContentType
     let result = web::block(move || {
         let result = proxmox_client
             .operations(access)
-            .storage(node, Some(storage_content_type))?;
+            .storage(&node, Some(storage_content_type))?;
         Ok::<Vec<proxmox::model::Storage>, HandlerError>(result)
     }).await??;
 

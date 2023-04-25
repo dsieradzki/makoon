@@ -38,7 +38,7 @@ pub(crate) fn execute(
 
     common::vm::create(&proxmox_client, repo.clone(), &cluster, node_to_add)?;
 
-    proxmox_client.start_vm(cluster.node.clone(), node_to_add.vm_id).map_err(|e| format!("Cannot start VM [{}]: {}", node_to_add.vm_id, e))?;
+    proxmox_client.start_vm(&cluster.node, node_to_add.vm_id).map_err(|e| format!("Cannot start VM [{}]: {}", node_to_add.vm_id, e))?;
     repo.save_log(LogEntry::info(&cluster.cluster_name, format!("Starting VM [{}]", node_to_add.vm_id)))?;
 
 

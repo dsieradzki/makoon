@@ -17,7 +17,7 @@ pub async fn networks_bridges(path: web::Path<String>, session: Session, proxmox
         move || {
             let result = proxmox_client
                 .operations(access)
-                .networks(node, Some(proxmox::model::NetworkType::Bridge))?;
+                .networks(&node, Some(proxmox::model::NetworkType::Bridge))?;
             Ok::<Vec<proxmox::model::Network>, HandlerError>(result)
         }).await??;
 

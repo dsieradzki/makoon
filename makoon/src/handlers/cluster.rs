@@ -138,7 +138,7 @@ pub async fn cluster_vm_status(path: web::Path<String>, session: Session, proxmo
     let vms = web::block(move || {
         let result = proxmox_client
             .operations(access)
-            .virtual_machines(cluster.node, None)?;
+            .virtual_machines(&cluster.node, None)?;
         Ok::<Vec<VirtualMachine>, HandlerError>(result)
     }).await??;
 

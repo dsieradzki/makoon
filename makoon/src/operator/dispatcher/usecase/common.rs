@@ -66,7 +66,7 @@ pub(crate) mod vm {
         })?;
 
         retry(|| {
-            let locked = proxmox_client.virtual_machines(cluster.node.clone(), Some(true))?
+            let locked = proxmox_client.virtual_machines(&cluster.node, Some(true))?
                 .iter()
                 .find(|i| i.vm_id == node.vm_id)
                 .map(|i| i.lock.is_some())
@@ -94,7 +94,7 @@ pub(crate) mod vm {
 
         let get_storage_content = || -> Result<Option<StorageContent>, String> {
             Ok(
-                proxmox_client.storage_content(cluster.node.clone(), os_image_storage.clone())?
+                proxmox_client.storage_content(&cluster.node, &os_image_storage)?
                     .iter()
                     .find(|i| i.volid.ends_with(&file_name))
                     .cloned()
@@ -129,7 +129,7 @@ pub(crate) mod vm {
         };
 
         proxmox_client
-            .storage_content_details(cluster.node.clone(), os_image_storage.clone(), existing_image.volid)
+            .storage_content_details(&cluster.node, &os_image_storage, &existing_image.volid)
             .map(|i| i.path)
             .map_err(|e| e.to_string())
     }
@@ -138,7 +138,7 @@ pub(crate) mod vm {
     pub fn wait_for_shutdown(proxmox_client: &proxmox::ClientOperations, node: String, vm_id: u32) -> Result<bool, String> {
         let is_shutdown = retry(|| {
             let status = proxmox_client
-                .status_vm(node.clone(), vm_id)
+                .status_vm(&node, vm_id)
                 .map(|i| i.status)
                 .map_err(|e| format!("Status VM {}, error: {}", vm_id, e))?;
 
@@ -167,7 +167,7 @@ pub(crate) mod vm {
                           cluster_node: &ClusterNode) -> Result<(), String> {
         retry(|| {
             let status = proxmox_client
-                .status_vm(cluster.node.clone(), cluster_node.vm_id)
+                .status_vm(&cluster.node, cluster_node.vm_id)
                 .map(|i| i.status)
                 .map_err(|e| format!("Status VM {}, error: {}", cluster_node.vm_id, e))?;
 
@@ -192,7 +192,7 @@ pub(crate) mod vm {
 
     pub(crate) fn get_existing_vms(proxmox_client: &ClientOperations, cluster: &Cluster) -> Result<Vec<ClusterNode>, String> {
         let vms = proxmox_client
-            .virtual_machines(cluster.node.clone(), None)?
+            .virtual_machines(&cluster.node, None)?
             .into_iter()
             .map(|i| (i.vm_id.clone(), i.name.unwrap_or_default()))
             .collect::<Vec<(u32, String)>>();
@@ -220,11 +220,11 @@ pub(crate) mod vm {
 
         repo.save_log(LogEntry::info(&cluster.cluster_name, format!("Reboot is required, shutdown VM [{}]", node.vm_id)))?;
 
-        proxmox_client.shutdown_vm(cluster.node.clone(), node.vm_id)?;
+        proxmox_client.shutdown_vm(&cluster.node, node.vm_id)?;
         let is_shutdown = wait_for_shutdown(proxmox_client, cluster.node.clone(), node.vm_id)?;
         if !is_shutdown {
             info!("Shutdown VM [{}] is timeout, stop VM immediately", node.vm_id);
-            proxmox_client.stop_vm(cluster.node.clone(), node.vm_id)?;
+            proxmox_client.stop_vm(&cluster.node, node.vm_id)?;
             let is_shutdown = wait_for_shutdown(proxmox_client, cluster.node.clone(), node.vm_id)?;
             if !is_shutdown {
                 error!("Cannot shutdown VM [{}]", node.vm_id);
@@ -232,7 +232,7 @@ pub(crate) mod vm {
             }
         }
         repo.save_log(LogEntry::info(&cluster.cluster_name, format!("Starting VM [{}]", node.vm_id)))?;
-        proxmox_client.start_vm(cluster.node.clone(), node.vm_id)?;
+        proxmox_client.start_vm(&cluster.node, node.vm_id)?;
         wait_for_start(proxmox_client, cluster, node).map_err(|e| format!("Cannot start VM [{}]: {}", node.vm_id, e))?;
         repo.save_log(LogEntry::info(&cluster.cluster_name, format!("VM [{}] has been started", node.vm_id)))?;
         Ok(())

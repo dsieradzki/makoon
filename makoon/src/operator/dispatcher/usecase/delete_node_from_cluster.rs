@@ -63,15 +63,15 @@ pub(crate) fn execute(
     if vm_exists {
         repo.save_log(LogEntry::info(&cluster_name, format!("Removing VM [{}]", node_to_delete.vm_id)))?;
 
-        proxmox_client.shutdown_vm(cluster.node.clone(), node_to_delete.vm_id).map_err(|e| format!("Shutdown VM [{}], error: [{}]", node_to_delete.vm_id, e))?;
+        proxmox_client.shutdown_vm(&cluster.node, node_to_delete.vm_id).map_err(|e| format!("Shutdown VM [{}], error: [{}]", node_to_delete.vm_id, e))?;
         repo.save_log(LogEntry::info(&cluster.cluster_name, format!("Requested VM [{}] to shutdown", node_to_delete.vm_id)))?;
         let is_shutdown = common::vm::wait_for_shutdown(&proxmox_client, cluster.node.clone(), node_to_delete.vm_id)?;
         if !is_shutdown {
-            proxmox_client.stop_vm(cluster.node.clone(), node_to_delete.vm_id)?;
+            proxmox_client.stop_vm(&cluster.node, node_to_delete.vm_id)?;
             common::vm::wait_for_shutdown(&proxmox_client, cluster.node.clone(), node_to_delete.vm_id)?;
         }
 
-        proxmox_client.delete_vm(cluster.node.clone(), node_to_delete.vm_id).map_err(|e| format!("Delete VM [{}], error: [{}]", node_to_delete.vm_id, e))?;
+        proxmox_client.delete_vm(&cluster.node, node_to_delete.vm_id).map_err(|e| format!("Delete VM [{}], error: [{}]", node_to_delete.vm_id, e))?;
         repo.save_log(LogEntry::info(&cluster.cluster_name, format!("VM [{}] has been deleted", node_to_delete.vm_id)))?;
     }
 

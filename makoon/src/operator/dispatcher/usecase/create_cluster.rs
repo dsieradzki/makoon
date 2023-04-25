@@ -60,7 +60,6 @@ fn install_cluster_resources(repo: Arc<Repository>, cluster: &Cluster) -> Result
 }
 
 
-
 fn install_helm_apps(repo: Arc<Repository>, cluster: &Cluster) -> Result<(), String> {
     repo.save_log(LogEntry::info(&cluster.cluster_name, "Install Helm apps".to_string()))?;
 
@@ -196,11 +195,11 @@ fn generate_ssh_keys() -> Result<KeyPair, String> {
 
 pub(crate) fn create_vms(proxmox_client: &ClientOperations, cluster: &Cluster, repo: Arc<Repository>) -> Result<(), String> {
     let mut used_vm_ids: Vec<u32> = proxmox_client
-        .virtual_machines(cluster.node.clone(), None)?.iter()
+        .virtual_machines(&cluster.node, None)?.iter()
         .map(|i| i.vm_id)
         .collect();
 
-    used_vm_ids.extend(proxmox_client.lxc_containers(cluster.node.clone())?.iter()
+    used_vm_ids.extend(proxmox_client.lxc_containers(&cluster.node)?.iter()
         .map(|i| &i.vm_id)
         .map(|i| i.parse::<u32>().unwrap_or_default())
         .collect::<Vec<u32>>());
@@ -220,7 +219,7 @@ pub(crate) fn start_vms(proxmox_client: &ClientOperations,
                         cluster: &Cluster,
                         repo: Arc<Repository>) -> Result<(), String> {
     for node in cluster.nodes.iter() {
-        proxmox_client.start_vm(cluster.node.clone(), node.vm_id)
+        proxmox_client.start_vm(&cluster.node, node.vm_id)
             .map_err(|e| format!("Cannot start VM [{}]: {}", node.vm_id, e))?;
         repo.save_log(LogEntry::info(&cluster.cluster_name, format!("Starting VM [{}]", node.vm_id)))?;
     }
