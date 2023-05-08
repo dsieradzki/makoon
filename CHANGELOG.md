@@ -1,3 +1,17 @@
+# [0.14.0](https://github.com/dsieradzki/makoon/compare/v0.13.0...v0.14.0) (2023-05-08)
+
+
+### Bug Fixes
+
+* Small code refactoring ([35f862f](https://github.com/dsieradzki/makoon/commit/35f862fcacf037d2be1d6c38c4447fdcb4d17326))
+
+
+### Features
+
+* Change node resources ([c0d3c7e](https://github.com/dsieradzki/makoon/commit/c0d3c7e177e44f0a9546ac3b688aaeff8c44d615))
+
+
+
 # [0.13.0](https://github.com/dsieradzki/makoon/compare/v0.12.0...v0.13.0) (2023-04-23)
 
 
@@ -43,21 +57,6 @@
 
 * Small UI improvements ([f9a760f](https://github.com/dsieradzki/makoon/commit/f9a760f28ee0f39d5ad9db0e82a4735bbe6a954c))
 * Support spaces in Kubernetes resources ([cf47817](https://github.com/dsieradzki/makoon/commit/cf4781722f170c3fcacebca6a4db816dd9e0a637))
-
-
-
-# [0.10.0](https://github.com/dsieradzki/makoon/compare/v0.9.0...v0.10.0) (2022-11-23)
-
-
-### Bug Fixes
-
-* Cancel key and config export should not cause error ([a3cf6cf](https://github.com/dsieradzki/makoon/commit/a3cf6cfc3f4a94a202c5ce49224aadc42211efb5))
-* update dependencies ([25952be](https://github.com/dsieradzki/makoon/commit/25952beacc7851e5c5be001c4dbf22874a0d59b3))
-
-
-### Features
-
-* Helm Chart management ([f2cb3b3](https://github.com/dsieradzki/makoon/commit/f2cb3b32c744913a9846280a872b1dc9478fe8cf))
 
 
 
