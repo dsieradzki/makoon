@@ -1,13 +1,12 @@
-
 use actix_session::Session;
-use actix_web::{delete, get, HttpResponse, post, Responder, web};
+use actix_web::{delete, get, put, HttpResponse, post, Responder, web};
 
 use proxmox::model::VirtualMachine;
 
 use crate::{logged_in, operator};
 use crate::handlers::actix::inject;
 use crate::handlers::error::HandlerError;
-use crate::handlers::model::ClusterNodeVmStatus;
+use crate::handlers::model::{ChangeNodeResourcesRequest, ClusterNodeVmStatus};
 use crate::operator::model::{LogEntry, Cluster, ClusterNode, ClusterRequest};
 
 #[get("/api/v1/clusters/{cluster_name}/nodes")]
@@ -18,7 +17,7 @@ pub async fn get_nodes(path: web::Path<String>, session: Session, operator: inje
     let operator = operator.lock()?;
 
     let result = operator
-        .get_nodes(cluster_name)?;
+        .get_nodes(&cluster_name)?;
 
     Ok(HttpResponse::Ok().json(result))
 }
@@ -35,6 +34,19 @@ pub async fn add_node_to_cluster(body: web::Json<ClusterNode>,
     let operator = operator.lock()?;
     let added_node = operator.add_node_cluster(access, cluster_name, body.0)?;
     Ok(HttpResponse::Created().json(added_node))
+}
+
+#[put("/api/v1/clusters/{cluster_name}/nodes/{node_name}/resources")]
+pub async fn change_node_resources(body: web::Json<ChangeNodeResourcesRequest>,
+                                   path: web::Path<(String, String)>,
+                                   session: Session,
+                                   operator: inject::Operator,
+                                   proxmox_client: inject::ProxmoxClient) -> actix_web::Result<impl Responder, HandlerError> {
+    let access = logged_in!(session, proxmox_client);
+    let (cluster_name, node_name) = path.into_inner();
+    let operator = operator.lock()?;
+    operator.change_node_resources(access, cluster_name, node_name, body.cores, body.memory)?;
+    Ok(HttpResponse::Accepted())
 }
 
 #[post("/api/v1/clusters")]
@@ -65,7 +77,7 @@ pub async fn get_cluster(path: web::Path<String>, session: Session, operator: in
     let operator = operator.lock()?;
 
     let result = operator
-        .get_cluster(name)?
+        .get_cluster(&name)?
         .ok_or(HandlerError::NotFound("Cluster not found".to_string()))?;
 
     Ok(HttpResponse::Ok().json(result))
@@ -128,7 +140,7 @@ pub async fn cluster_vm_status(path: web::Path<String>, session: Session, proxmo
     let cluster = web::block(
         move || {
             let result = operator.lock()?
-                .get_cluster(name)?;
+                .get_cluster(&name)?;
             Ok::<Option<Cluster>, HandlerError>(result)
         })
         .await??
@@ -162,7 +174,8 @@ pub async fn cluster_kube_status(path: web::Path<String>, session: Session, prox
     let _ = logged_in!(session, proxmox_client);
     let name = path.into_inner();
 
-    let result = web::block(move || operator.lock().unwrap().cluster_status(name)).await??;
+
+    let result = web::block(move || operator.lock().unwrap().cluster_status(&name)).await??;
 
     Ok(HttpResponse::Ok().json(result))
 }

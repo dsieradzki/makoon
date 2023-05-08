@@ -179,3 +179,8 @@ export interface AvailableStorage {
     used?: number,
     total?: number,
 }
+
+export interface ChangeNodeResourcesRequest {
+    cores: number,
+    memory: number,
+}

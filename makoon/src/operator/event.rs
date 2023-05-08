@@ -20,4 +20,11 @@ pub enum Event {
         access: AccessData,
         cluster_name: String,
     },
+    ChangeNodeResources {
+        access: AccessData,
+        cluster_name: String,
+        node_name: String,
+        cores: u16,
+        memory: u64,
+    },
 }

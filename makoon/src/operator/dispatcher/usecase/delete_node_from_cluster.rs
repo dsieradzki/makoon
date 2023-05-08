@@ -17,7 +17,7 @@ pub(crate) fn execute(
     let proxmox_client = proxmox_client.operations(access);
     repo.save_log(LogEntry::info(&cluster_name, format!("Start deleting node [{}-{}]", cluster_name, node_name)))?;
 
-    let mut cluster = repo.get_cluster(cluster_name.clone())?.ok_or("Cannot find cluster")?;
+    let mut cluster = repo.get_cluster(&cluster_name)?.ok_or("Cannot find cluster")?;
     if cluster.nodes.len() == 1 {
         repo.save_log(LogEntry::error(&cluster_name, format!("Cannot delete last node, delete whole cluster instead")))?;
         return Ok(());
@@ -65,10 +65,10 @@ pub(crate) fn execute(
 
         proxmox_client.shutdown_vm(&cluster.node, node_to_delete.vm_id).map_err(|e| format!("Shutdown VM [{}], error: [{}]", node_to_delete.vm_id, e))?;
         repo.save_log(LogEntry::info(&cluster.cluster_name, format!("Requested VM [{}] to shutdown", node_to_delete.vm_id)))?;
-        let is_shutdown = common::vm::wait_for_shutdown(&proxmox_client, cluster.node.clone(), node_to_delete.vm_id)?;
+        let is_shutdown = common::vm::wait_for_shutdown(&proxmox_client, &cluster.node, node_to_delete.vm_id)?;
         if !is_shutdown {
             proxmox_client.stop_vm(&cluster.node, node_to_delete.vm_id)?;
-            common::vm::wait_for_shutdown(&proxmox_client, cluster.node.clone(), node_to_delete.vm_id)?;
+            common::vm::wait_for_shutdown(&proxmox_client, &cluster.node, node_to_delete.vm_id)?;
         }
 
         proxmox_client.delete_vm(&cluster.node, node_to_delete.vm_id).map_err(|e| format!("Delete VM [{}], error: [{}]", node_to_delete.vm_id, e))?;
@@ -83,14 +83,14 @@ pub(crate) fn execute(
 }
 
 fn remove_node_from_project(repo: Arc<Repository>, cluster_name: &str, node_name: &str) -> Result<(), String> {
-    let mut cluster = repo.get_cluster(cluster_name.to_string())?.ok_or("Cannot find cluster")?;
+    let mut cluster = repo.get_cluster(cluster_name)?.ok_or("Cannot find cluster")?;
     cluster.nodes.retain_mut(|i| i.name != node_name);
     repo.save_cluster(cluster)?;
     Ok(())
 }
 
 fn remove_hosts_from_rest_of_nodes(repo: Arc<Repository>, proxmox_client: &ClientOperations, cluster_name: &str, node_name: &str) -> Result<(), String> {
-    let cluster = repo.get_cluster(cluster_name.to_string())?.ok_or("Cannot find cluster")?;
+    let cluster = repo.get_cluster(cluster_name)?.ok_or("Cannot find cluster")?;
     let existing_nodes = common::vm::get_existing_vms(&proxmox_client, &cluster)?;
     for node in existing_nodes.iter() {
         let mut ssh_client = ssh::Client::new();

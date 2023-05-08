@@ -262,6 +262,10 @@ class ClusterManagementStore {
         });
     }
 
+    async changeNodeResources(nodeName: string, cores: number, memory: number) {
+        await api.clusters.changeNodeResources(this.cluster.clusterName, nodeName, cores, memory);
+    }
+
     async addNodeToCluster(node: ClusterNode) {
         const addedNode = await api.clusters.addNodeToCluster(this.cluster.clusterName, node);
         runInAction(() => {

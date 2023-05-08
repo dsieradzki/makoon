@@ -23,7 +23,7 @@ pub async fn export_cluster_data(path: web::Path<(String, ExportType)>, session:
     let (cluster_name, export_type) = path.into_inner();
 
     let cluster = operator.lock().map_err(HandlerError::from)?
-        .get_cluster(cluster_name.clone())?
+        .get_cluster(&cluster_name)?
         .ok_or(HandlerError::NotFound("Cluster not found".to_string()))?;
 
     let (key, file_name) = match export_type {

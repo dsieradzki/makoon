@@ -15,23 +15,16 @@ import {apiCall} from "@/utils/api";
 import api from "@/api/api";
 import {AvailableStorage} from "@/api/model";
 import {Dialog} from "primereact/dialog";
+import {array} from "yup";
 
 interface NodeFormModel {
-    name: string
-    vmid: number
     cores: number
     memory: number
-    ipAddress: string
-    storagePool: string
 }
 
 const schema = Yup.object().shape({
-    name: Yup.string().required(),
-    vmid: Yup.number().min(100).required(),
     cores: Yup.number().min(1).required(),
     memory: Yup.number().positive().required(),
-    ipAddress: Yup.string().min(7).required(),
-    storagePool: Yup.string().required()
 })
 const ManagementEditNodeProperties = () => {
 
@@ -47,6 +40,7 @@ const ManagementEditNodeProperties = () => {
             return null
         }
     })
+    const [editResources, setEditResources] = useState(false);
 
     const cannotDelete = computed(() => {
         return (!!storedNode.get()?.lock) || clusterManagementStore.cluster.nodes.filter(i => !i.lock).length < 2;
@@ -54,18 +48,20 @@ const ManagementEditNodeProperties = () => {
 
     const fullNodeName = `${clusterManagementStore.cluster.clusterName}-${storedNode.get()?.name}`;
 
+    const initialValues = {
+        cores: storedNode.get()?.cores,
+        memory: storedNode.get()?.memory,
+    } as NodeFormModel;
+
     const formik = useFormik({
         validationSchema: schema,
-        initialValues: {
-            vmid: storedNode.get()?.vmId,
-            name: fullNodeName,
-            cores: storedNode.get()?.cores,
-            memory: storedNode.get()?.memory,
-            ipAddress: storedNode.get()?.ipAddress,
-            storagePool: storedNode.get()?.storagePool
-        } as NodeFormModel,
-
-        onSubmit: (values, formikHelpers) => {
+        initialValues: initialValues,
+        onSubmit: async (values, formikHelpers) => {
+            const nodeName = storedNode.get()?.name;
+            if (!nodeName) {
+                throw Error("Node name is empty")
+            }
+            await clusterManagementStore.changeNodeResources(nodeName, values.cores, values.memory);
         }
     })
 
@@ -103,23 +99,21 @@ const ManagementEditNodeProperties = () => {
                     <div>
                         <div className="text-stone-400 required">VM id</div>
                         <InputNumber name="vmid"
-                                     value={formik.values.vmid}
+                                     value={storedNode.get()?.vmId}
                                      readOnly={true}
                                      disabled={true}
                                      className="w-full p-inputtext-sm" showButtons buttonLayout="horizontal"
                                      incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus"
                                      min={100}></InputNumber>
-                        <FormError error={formik.errors.vmid} touched={formik.touched.vmid}/>
                     </div>
 
                     <div className="mt-3">
                         <div className="text-stone-400 required">Node name</div>
                         <InputText name="name"
-                                   value={formik.values.name}
+                                   value={storedNode.get()?.name}
                                    readOnly={true}
                                    disabled={true}
                                    className="w-full p-inputtext-sm"></InputText>
-                        <FormError error={formik.errors.name} touched={formik.touched.name}/>
                     </div>
 
                     <div className="mt-3">
@@ -127,9 +121,8 @@ const ManagementEditNodeProperties = () => {
                         <InputText name="ipAddress"
                                    readOnly={true}
                                    disabled={true}
-                                   value={formik.values.ipAddress}
+                                   value={storedNode.get()?.ipAddress}
                                    className="w-full p-inputtext-sm"></InputText>
-                        <FormError error={formik.errors.ipAddress} touched={formik.touched.ipAddress}/>
                     </div>
 
                     <div className="mt-3">
@@ -137,23 +130,53 @@ const ManagementEditNodeProperties = () => {
                         <Dropdown name="storagePool"
                                   readOnly={true}
                                   disabled={true}
-                                  value={formik.values.storagePool}
+                                  value={storedNode.get()?.storagePool}
                                   optionLabel={"storage"}
                                   optionValue={"storage"}
                                   options={storages}
                                   className="w-full"/>
-                        <FormError error={formik.errors.storagePool} touched={formik.touched.storagePool}/>
                     </div>
 
-                    <div className="border-t-2 border-stone-800 text-xl mt-10 mb-3">
-                        Resources
+                    <div className="border-t-2 border-stone-800 text-xl mt-10 mb-3 flex items-center">
+                        <span className="mr-2">Resources</span>
+                        {!editResources &&
+                            <div>
+                                <a onClick={() => {
+                                    setEditResources(true);
+                                }}
+                                   className="text-sm primary-text-color cursor-pointer">
+                                    Edit
+                                </a>
+                            </div>
+                        }
+                        {editResources &&
+                            <div>
+                                <a onClick={async () => {
+                                    setEditResources(false);
+                                    await formik.submitForm();
+                                }}
+                                   className="text-sm primary-text-color cursor-pointer mr-2">
+                                    Save
+                                </a>
+
+                                <a onClick={() => {
+                                    setEditResources(false);
+                                    formik.resetForm();
+                                }}
+                                   className="text-sm text-stone-400 cursor-pointer">
+                                    Cancel
+                                </a>
+                            </div>
+                        }
                     </div>
                     <div className="mt-3">
                         <div className="text-stone-400 required">CPU cores</div>
                         <InputNumber name="cores"
                                      value={formik.values.cores}
-                                     readOnly={true}
-                                     disabled={true}
+                                     onChange={v => {
+                                         formik.setFieldValue("cores", v.value, true)
+                                     }}
+                                     disabled={!editResources}
                                      className="w-full p-inputtext-sm" showButtons
                                      buttonLayout="horizontal"
                                      incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus" min={1}>
@@ -164,8 +187,10 @@ const ManagementEditNodeProperties = () => {
                         <div className="text-stone-400 required">Memory (MB)</div>
                         <InputNumber name="memory"
                                      value={formik.values.memory}
-                                     readOnly={true}
-                                     disabled={true}
+                                     onChange={v => {
+                                         formik.setFieldValue("memory", v.value, true)
+                                     }}
+                                     disabled={!editResources}
                                      className="w-full p-inputtext-sm" showButtons
                                      buttonLayout="horizontal"
                                      incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus" step={1024}

@@ -1,5 +1,5 @@
 import {
-    ActionLogEntry,
+    ActionLogEntry, ChangeNodeResourcesRequest,
     Cluster,
     ClusterHeader,
     ClusterNode,
@@ -28,6 +28,13 @@ export namespace clusters {
 
     export function deleteNodeFromCluster(clusterName: string, nodeName: string): Promise<ClusterNode> {
         return axios.delete(`/api/v1/clusters/${clusterName}/nodes/${nodeName}`).then(e => e.data);
+    }
+
+    export function changeNodeResources(clusterName: string, nodeName: string, cores: number, memory: number): Promise<void> {
+        return axios.put(`/api/v1/clusters/${clusterName}/nodes/${nodeName}/resources`, {
+            cores,
+            memory
+        } as ChangeNodeResourcesRequest).then(e => e.data);
     }
 
     export function createCluster(request: ClusterRequest): Promise<void> {
