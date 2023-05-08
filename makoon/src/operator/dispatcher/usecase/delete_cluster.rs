@@ -13,7 +13,7 @@ pub(crate) fn execute(
     access: AccessData,
     cluster_name: String) -> Result<(), String> {
     let proxmox_client = proxmox_client.operations(access);
-    let cluster = repo.get_cluster(cluster_name.clone())?.ok_or("Cannot find cluster")?;
+    let cluster = repo.get_cluster(&cluster_name)?.ok_or("Cannot find cluster")?;
 
     let existing_nodes = common::vm::get_existing_vms(&proxmox_client, &cluster)?;
     stop_vms(&repo, &proxmox_client, &cluster, &existing_nodes)?;
@@ -32,11 +32,11 @@ pub(crate) fn stop_vms(repo: &Arc<Repository>, proxmox_client: &ClientOperations
 
     for node in existing_nodes.iter() {
         repo.save_log(LogEntry::info(&cluster.cluster_name, format!("Wait for VM [{}] shutdown", node.vm_id)))?;
-        let is_shutdown = common::vm::wait_for_shutdown(proxmox_client, cluster.node.clone(), node.vm_id)?;
+        let is_shutdown = common::vm::wait_for_shutdown(proxmox_client, &cluster.node, node.vm_id)?;
         if !is_shutdown {
             repo.save_log(LogEntry::info(&cluster.cluster_name, format!("VM [{}] cannot be shouted down gracefully, stop VM imminently", node.vm_id)))?;
             proxmox_client.stop_vm(&cluster.node, node.vm_id)?;
-            common::vm::wait_for_shutdown(proxmox_client, cluster.node.clone(), node.vm_id)?;
+            common::vm::wait_for_shutdown(proxmox_client, &cluster.node, node.vm_id)?;
         }
     }
     Ok(())

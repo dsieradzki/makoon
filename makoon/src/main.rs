@@ -84,6 +84,7 @@ async fn main() -> std::io::Result<()> {
             .service(handlers::cluster::cluster_kube_status)
             .service(handlers::cluster::add_node_to_cluster)
             .service(handlers::cluster::delete_node_from_cluster)
+            .service(handlers::cluster::change_node_resources)
             .service(handlers::apps::apps_status)
             .service(handlers::apps::save_helm_app)
             .service(handlers::apps::update_helm_app)

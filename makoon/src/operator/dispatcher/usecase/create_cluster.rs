@@ -22,7 +22,7 @@ pub(crate) fn execute(
 
     repo.save_log(LogEntry::info(&cluster_name, "Start creating cluster".to_string()))?;
 
-    let mut cluster = repo.get_cluster(cluster_name)?.ok_or("Cannot find cluster")?;
+    let mut cluster = repo.get_cluster(&cluster_name)?.ok_or("Cannot find cluster")?;
     let keys = generate_ssh_keys()?;
     cluster.ssh_key = keys;
     repo.save_cluster(cluster.clone())?;
@@ -101,7 +101,7 @@ fn add_kubeconfig_to_project(repo: Arc<Repository>, cluster: &mut Cluster) -> Re
     let kube_config_content = ssh_client.execute("sudo microk8s config")?;
     cluster.cluster_config = kube_config_content.clone();
     let mut cluster_to_update = repo
-        .get_cluster(cluster.cluster_name.clone())?
+        .get_cluster(&cluster.cluster_name)?
         .ok_or("Cannot read cluster from repository".to_string())?;
     cluster_to_update.cluster_config = kube_config_content;
     repo.save_cluster(cluster_to_update)?;

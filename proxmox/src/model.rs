@@ -55,7 +55,6 @@ pub enum StorageType {
     ZfsPool,
 }
 
-
 impl Display for StorageType {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -96,7 +95,7 @@ impl Display for StorageContentType {
             StorageContentType::Rootdir => write!(f, "rootdir"),
             StorageContentType::Vztmpl => write!(f, "vztmpl"),
             StorageContentType::Backup => write!(f, "backup"),
-            StorageContentType::Snippets => write!(f, "snippets")
+            StorageContentType::Snippets => write!(f, "snippets"),
         }
     }
 }
@@ -341,7 +340,7 @@ impl Display for NetworkType {
             NetworkType::OVSBond => write!(f, "OVSBond"),
             NetworkType::OVSPort => write!(f, "OVSPort"),
             NetworkType::OVSIntPort => write!(f, "OVSIntPort"),
-            NetworkType::AnyBridge => write!(f, "any_bridge")
+            NetworkType::AnyBridge => write!(f, "any_bridge"),
         }
     }
 }
@@ -399,7 +398,6 @@ pub enum OsType {
     L26,
     Solaris,
 }
-
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum ScsiHw {
@@ -524,7 +522,6 @@ pub struct CreateVirtualMachine {
     pub ssh_keys: Option<String>,
 }
 
-
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ResizeDisk {
     #[doc = "The (unique) ID of the VM."]
@@ -536,6 +533,21 @@ pub struct ResizeDisk {
     pub disk: String,
     #[doc = "The new size. With the `+` sign the value is added to the actual size of the volume and without it, the value is taken as an absolute one. Shrinking disk size is not supported."]
     pub size: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct VmConfig {
+    #[doc = "The (unique) ID of the VM."]
+    #[serde(rename = "vmid")]
+    pub vm_id: u32,
+    #[doc = "The cluster node name."]
+    pub node: String,
+
+    #[doc = "The number of cores per socket."]
+    pub cores: u16,
+
+    #[doc = "Amount of RAM for the VM in MB. This is the maximum available memory when you use the balloon device."]
+    pub memory: u64,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -641,7 +653,6 @@ pub struct StorageContentDetails {
     #[doc = "Protection status. Currently only supported for backups."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub protected: Option<u8>,
-
 }
 
 pub type VmCurrentStatus = VirtualMachine;
@@ -686,11 +697,10 @@ mod tests {
 
     #[test]
     fn test_param_builder() {
-        let result =
-            ParamBuilder::default()
-                .add_param("name", "value")
-                .add_param("name2", "value2")
-                .build();
+        let result = ParamBuilder::default()
+            .add_param("name", "value")
+            .add_param("name2", "value2")
+            .build();
 
         assert_eq!(result, "name=value,name2=value2")
     }

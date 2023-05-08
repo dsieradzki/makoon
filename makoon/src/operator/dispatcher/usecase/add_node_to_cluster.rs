@@ -20,7 +20,7 @@ pub(crate) fn execute(
     repo.save_log(LogEntry::info(&cluster_name, "Start creating node".to_string()))?;
 
 
-    let cluster = repo.get_cluster(cluster_name.clone())?.ok_or("Cannot find cluster")?;
+    let cluster = repo.get_cluster(&cluster_name)?.ok_or("Cannot find cluster")?;
     let master_node = cluster.nodes.iter()
         .find(|i| i.node_type == ClusterNodeType::Master && i.name != node_name).cloned().ok_or("Cannot find any master node".to_string())?;
 

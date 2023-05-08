@@ -1,4 +1,3 @@
-
 pub(crate) mod vm {
     use std::collections::HashMap;
     use std::path::Path;
@@ -135,10 +134,10 @@ pub(crate) mod vm {
     }
 
 
-    pub fn wait_for_shutdown(proxmox_client: &proxmox::ClientOperations, node: String, vm_id: u32) -> Result<bool, String> {
+    pub fn wait_for_shutdown(proxmox_client: &proxmox::ClientOperations, node: &str, vm_id: u32) -> Result<bool, String> {
         let is_shutdown = retry(|| {
             let status = proxmox_client
-                .status_vm(&node, vm_id)
+                .status_vm(node, vm_id)
                 .map(|i| i.status)
                 .map_err(|e| format!("Status VM {}, error: {}", vm_id, e))?;
 
@@ -206,6 +205,20 @@ pub(crate) mod vm {
         Ok(existing_nodes)
     }
 
+    pub(crate) fn stop_vm(proxmox_client: &ClientOperations, node: &str, vm_id: u32) -> Result<(), String> {
+        proxmox_client.shutdown_vm(node, vm_id)?;
+        let is_shutdown = wait_for_shutdown(proxmox_client, node, vm_id)?;
+        if !is_shutdown {
+            info!("Shutdown VM [{}] is timeout, stop VM immediately", vm_id);
+            proxmox_client.stop_vm(node, vm_id)?;
+            let is_shutdown = wait_for_shutdown(proxmox_client, node, vm_id)?;
+            if !is_shutdown {
+                error!("Cannot shutdown VM [{}]", vm_id);
+                return Err(format!("Cannot shutdown VM [{}]", vm_id));
+            }
+        }
+        Ok(())
+    }
 
     pub(crate) fn restart_vm_if_necessary(proxmox_client: &ClientOperations,
                                           repo: Arc<Repository>,
@@ -220,17 +233,8 @@ pub(crate) mod vm {
 
         repo.save_log(LogEntry::info(&cluster.cluster_name, format!("Reboot is required, shutdown VM [{}]", node.vm_id)))?;
 
-        proxmox_client.shutdown_vm(&cluster.node, node.vm_id)?;
-        let is_shutdown = wait_for_shutdown(proxmox_client, cluster.node.clone(), node.vm_id)?;
-        if !is_shutdown {
-            info!("Shutdown VM [{}] is timeout, stop VM immediately", node.vm_id);
-            proxmox_client.stop_vm(&cluster.node, node.vm_id)?;
-            let is_shutdown = wait_for_shutdown(proxmox_client, cluster.node.clone(), node.vm_id)?;
-            if !is_shutdown {
-                error!("Cannot shutdown VM [{}]", node.vm_id);
-                return Err(format!("Cannot shutdown VM [{}]", node.vm_id));
-            }
-        }
+        stop_vm(proxmox_client, &cluster.node, node.vm_id)?;
+
         repo.save_log(LogEntry::info(&cluster.cluster_name, format!("Starting VM [{}]", node.vm_id)))?;
         proxmox_client.start_vm(&cluster.node, node.vm_id)?;
         wait_for_start(proxmox_client, cluster, node).map_err(|e| format!("Cannot start VM [{}]: {}", node.vm_id, e))?;
@@ -278,6 +282,7 @@ pub(crate) mod cluster {
         pub(crate) token: String,
         pub(crate) urls: Vec<String>,
     }
+
     pub(crate) fn join_node_to_cluster(repo: Arc<Repository>, cluster: &Cluster, master_node: &ClusterNode, node_to_join: &ClusterNode) -> Result<(), String> {
         repo.save_log(LogEntry::info(&cluster.cluster_name, format!("Generate join token on VM [{}] ", master_node.vm_id)))?;
 
@@ -308,6 +313,7 @@ pub(crate) mod cluster {
         Ok(())
     }
 }
+
 pub(crate) mod apps {
     pub const HELM_CMD: &str = "microk8s.helm3";
 

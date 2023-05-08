@@ -54,7 +54,7 @@ impl Repository {
         self.repo.read().unwrap().get_clusters()
     }
 
-    pub fn get_cluster(&self, name: String) -> Result<Option<Cluster>> {
+    pub fn get_cluster(&self, name: &str) -> Result<Option<Cluster>> {
         self.repo.read().unwrap().get_cluster(name)
     }
 
@@ -120,7 +120,7 @@ impl YamlRepository {
         self.load().map(|v| v.clusters)
     }
 
-    pub fn get_cluster(&self, name: String) -> Result<Option<Cluster>> {
+    pub fn get_cluster(&self, name: &str) -> Result<Option<Cluster>> {
         let clusters = self.get_clusters()?;
         Ok(clusters.into_iter()
             .find(|i| i.cluster_name == name))

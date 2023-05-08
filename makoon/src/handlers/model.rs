@@ -57,3 +57,11 @@ pub struct AvailableNetwork {
     pub iface: String,
     pub address: Option<String>,
 }
+
+#[typeshare]
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct ChangeNodeResourcesRequest {
+    pub cores: u16,
+    pub memory: u64,
+}

@@ -86,7 +86,7 @@ impl Operator {
     pub fn create_cluster(&self, access: AccessData, cluster_request: ClusterRequest) -> Result<()> {
         let cluster_name = cluster_request.cluster_name.clone();
 
-        if (self.repository.get_cluster(cluster_name.clone())?).is_some() {
+        if (self.repository.get_cluster(&cluster_name)?).is_some() {
             return Err(Error::ResourceAlreadyExists);
         }
 
@@ -123,10 +123,32 @@ impl Operator {
         Ok(())
     }
 
+    pub fn change_node_resources(&self, access: AccessData, cluster_name: String, node_name: String, cores: u16, memory: u64) -> Result<()> {
+        let mut cluster = self.repository
+            .get_cluster(&cluster_name)?
+            .ok_or(Error::Generic("Cannot get cluster".to_string()))?;
+
+        for node in cluster.nodes.iter_mut() {
+            if node.name == node_name {
+                node.lock = Some(ClusterNodeLock::ChangeResources)
+            }
+        }
+
+        self.repository.save_cluster(cluster)?;
+
+        self.tx.send(Event::ChangeNodeResources {
+            access,
+            cluster_name,
+            node_name,
+            cores,
+            memory,
+        })?;
+        Ok(())
+    }
 
     pub fn add_node_cluster(&self, access: AccessData, cluster_name: String, node_request: ClusterNode) -> Result<ClusterNode> {
         let mut cluster = self.repository
-            .get_cluster(cluster_name.clone())?
+            .get_cluster(&cluster_name)?
             .ok_or(Error::Generic("Cannot get cluster".to_string()))?;
 
         let mut node_request = node_request;
@@ -147,7 +169,7 @@ impl Operator {
 
     pub fn delete_cluster(&self, access: AccessData, cluster_name: String) -> Result<()> {
         let mut cluster = self.repository
-            .get_cluster(cluster_name.clone())?
+            .get_cluster(&cluster_name)?
             .ok_or(Error::Generic("Cannot get cluster".to_string()))?;
         cluster.status = ClusterStatus::Destroying;
         self.repository.save_cluster(cluster)?;
@@ -164,7 +186,7 @@ impl Operator {
     pub fn delete_node_from_cluster(&self, access: AccessData, cluster_name: String, node_name: String) -> Result<ClusterNode> {
         self.repository.save_log(LogEntry::info(&cluster_name, format!("Deleting node [{}] from cluster has been started", node_name)))?;
 
-        let mut cluster = self.repository.get_cluster(cluster_name.clone())?.ok_or(Error::ResourceNotFound)?;
+        let mut cluster = self.repository.get_cluster(&cluster_name)?.ok_or(Error::ResourceNotFound)?;
         let node_to_delete = cluster.nodes.iter_mut()
             .find(|i| i.name == node_name).ok_or(Error::ResourceNotFound)?;
         node_to_delete.lock = Some(ClusterNodeLock::Delete);
@@ -213,7 +235,7 @@ impl Operator {
         Ok(result)
     }
 
-    pub fn cluster_status(&self, cluster_name: String) -> Result<Vec<ClusterNodeStatus>> {
+    pub fn cluster_status(&self, cluster_name: &str) -> Result<Vec<ClusterNodeStatus>> {
         let cluster = self.get_cluster(cluster_name)?
             .ok_or(Error::ResourceNotFound)?;
 
@@ -254,7 +276,7 @@ impl Operator {
     }
 
     pub fn apps_status(&self, cluster_name: &str) -> Result<Vec<AppStatus>> {
-        let cluster = self.get_cluster(cluster_name.to_string())?
+        let cluster = self.get_cluster(cluster_name)?
             .ok_or(Error::ResourceNotFound)?;
 
         let master_node = cluster.nodes.iter()
@@ -298,17 +320,17 @@ impl Operator {
         Ok(self.repository.logs(name)?)
     }
 
-    pub fn get_cluster(&self, cluster_name: String) -> Result<Option<Cluster>> {
+    pub fn get_cluster(&self, cluster_name: &str) -> Result<Option<Cluster>> {
         Ok(self.repository.get_cluster(cluster_name)?)
     }
 
-    pub fn get_nodes(&self, cluster_name: String) -> Result<Vec<ClusterNode>> {
+    pub fn get_nodes(&self, cluster_name: &str) -> Result<Vec<ClusterNode>> {
         Ok(self.repository.get_cluster(cluster_name)?.ok_or(Error::ResourceNotFound)?.nodes)
     }
 
     pub fn save_helm_app(&self, cluster_name: &str, app: HelmApp) -> Result<String> {
         let mut cluster = self.repository
-            .get_cluster(cluster_name.to_string())?
+            .get_cluster(cluster_name)?
             .ok_or(Error::ResourceNotFound)?;
 
         let app_id = uuid::Uuid::new_v4().to_string();
@@ -320,7 +342,7 @@ impl Operator {
     }
     pub fn update_helm_app(&self, cluster_name: &str, app: HelmApp) -> Result<()> {
         let mut cluster = self.repository
-            .get_cluster(cluster_name.to_string())?
+            .get_cluster(cluster_name)?
             .ok_or(Error::ResourceNotFound)?;
 
         let app_to_update = cluster.helm_apps.iter_mut()
@@ -340,7 +362,7 @@ impl Operator {
     }
     pub fn delete_helm_app(&self, cluster_name: &str, app_id: &str) -> Result<()> {
         let mut cluster = self.repository
-            .get_cluster(cluster_name.to_string())?
+            .get_cluster(cluster_name)?
             .ok_or(Error::ResourceNotFound)?;
 
         cluster.helm_apps.retain_mut(|i| i.id != app_id);
@@ -350,7 +372,7 @@ impl Operator {
     }
     pub fn install_helm_app(&self, cluster_name: &str, app_id: &str) -> Result<()> {
         let cluster = self.repository
-            .get_cluster(cluster_name.to_string())?
+            .get_cluster(cluster_name)?
             .ok_or(Error::ResourceNotFound)?;
 
         let app = cluster.helm_apps.iter()
@@ -369,7 +391,7 @@ impl Operator {
     }
     pub fn uninstall_helm_app(&self, cluster_name: &str, app_id: &str) -> Result<()> {
         let cluster = self.repository
-            .get_cluster(cluster_name.to_string())?
+            .get_cluster(cluster_name)?
             .ok_or(Error::ResourceNotFound)?;
 
         let app = cluster.helm_apps.iter()
@@ -394,7 +416,7 @@ impl Operator {
 
     pub fn save_cluster_resource(&self, cluster_name: &str, res: ClusterResource) -> Result<String> {
         let mut cluster = self.repository
-            .get_cluster(cluster_name.to_string())?
+            .get_cluster(cluster_name)?
             .ok_or(Error::ResourceNotFound)?;
 
         let res_id = uuid::Uuid::new_v4().to_string();
@@ -407,7 +429,7 @@ impl Operator {
 
     pub fn update_cluster_resource(&self, cluster_name: &str, res: ClusterResource) -> Result<()> {
         let mut cluster = self.repository
-            .get_cluster(cluster_name.to_string())?
+            .get_cluster(cluster_name)?
             .ok_or(Error::ResourceNotFound)?;
 
         let res_to_update = cluster.cluster_resources.iter_mut()
@@ -423,7 +445,7 @@ impl Operator {
 
     pub fn install_cluster_resource(&self, cluster_name: &str, res_id: &str) -> Result<()> {
         let cluster = self.repository
-            .get_cluster(cluster_name.to_string())?
+            .get_cluster(cluster_name)?
             .ok_or(Error::ResourceNotFound)?;
 
         let res = cluster.cluster_resources.iter()
@@ -442,7 +464,7 @@ impl Operator {
     }
     pub fn uninstall_cluster_resource(&self, cluster_name: &str, res_id: &str) -> Result<()> {
         let cluster = self.repository
-            .get_cluster(cluster_name.to_string())?
+            .get_cluster(cluster_name)?
             .ok_or(Error::ResourceNotFound)?;
 
         let res = cluster.cluster_resources.iter()
@@ -465,7 +487,7 @@ impl Operator {
 
     pub fn delete_cluster_resource(&self, cluster_name: &str, res_id: &str) -> Result<()> {
         let mut cluster = self.repository
-            .get_cluster(cluster_name.to_string())?
+            .get_cluster(cluster_name)?
             .ok_or(Error::ResourceNotFound)?;
 
         cluster.cluster_resources.retain_mut(|i| i.id != res_id);
