@@ -50,7 +50,7 @@ export const router = createHashRouter(
         basename: "/"
     })
 axios.interceptors.response.use(response => response, error => {
-    if (error.response.status === 401) {
+    if (error?.response?.status === 401) {
         console.warn("Unauthenticated request. Redirect to login page");
         router.navigate("/login")
             .then(() => {

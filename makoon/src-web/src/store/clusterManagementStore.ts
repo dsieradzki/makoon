@@ -8,6 +8,7 @@ import {
     AppStatusType,
     Cluster,
     ClusterNode,
+    ClusterNodeLock,
     ClusterNodeStatus,
     ClusterNodeType,
     ClusterNodeVmStatus,
@@ -263,6 +264,10 @@ class ClusterManagementStore {
     }
 
     async changeNodeResources(nodeName: string, cores: number, memory: number) {
+        runInAction(()=>{
+            const index = this.cluster.nodes.findIndex((e: ClusterNode) => e.name == nodeName);
+            this.cluster.nodes[index].lock = ClusterNodeLock.ChangeResources;
+        });
         await api.clusters.changeNodeResources(this.cluster.clusterName, nodeName, cores, memory);
     }
 
