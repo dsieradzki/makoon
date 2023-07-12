@@ -19,7 +19,7 @@ pub(crate) fn execute(
     stop_vms(&repo, &proxmox_client, &cluster, &existing_nodes)?;
     delete_vms(repo.clone(), &proxmox_client, &cluster, &existing_nodes)?;
 
-    repo.delete_cluster(cluster_name)?;
+    repo.delete_cluster(&cluster_name)?;
     Ok(())
 }
 

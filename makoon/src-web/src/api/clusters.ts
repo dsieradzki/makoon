@@ -52,6 +52,9 @@ export namespace clusters {
     export function logsForCluster(name: string): Promise<ActionLogEntry[]> {
         return axios.get(`/api/v1/clusters/${name}/logs`).then(e => e.data);
     }
+    export function clearLogsForCluster(name: string): Promise<ActionLogEntry[]> {
+        return axios.delete(`/api/v1/clusters/${name}/logs`).then(e => e.data);
+    }
 
     export function clusterNodeVmsStatus(clusterName: string): Promise<ClusterNodeVmStatus[]> {
         return axios.get(`/api/v1/clusters/${clusterName}/status/vms`).then(e => e.data);

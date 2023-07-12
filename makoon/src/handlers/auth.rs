@@ -39,6 +39,7 @@ pub async fn logout(session: Session) -> impl Responder {
 
 #[get("/api/v1/host-ip")]
 pub async fn get_host_ip(session: Session) -> impl Responder {
+    info!("Get host ip");
     get_session(&session)
         .map(|i| i.access.host)
         .map(|i| HttpResponse::Ok().content_type("text/plain").body(i))

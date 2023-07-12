@@ -1,9 +1,9 @@
-FROM docker.io/rust:1.68.2 as build
+FROM docker.io/rust:1.71.1 as build
 # Install and configure NODE using NVM
 RUN mkdir /usr/local/nvm
 ENV NVM_DIR /usr/local/nvm
-ENV NODE_VERSION 18.15.0
-RUN curl https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash \
+ENV NODE_VERSION 18.17.1
+RUN curl https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash \
     && . $NVM_DIR/nvm.sh \
     && nvm install $NODE_VERSION \
     && nvm alias default $NODE_VERSION \

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import {Button} from "primereact/button";
 
 type Props = {
     password: string
@@ -9,8 +10,9 @@ const HiddenPassword = (props: Props) => {
     if (show) {
         return <span>{props.password}</span>
     } else {
+
         return <span
-            className="primary-text-color cursor-pointer"
+            className="text-primary cursor-pointer hover:underline"
             onClick={() => {
                 setShow(true)
             }}>
