@@ -7,7 +7,7 @@ type Props = {
 
 const FormError = (props: Props) => {
     return (
-        <div className="h-[24px]">
+        <div className="h-[20px] italic text-sm">
             {props.error && props.touched && <div className="p-error">{props.error}</div>}
         </div>
     );

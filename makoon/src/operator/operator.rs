@@ -1,7 +1,7 @@
 use std::str::FromStr;
 use std::sync::{Arc, mpsc};
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::mpsc::{Receiver, Sender};
+use std::sync::mpsc::{Receiver, SyncSender};
 use std::time::Duration;
 
 use proxmox::model::AccessData;
@@ -30,7 +30,7 @@ impl Default for Config {
 
 pub struct Operator {
     executor: Option<std::thread::JoinHandle<()>>,
-    tx: Sender<Event>,
+    tx: SyncSender<Event>,
     shutdown: Arc<AtomicBool>,
     repository: Arc<Repository>,
 }
@@ -48,7 +48,7 @@ impl Drop for Operator {
 
 impl Operator {
     pub fn new(config: Config, dispatcher: Dispatcher, repository: Arc<Repository>) -> Self {
-        let (tx, rx): (Sender<Event>, Receiver<Event>) = mpsc::channel();
+        let (tx, rx): (SyncSender<Event>, Receiver<Event>) = mpsc::sync_channel(10);
         let shutdown = Arc::new(AtomicBool::from(false));
 
         Operator {
@@ -84,6 +84,7 @@ impl Operator {
     }
 
     pub fn create_cluster(&self, access: AccessData, cluster_request: ClusterRequest) -> Result<()> {
+        info!("Start creating cluster");
         let cluster_name = cluster_request.cluster_name.clone();
 
         if (self.repository.get_cluster(&cluster_name)?).is_some() {
@@ -124,6 +125,7 @@ impl Operator {
     }
 
     pub fn change_node_resources(&self, access: AccessData, cluster_name: String, node_name: String, cores: u16, memory: u64) -> Result<()> {
+        info!("Start changing node resources");
         let mut cluster = self.repository
             .get_cluster(&cluster_name)?
             .ok_or(Error::Generic("Cannot get cluster".to_string()))?;
@@ -147,6 +149,7 @@ impl Operator {
     }
 
     pub fn add_node_cluster(&self, access: AccessData, cluster_name: String, node_request: ClusterNode) -> Result<ClusterNode> {
+        info!("Start adding node to the cluster");
         let mut cluster = self.repository
             .get_cluster(&cluster_name)?
             .ok_or(Error::Generic("Cannot get cluster".to_string()))?;
@@ -168,6 +171,7 @@ impl Operator {
     }
 
     pub fn delete_cluster(&self, access: AccessData, cluster_name: String) -> Result<()> {
+        info!("Start deleting cluster");
         let mut cluster = self.repository
             .get_cluster(&cluster_name)?
             .ok_or(Error::Generic("Cannot get cluster".to_string()))?;
@@ -184,6 +188,7 @@ impl Operator {
     }
 
     pub fn delete_node_from_cluster(&self, access: AccessData, cluster_name: String, node_name: String) -> Result<ClusterNode> {
+        info!("Start deleting node from the cluster");
         self.repository.save_log(LogEntry::info(&cluster_name, format!("Deleting node [{}] from cluster has been started", node_name)))?;
 
         let mut cluster = self.repository.get_cluster(&cluster_name)?.ok_or(Error::ResourceNotFound)?;
@@ -204,6 +209,7 @@ impl Operator {
     }
 
     pub fn get_clusters(&self) -> Result<Vec<ClusterHeader>> {
+        info!("Get clusters");
         let repo = self.repository.clone();
 
         let result = repo.
@@ -236,6 +242,7 @@ impl Operator {
     }
 
     pub fn cluster_status(&self, cluster_name: &str) -> Result<Vec<ClusterNodeStatus>> {
+        info!("Get cluster status");
         let cluster = self.get_cluster(cluster_name)?
             .ok_or(Error::ResourceNotFound)?;
 
@@ -276,6 +283,7 @@ impl Operator {
     }
 
     pub fn apps_status(&self, cluster_name: &str) -> Result<Vec<AppStatus>> {
+        info!("Get apps status");
         let cluster = self.get_cluster(cluster_name)?
             .ok_or(Error::ResourceNotFound)?;
 
@@ -316,19 +324,28 @@ impl Operator {
         }).collect())
     }
 
-    pub fn logs_for_cluster(&self, name: String) -> Result<Vec<LogEntry>> {
+    pub fn logs_for_cluster(&self, name: &str) -> Result<Vec<LogEntry>> {
+        info!("Get logs for the cluster");
         Ok(self.repository.logs(name)?)
     }
 
+    pub fn clear_logs_for_cluster(&self, name: &str) -> Result<()> {
+        info!("Clear logs for the cluster");
+        self.repository.delete_logs(name)?;
+        Ok(())
+    }
     pub fn get_cluster(&self, cluster_name: &str) -> Result<Option<Cluster>> {
+        info!("Get cluster");
         Ok(self.repository.get_cluster(cluster_name)?)
     }
 
     pub fn get_nodes(&self, cluster_name: &str) -> Result<Vec<ClusterNode>> {
+        info!("Get nodes for the cluster");
         Ok(self.repository.get_cluster(cluster_name)?.ok_or(Error::ResourceNotFound)?.nodes)
     }
 
     pub fn save_helm_app(&self, cluster_name: &str, app: HelmApp) -> Result<String> {
+        info!("Save Helm application");
         let mut cluster = self.repository
             .get_cluster(cluster_name)?
             .ok_or(Error::ResourceNotFound)?;
@@ -341,6 +358,7 @@ impl Operator {
         Ok(app_id)
     }
     pub fn update_helm_app(&self, cluster_name: &str, app: HelmApp) -> Result<()> {
+        info!("Update Helm application");
         let mut cluster = self.repository
             .get_cluster(cluster_name)?
             .ok_or(Error::ResourceNotFound)?;
@@ -361,6 +379,7 @@ impl Operator {
         Ok(())
     }
     pub fn delete_helm_app(&self, cluster_name: &str, app_id: &str) -> Result<()> {
+        info!("Delete Helm application");
         let mut cluster = self.repository
             .get_cluster(cluster_name)?
             .ok_or(Error::ResourceNotFound)?;
@@ -371,6 +390,7 @@ impl Operator {
         Ok(())
     }
     pub fn install_helm_app(&self, cluster_name: &str, app_id: &str) -> Result<()> {
+        info!("Install Helm application");
         let cluster = self.repository
             .get_cluster(cluster_name)?
             .ok_or(Error::ResourceNotFound)?;
@@ -390,6 +410,7 @@ impl Operator {
         Ok(())
     }
     pub fn uninstall_helm_app(&self, cluster_name: &str, app_id: &str) -> Result<()> {
+        info!("Uninstall Helm application");
         let cluster = self.repository
             .get_cluster(cluster_name)?
             .ok_or(Error::ResourceNotFound)?;
@@ -414,7 +435,8 @@ impl Operator {
     }
 
 
-    pub fn save_cluster_resource(&self, cluster_name: &str, res: ClusterResource) -> Result<String> {
+    pub fn save_cluster_workload(&self, cluster_name: &str, res: ClusterResource) -> Result<String> {
+        info!("Save cluster workload");
         let mut cluster = self.repository
             .get_cluster(cluster_name)?
             .ok_or(Error::ResourceNotFound)?;
@@ -427,7 +449,8 @@ impl Operator {
         Ok(res_id)
     }
 
-    pub fn update_cluster_resource(&self, cluster_name: &str, res: ClusterResource) -> Result<()> {
+    pub fn update_cluster_workload(&self, cluster_name: &str, res: ClusterResource) -> Result<()> {
+        info!("Update cluster workload");
         let mut cluster = self.repository
             .get_cluster(cluster_name)?
             .ok_or(Error::ResourceNotFound)?;
@@ -443,7 +466,8 @@ impl Operator {
         Ok(())
     }
 
-    pub fn install_cluster_resource(&self, cluster_name: &str, res_id: &str) -> Result<()> {
+    pub fn install_cluster_workload(&self, cluster_name: &str, res_id: &str) -> Result<()> {
+        info!("Install cluster workload");
         let cluster = self.repository
             .get_cluster(cluster_name)?
             .ok_or(Error::ResourceNotFound)?;
@@ -462,7 +486,8 @@ impl Operator {
         crate::operator::dispatcher::install_cluster_resource(&ssh_client, res)?;
         Ok(())
     }
-    pub fn uninstall_cluster_resource(&self, cluster_name: &str, res_id: &str) -> Result<()> {
+    pub fn uninstall_cluster_workload(&self, cluster_name: &str, res_id: &str) -> Result<()> {
+        info!("Uninstall cluster workload");
         let cluster = self.repository
             .get_cluster(cluster_name)?
             .ok_or(Error::ResourceNotFound)?;
@@ -485,7 +510,8 @@ impl Operator {
         Ok(())
     }
 
-    pub fn delete_cluster_resource(&self, cluster_name: &str, res_id: &str) -> Result<()> {
+    pub fn delete_cluster_workload(&self, cluster_name: &str, res_id: &str) -> Result<()> {
+        info!("Delete cluster workload");
         let mut cluster = self.repository
             .get_cluster(cluster_name)?
             .ok_or(Error::ResourceNotFound)?;

@@ -1,9 +1,9 @@
 import React from 'react';
 import { observer } from "mobx-react-lite";
-import applicationStore from "@/store/applicationStore";
 import "./ErrorPanel.css"
 import { ISSUE_TRACKER_URL } from "@/constants";
 import { Button } from "primereact/button";
+import applicationStore from "@/store/application-store";
 
 const ErrorPanel = () => {
     const renderError = () => {

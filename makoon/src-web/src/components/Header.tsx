@@ -1,20 +1,21 @@
-import React, { useState } from 'react';
-import { Button } from "primereact/button";
-import { useNavigate } from "react-router-dom";
-import { apiCall } from "@/utils/api";
-import { useOnFirstMount } from "@/utils/hooks";
+import {Button} from "primereact/button";
+import React, {useState} from "react";
+import {apiCall} from "@/utils/api";
 import api from "@/api/api";
-import logo from "../assets/images/makonn_logo.svg";
+import {useNavigate} from "react-router-dom";
+import {useOnFirstMount} from "@/utils/hooks";
 
-type Props = {
+export type Props = {
     title: string;
-    titlePath?: string[]
-} & React.PropsWithChildren
+    titlePrefix?: string
+    content?: React.ReactNode
+}
+const header = (props: Props) => {
 
-const Header = (props: Props) => {
     const navigate = useNavigate();
     const [hostIp, setHostIp] = useState("");
 
+    // TODO: move this to global place
     useOnFirstMount(async () => {
         setHostIp(await api.auth.getLoggedInHostIp());
     });
@@ -22,42 +23,34 @@ const Header = (props: Props) => {
         await apiCall(() => api.auth.logout());
         navigate("/login")
     }
-
-    return (
-        <div className="flex justify-between pt-10 pl-10 pr-10 pb-8">
-            <div className="flex justify-start items-center">
-                <img title="Makoon" alt="Makoon logo" className="mb-1" src={logo} width={40} height={40}/>
-                <span className="primary-text-color text-4xl mx-2">/</span>
-                <div className="flex items-center">
-                    <div className="text-3xl mr-1">
-                        {props.title}
-                    </div>
-                    {
-                        props.titlePath && props.titlePath.map((e, idx) =>
-                            <div key={idx} className="flex items-center">
-                                <span className="primary-text-color text-4xl mx-2">/</span>
-                                <div className="text-3xl mr-4 font-bold">
-                                    {e}
-                                </div>
-                            </div>
-                        )
-                    }
-                    <div>
-                        {props.children}
-                    </div>
+    return <div className="mb-4 flex items-center justify-between" style={{color: "#454560"}}>
+        <div className="flex items-end">
+            <div>
+                {
+                    props.titlePrefix
+                        ? <div className="text-sm">{props.titlePrefix}</div>
+                        : null
+                }
+                <div className="text-3xl font-semibold pb-1">
+                    {props.title}
                 </div>
             </div>
-            <div className="flex items-center">
-                <p className="pi pi-server mr-2" style={{fontSize: "1.5rem"}}/>
-                <p className="pi pi-angle-double-left primary-text-color mr-2"/>
-                <span title="Proxmox IP">{hostIp}</span>
-                <span className="primary-text-color text-4xl mx-2">/</span>
-                <Button disabled={false} onClick={onLogoutHandler} icon="pi pi-sign-out"
-                        className="p-button-rounded p-button-secondary p-button-text" style={{color: "#FFFFFF"}}
-                        aria-label="Logout"/>
-            </div>
+            {props.content
+                ? <div className="ml-4">
+                    {props.content}
+                </div>
+                : null
+            }
         </div>
-    );
-};
+        <div className="pr-2 flex items-center text-md">
+            <p className="pi pi-server mr-2 text-primary" style={{fontSize: "1rem"}}/>
+            <div className="text-text mr-4">{hostIp}</div>
+            <Button
+                onClick={onLogoutHandler}
+                icon="pi pi-sign-out" rounded text aria-label="Logout"/>
+        </div>
+    </div>;
+}
 
-export default Header;
+export default header;
+export const Header = header;

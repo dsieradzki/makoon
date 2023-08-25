@@ -73,24 +73,31 @@ docker build -t makoon:local .
 
 #### Internal Business Use [PolyForm Internal Use License 1.0.0](./LICENCE_INTERNAL_USE)
 
+### Can I use Makoon?
+- Can I use Makoon for personal project?\
+**Yes.**
+- Can I use Makoon for commercial project?\
+**Yes, if you sell own software managed by Makoon, not Makoon itself.**
+- Can I use Makoon commercially as a service (SaaS)\
+**No.** You are not allowed to sell or provide to your customers this software as a service.
+If you are interested in this kind of use, contact me. 
+
 # :camera: Screenshots
 
 ![1_screenshot](./doc/screenshots/1_login.png)
 
-![2_screenshot](./doc/screenshots/2_create_cluster_settings.png)
+![2_screenshot](./doc/screenshots/2_1_create_cluster_settings.png)
 
-![3_screenshot](./doc/screenshots/3_create_cluster.png)
+![3_screenshot](./doc/screenshots/2_2_create_cluster_nodes.png)
 
-![4_screenshot](./doc/screenshots/4_create_cluster_nodes.png)
+![4_screenshot](./doc/screenshots/3_list_of_clusters.png)
 
-![5_screenshot](./doc/screenshots/5_create_cluster_apps.png)
+![5_screenshot](./doc/screenshots/4_1_cluster_details.png)
 
-![6_screenshot](./doc/screenshots/6_create_cluster_apps_edit.png)
+![6_screenshot](./doc/screenshots/4_2_helm_apps.png)
 
-![7_screenshot](./doc/screenshots/7_list.png)
+![7_screenshot](./doc/screenshots/4_3_add_chart.png)
 
-![8_screenshot](./doc/screenshots/8_details_nodes.png)
+![8_screenshot](./doc/screenshots/4_4_workload.png)
 
-![9_screenshot](./doc/screenshots/9_details_apps.png)
-
-![10_screenshot](./doc/screenshots/10_details_logs.png)
+![9_screenshot](./doc/screenshots/4_5_logs.png)

@@ -73,7 +73,7 @@ pub struct ClusterNode {
 }
 
 #[typeshare]
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct Network {
     pub gateway: String,
@@ -83,7 +83,7 @@ pub struct Network {
 }
 
 #[typeshare]
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct KeyPair {
     pub private_key: String,
@@ -91,9 +91,10 @@ pub struct KeyPair {
 }
 
 #[typeshare]
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug, Default)]
 #[serde(rename_all = "camelCase")]
 pub enum ClusterStatus {
+    #[default]
     Pending,
     Creating,
     Sync,
@@ -104,7 +105,7 @@ pub enum ClusterStatus {
 
 
 #[typeshare]
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(PartialEq, Eq, Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub enum ActionLogLevel {
     Info,
@@ -112,7 +113,7 @@ pub enum ActionLogLevel {
 }
 
 #[typeshare]
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(PartialEq, Eq, Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct LogEntry {
     pub date: NaiveDateTime,
@@ -143,7 +144,7 @@ impl LogEntry {
 }
 
 #[typeshare]
-#[derive(Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct Cluster {
     pub node: String,

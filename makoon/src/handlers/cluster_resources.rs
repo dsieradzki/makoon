@@ -11,7 +11,7 @@ pub async fn save_cluster_resources(path: web::Path<String>, body: web::Json<Clu
     let _ = logged_in!(session, proxmox_client);
     let name = path.into_inner();
 
-    let result = web::block(move || operator.lock().unwrap().save_cluster_resource(&name, body.0)).await??;
+    let result = web::block(move || operator.save_cluster_workload(&name, body.0)).await??;
 
     Ok(HttpResponse::Ok()
         .content_type(ContentType::plaintext())
@@ -23,7 +23,7 @@ pub async fn update_cluster_resources(path: web::Path<String>, body: web::Json<C
     let _ = logged_in!(session, proxmox_client);
     let name = path.into_inner();
 
-    web::block(move || operator.lock().unwrap().update_cluster_resource(&name, body.0)).await??;
+    web::block(move || operator.update_cluster_workload(&name, body.0)).await??;
 
     Ok(HttpResponse::Ok())
 }
@@ -33,7 +33,7 @@ pub async fn delete_cluster_resources(path: web::Path<(String, String)>, session
     let _ = logged_in!(session, proxmox_client);
     let (name, res_id) = path.into_inner();
 
-    web::block(move || operator.lock().unwrap().delete_cluster_resource(&name, &res_id)).await??;
+    web::block(move || operator.delete_cluster_workload(&name, &res_id)).await??;
 
     Ok(HttpResponse::Ok())
 }
@@ -44,7 +44,7 @@ pub async fn install_cluster_resources(path: web::Path<(String, String)>, sessio
     let _ = logged_in!(session, proxmox_client);
     let (name, res_id) = path.into_inner();
 
-    web::block(move || operator.lock().unwrap().install_cluster_resource(&name, &res_id)).await??;
+    web::block(move || operator.install_cluster_workload(&name, &res_id)).await??;
 
     Ok(HttpResponse::Ok())
 }
@@ -54,7 +54,7 @@ pub async fn uninstall_cluster_resources(path: web::Path<(String, String)>, sess
     let _ = logged_in!(session, proxmox_client);
     let (name, res_id) = path.into_inner();
 
-    web::block(move || operator.lock().unwrap().uninstall_cluster_resource(&name, &res_id)).await??;
+    web::block(move || operator.uninstall_cluster_workload(&name, &res_id)).await??;
 
     Ok(HttpResponse::Ok())
 }

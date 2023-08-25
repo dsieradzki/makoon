@@ -1,9 +1,9 @@
-FROM docker.io/rust:1.68.2 as build
+FROM docker.io/rust:1.71.1 as build
 # Install and configure NODE using NVM
 RUN mkdir /usr/local/nvm
 ENV NVM_DIR /usr/local/nvm
-ENV NODE_VERSION 18.15.0
-RUN curl https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash \
+ENV NODE_VERSION 18.17.1
+RUN curl https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash \
     && . $NVM_DIR/nvm.sh \
     && nvm install $NODE_VERSION \
     && nvm alias default $NODE_VERSION \
@@ -21,12 +21,12 @@ RUN cd makoon/src-web; \
     pnpm build;
 RUN cargo build --release
 
-FROM debian:stable-slim
+FROM debian:bullseye-slim
 RUN mkdir /app
 WORKDIR /app
 COPY --from=build /build/target/release/makoon .
 ENV RUST_LOG="info"
-ENV MAKOON_DB_PATH="/app/data/makoon.db.json"
+ENV MAKOON_DB_PATH="/app/data/makoon.db"
 ENV MAKOON_SERVER_PORT=8080
 VOLUME /app/data
 CMD ["/app/makoon"]
