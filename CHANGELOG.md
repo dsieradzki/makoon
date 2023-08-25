@@ -1,3 +1,12 @@
+# [0.15.0](https://github.com/dsieradzki/makoon/compare/v0.14.0...v0.15.0) (2023-08-25)
+
+
+### Features
+
+* New UI ([9714d48](https://github.com/dsieradzki/makoon/commit/9714d48cbe980620dc697c8794c6b3671ccb6f79))
+
+
+
 # [0.14.0](https://github.com/dsieradzki/makoon/compare/v0.13.0...v0.14.0) (2023-05-08)
 
 
@@ -47,16 +56,6 @@
 ### Features
 
 * Add monaco-editor for helm values and kubernetes resources ([e254603](https://github.com/dsieradzki/makoon/commit/e254603195029b5f85c2899a2bcb1abe9ede3013))
-
-
-
-## [0.10.1](https://github.com/dsieradzki/makoon/compare/v0.10.0...v0.10.1) (2022-11-25)
-
-
-### Bug Fixes
-
-* Small UI improvements ([f9a760f](https://github.com/dsieradzki/makoon/commit/f9a760f28ee0f39d5ad9db0e82a4735bbe6a954c))
-* Support spaces in Kubernetes resources ([cf47817](https://github.com/dsieradzki/makoon/commit/cf4781722f170c3fcacebca6a4db816dd9e0a637))
 
 
 
