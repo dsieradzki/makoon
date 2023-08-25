@@ -1,3 +1,12 @@
+## [0.15.1](https://github.com/dsieradzki/makoon/compare/v0.15.0...v0.15.1) (2023-08-25)
+
+
+### Bug Fixes
+
+* Set fixed debian image ([f3ca25e](https://github.com/dsieradzki/makoon/commit/f3ca25ee8723e1d6663795cabe5aeaf38af6ff6c))
+
+
+
 # [0.15.0](https://github.com/dsieradzki/makoon/compare/v0.14.0...v0.15.0) (2023-08-25)
 
 
@@ -41,21 +50,6 @@
 ### Features
 
 * Migration to Makoon - initial commit ([255549a](https://github.com/dsieradzki/makoon/commit/255549a945a880c7bf7ab531baac65b5049d4ec0))
-
-
-
-# [0.11.0](https://github.com/dsieradzki/makoon/compare/v0.10.1...v0.11.0) (2023-02-04)
-
-
-### Bug Fixes
-
-* Update dependencies ([f2b72f9](https://github.com/dsieradzki/makoon/commit/f2b72f93c4088c1478a2f94ce9e1c08afe47213c))
-* Update dependencies ([ae078b5](https://github.com/dsieradzki/makoon/commit/ae078b5247f6f61e040ad450f0c84257cca56d6c))
-
-
-### Features
-
-* Add monaco-editor for helm values and kubernetes resources ([e254603](https://github.com/dsieradzki/makoon/commit/e254603195029b5f85c2899a2bcb1abe9ede3013))
 
 
 
