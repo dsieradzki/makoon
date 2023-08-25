@@ -21,7 +21,7 @@ RUN cd makoon/src-web; \
     pnpm build;
 RUN cargo build --release
 
-FROM debian:stable-slim
+FROM debian:bullseye-slim
 RUN mkdir /app
 WORKDIR /app
 COPY --from=build /build/target/release/makoon .
