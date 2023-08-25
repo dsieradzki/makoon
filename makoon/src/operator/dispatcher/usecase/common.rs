@@ -164,22 +164,25 @@ pub(crate) mod vm {
     pub fn wait_for_start(proxmox_client: &proxmox::ClientOperations,
                           cluster: &Cluster,
                           cluster_node: &ClusterNode) -> Result<(), String> {
+        info!("Wait for VM start");
         retry(|| {
             let status = proxmox_client
                 .status_vm(&cluster.node, cluster_node.vm_id)
                 .map(|i| i.status)
-                .map_err(|e| format!("Status VM {}, error: {}", cluster_node.vm_id, e))?;
+                .map_err(|e| format!("Status VM [{}], error: {}", cluster_node.vm_id, e))?;
 
             match status {
                 VmStatus::Running => {
+                    info!("VM [{}] is running", cluster_node.vm_id);
                     Ok(())
                 }
                 VmStatus::Stopped => {
-                    Err("Stopped".to_string())
+                    Err(format!("VM [{}] is stopped", cluster_node.vm_id))
                 }
             }
         })?;
 
+        info!("Check cloud-init status for VM [{}]", cluster_node.vm_id);
         retry(|| {
             let mut ssh_client = crate::operator::ssh::Client::new();
             ssh_client.connect(&cluster_node.ip_address, &cluster.node_username, &cluster.ssh_key.private_key, &cluster.ssh_key.public_key)?;

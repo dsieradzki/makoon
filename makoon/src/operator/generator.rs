@@ -20,6 +20,7 @@ impl DefaultClusterConfigurationGenerator {
     }
 
     pub fn generate(&self) -> Result<ClusterRequest> {
+        info!("Generate default cluster");
         let default_proxmox_node = get_default_proxmox_node(&self.proxmox_client)?;
         let default_iso_storage = get_default_iso_storage(&self.proxmox_client, &default_proxmox_node)?;
         let default_disk_storage = get_default_disk_storage(&self.proxmox_client, &default_proxmox_node)?;

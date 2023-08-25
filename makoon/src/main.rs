@@ -3,7 +3,7 @@ extern crate log;
 
 use std::env;
 use std::io::ErrorKind;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 use actix_session::SessionMiddleware;
 use actix_session::storage::CookieSessionStore;
@@ -15,15 +15,14 @@ use mime_guess::from_path;
 use rust_embed::RustEmbed;
 
 use operator::{Config, Dispatcher, Operator};
+
 use crate::handlers::actix::inject;
 
 mod handlers;
 mod operator;
 mod helm;
 
-#[derive(
-
-RustEmbed)]
+#[derive(RustEmbed)]
 #[folder = "src-web/dist/"]
 struct Asset;
 
@@ -46,20 +45,21 @@ async fn static_files(path: web::Path<String>) -> impl Responder {
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     env_logger::init_from_env(Env::default().default_filter_or("info"));
-    let db_location = env::var("MAKOON_DB_PATH").unwrap_or("./makoon.db.json".to_string());
+    let db_location = env::var("MAKOON_DB_PATH").unwrap_or("./makoon".to_string());
     let server_port: u16 = env::var("MAKOON_SERVER_PORT").unwrap_or("8080".to_string())
         .parse()
         .map_err(|_| std::io::Error::from(ErrorKind::InvalidInput))?;
 
     let proxmox_client = Arc::new(proxmox::Client::new());
-    let repo = Arc::new(operator::Repository::new(db_location));
+    let repo = Arc::new(operator::Repository::new(&db_location)
+        .map_err(|_| std::io::Error::from(ErrorKind::InvalidData))?);
 
     let operator = Operator::new(
         Config::default(),
         Dispatcher::new(proxmox_client.clone(), repo.clone()),
         repo.clone());
+    let operator = inject::Operator::new(operator);
 
-    let operator = inject::Operator::new(Mutex::new(operator));
     let session_encryption_key = Key::generate();
     HttpServer::new(move || {
         App::new()
@@ -80,6 +80,7 @@ async fn main() -> std::io::Result<()> {
             .service(handlers::cluster::create_cluster)
             .service(handlers::cluster::delete_cluster)
             .service(handlers::cluster::logs_for_cluster)
+            .service(handlers::cluster::clear_logs_for_cluster)
             .service(handlers::cluster::cluster_vm_status)
             .service(handlers::cluster::cluster_kube_status)
             .service(handlers::cluster::add_node_to_cluster)

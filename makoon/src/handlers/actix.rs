@@ -30,14 +30,10 @@ macro_rules! logged_in {
 
 
 pub mod inject {
-    use std::sync::Mutex;
-
     use actix_web::web;
-
     use crate::operator;
-
     pub type ProxmoxClient = web::Data<proxmox::Client>;
-    pub type Operator = web::Data<Mutex<operator::Operator>>;
+    pub type Operator = web::Data<operator::Operator>;
 }
 
 

@@ -4,15 +4,23 @@ pub fn retry<F, R, E>(f: F) -> Result<R, E>
     where
         E: ToString,
         F: Fn() -> Result<R, E> {
-    let mut attempts = 30;
+    retry_with_opts::<F, R, E>(f, 10, 30)
+}
+
+
+pub fn retry_with_opts<F, R, E>(f: F, delay: u64, attempts: u64) -> Result<R, E>
+    where
+        E: ToString,
+        F: Fn() -> Result<R, E> {
+    let mut attempts_left = attempts;
     loop {
         match f() {
             Ok(v) => return Ok(v),
             Err(e) => {
-                if attempts > 0 {
-                    attempts -= 1;
-                    debug!("Remaining retries: [{}]: {}", attempts, e.to_string());
-                    std::thread::sleep(Duration::from_secs(10))
+                if attempts_left > 0 {
+                    attempts_left -= 1;
+                    info!("Operation probe: [{}/{}], wait [{}] seconds: {}", (attempts-attempts_left), attempts, delay, e.to_string());
+                    std::thread::sleep(Duration::from_secs(delay))
                 } else {
                     return Err(e);
                 }

@@ -2,17 +2,12 @@
     box-sizing: border-box;
 }
 
-:root {
-    --danger: rgb(244, 143, 177);
-    --warning: rgb(255, 224, 130);
-}
-
 html, body {
     padding: 0;
     margin: 0;
     width: 100%;
     height: 100%;
-    background-color: var(--surface-b);
+    background-color: var(--bg);
 }
 
 #root {
@@ -26,14 +21,9 @@ html, body {
     font-weight: normal;
 }
 
-
 input::placeholder {
     font-style: italic;
     opacity: 0.4;
-}
-
-.primary-text-color {
-    color: var(--primary-color);
 }
 
 .required::after {
@@ -41,6 +31,6 @@ input::placeholder {
     color: var(--danger);
 }
 
-.danger {
-    color: var(--danger);
+.font-monospace {
+    font-family: 'Courier New', monospace !important;
 }

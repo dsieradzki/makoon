@@ -13,8 +13,8 @@ pub enum Error {
 impl From<repository::Error> for Error {
     fn from(value: repository::Error) -> Self {
         match value {
-            repository::Error::ReadingError(e) => Error::Generic(e),
-            repository::Error::WritingError(e) => Error::Generic(e)
+            repository::Error::IO(e) => Error::Generic(e),
+            repository::Error::DB(e) => Error::Generic(e)
         }
     }
 }

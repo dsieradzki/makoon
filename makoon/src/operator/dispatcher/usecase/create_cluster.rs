@@ -129,6 +129,7 @@ fn join_nodes_to_cluster(repo: Arc<Repository>, cluster: &Cluster) -> Result<(),
 
 
 pub(crate) fn install_kubernetes(repo: Arc<Repository>, cluster: &Cluster) -> Result<(), String> {
+    info!("Install Kubernetes");
     for node in cluster.nodes.iter() {
         common::cluster::install_kubernetes(repo.clone(), cluster, node)?;
     }
@@ -146,6 +147,7 @@ pub(crate) fn wait_for_ready_kubernetes(repo: Arc<Repository>, cluster: &Cluster
 pub(crate) fn restart_vms_if_necessary(proxmox_client: &ClientOperations,
                                        cluster: &Cluster,
                                        repo: Arc<Repository>) -> Result<(), String> {
+    info!("Restart VM's if necessary");
     for node in cluster.nodes.iter() {
         common::vm::restart_vm_if_necessary(proxmox_client, repo.clone(), cluster, node)?;
     }
@@ -154,8 +156,9 @@ pub(crate) fn restart_vms_if_necessary(proxmox_client: &ClientOperations,
 
 
 pub(crate) fn wait_for_vms_start(proxmox_client: &ClientOperations, cluster: &Cluster, repo: Arc<Repository>) -> Result<(), String> {
+    info!("Waiting for VM's start");
     for node in cluster.nodes.iter() {
-        common::vm::wait_for_start(proxmox_client, cluster, &node)
+        common::vm::wait_for_start(proxmox_client, cluster, node)
             .map_err(|e| format!("Cannot start VM [{}]: {}", node.vm_id, e))?;
         repo.save_log(LogEntry::info(&cluster.cluster_name, format!("VM [{}] has been started", node.vm_id)))?;
     }
@@ -163,6 +166,7 @@ pub(crate) fn wait_for_vms_start(proxmox_client: &ClientOperations, cluster: &Cl
 }
 
 fn setup_vms(repo: Arc<Repository>, cluster: &Cluster) -> Result<(), String> {
+    info!("Setup VM's");
     let hosts = cluster.nodes.iter()
         .map(|i| (format!("{}-{}", cluster.cluster_name, i.name), i.ip_address.clone()))
         .collect::<HashMap<String, String>>();
@@ -176,6 +180,7 @@ fn setup_vms(repo: Arc<Repository>, cluster: &Cluster) -> Result<(), String> {
 }
 
 fn generate_ssh_keys() -> Result<KeyPair, String> {
+    info!("Generate SSH keys");
     let rsa = Rsa::generate(4096).map_err(|e| e.to_string())?;
     let private_key = rsa.private_key_to_der().map_err(|e| e.to_string())?;
     let private_key = Pem::new(
@@ -187,6 +192,7 @@ fn generate_ssh_keys() -> Result<KeyPair, String> {
     let ssh_private_key = ssh_keys::openssh::parse_private_key(private_key.as_str()).map_err(|e| e.to_string())?;
     let ssh_private_key = ssh_private_key.get(0).ok_or("Cannot parse private key")?;
     let ssh_public_key = ssh_private_key.public_key();
+    info!("SSH keys has been generated");
     Ok(KeyPair {
         public_key: ssh_public_key.to_string(),
         private_key,
@@ -194,6 +200,7 @@ fn generate_ssh_keys() -> Result<KeyPair, String> {
 }
 
 pub(crate) fn create_vms(proxmox_client: &ClientOperations, cluster: &Cluster, repo: Arc<Repository>) -> Result<(), String> {
+    info!("Create VM's");
     let mut used_vm_ids: Vec<u32> = proxmox_client
         .virtual_machines(&cluster.node, None)?.iter()
         .map(|i| i.vm_id)
@@ -212,12 +219,14 @@ pub(crate) fn create_vms(proxmox_client: &ClientOperations, cluster: &Cluster, r
             .map_err(|e| format!("Cannot create VM [{}]: {}", node.vm_id, e))?;
         repo.save_log(LogEntry::info(&cluster.cluster_name, format!("VM [{}] has been created", node.vm_id)))?;
     };
+    info!("VM's has been created");
     Ok(())
 }
 
 pub(crate) fn start_vms(proxmox_client: &ClientOperations,
                         cluster: &Cluster,
                         repo: Arc<Repository>) -> Result<(), String> {
+    info!("Start VM's");
     for node in cluster.nodes.iter() {
         proxmox_client.start_vm(&cluster.node, node.vm_id)
             .map_err(|e| format!("Cannot start VM [{}]: {}", node.vm_id, e))?;

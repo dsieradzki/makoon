@@ -1,13 +1,13 @@
+
+pub mod model;
 mod operator;
 mod event;
 mod repository;
-
-pub mod model;
+mod repository_json;
 mod generator;
 mod error;
 mod dispatcher;
 mod ssh;
-
 pub use operator::{Config, Operator};
 pub use dispatcher::Dispatcher;
 pub use repository::Repository;
