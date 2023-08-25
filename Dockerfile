@@ -26,7 +26,7 @@ RUN mkdir /app
 WORKDIR /app
 COPY --from=build /build/target/release/makoon .
 ENV RUST_LOG="info"
-ENV MAKOON_DB_PATH="/app/data/makoon.db.json"
+ENV MAKOON_DB_PATH="/app/data/makoon.db"
 ENV MAKOON_SERVER_PORT=8080
 VOLUME /app/data
 CMD ["/app/makoon"]
