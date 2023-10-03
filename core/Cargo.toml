@@ -1,0 +1,21 @@
+[package]
+name = "core"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+proxmox-client = { path = "../proxmox-client" }
+helm-client = { path = "../helm-client" }
+ssh-client = { path = "../ssh-client" }
+openssl = "0.10"
+pem = "3.0"
+ssh-keys = "0.1"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+typeshare = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+log = "0.4"
+env_logger = "0.10"
+uuid = { version = "1.4", features = ["v4", "fast-rng"] }

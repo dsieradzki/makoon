@@ -3,4 +3,5 @@
 Cargo.lock
 **/*.rs.bk
 **/*.iml
-
+.vscode
+makoon.json

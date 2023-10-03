@@ -1,8 +1,8 @@
-FROM docker.io/rust:1.71.1 as build
+FROM docker.io/rust:1.73.0 as build
 # Install and configure NODE using NVM
 RUN mkdir /usr/local/nvm
 ENV NVM_DIR /usr/local/nvm
-ENV NODE_VERSION 18.17.1
+ENV NODE_VERSION 18.18.0
 RUN curl https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash \
     && . $NVM_DIR/nvm.sh \
     && nvm install $NODE_VERSION \
@@ -16,9 +16,11 @@ RUN npm install -g pnpm
 RUN mkdir /build
 WORKDIR /build
 COPY . .
-RUN cd makoon/src-web; \
+RUN cd web/src-web; \
     pnpm install; \
     pnpm build;
+
+RUN cargo test
 RUN cargo build --release
 
 FROM debian:bullseye-slim
