@@ -1,5 +1,10 @@
 [workspace]
+resolver = "2"
+
 members = [
-    "proxmox",
-    "makoon"
+    "core",
+    "web",
+    "proxmox-client",
+    "helm-client",
+    "ssh-client"
 ]

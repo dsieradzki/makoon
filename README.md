@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./makoon/src-web/src/assets/images/makonn_logo.svg" width="200" height="200">
+  <img src="./web/src-web/src/assets/images/makonn_logo.svg" width="200" height="200">
 </p>
 
 ## Table of contents
