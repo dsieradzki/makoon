@@ -28,9 +28,13 @@ resources without the need for complicated bash scripts, terraform or ansible.
 
 * Proxmox 7.2-7 or later (previous versions were not tested)
 * Supported MicroK8s versions:
+    * 1.28/stable
+    * 1.27/stable
+    * 1.26/stable
+    * 1.25/stable
     * 1.24/stable
 * Support Ubuntu cloud images:
-    * Ubuntu Server 22.10
+    * Ubuntu Server 22.04 LTS (Jammy Jellyfish)
 
 ## :pushpin: Installation
 
