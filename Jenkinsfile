@@ -6,7 +6,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 sh 'rm -rf makoon'
-                sh 'git clone -b integration_tests --depth 1 https://github.com/dsieradzki/makoon'
+                sh 'git clone --depth 1 https://github.com/dsieradzki/makoon'
             }
         }
         stage('Test') {
