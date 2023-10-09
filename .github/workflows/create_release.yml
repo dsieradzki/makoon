@@ -18,7 +18,7 @@ jobs:
         with:
           github-token: ${{ secrets.ACCESS_TOKEN }}
           git-message: 'chore(release): {version}'
-          version-file: './makoon/src-web/package.json'
+          version-file: './web/src-web/package.json'
           git-user-email: damian.sieradzki@hotmail.com
 
       - name: Create release
