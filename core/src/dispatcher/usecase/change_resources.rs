@@ -17,7 +17,7 @@ pub(crate) fn execute(
     cluster_name: String,
     node_name: String,
     cores: u16,
-    memory: u64,
+    memory: u32,
 ) -> Result<(), String> {
     info!("Cluster creation request has been received");
     let proxmox_client = proxmox_client.operations(access);
@@ -36,12 +36,11 @@ pub(crate) fn execute(
         .iter()
         .find(|i| i.name == node_name)
         .ok_or("Cannot find node to create")?;
-
     proxmox_client.update_config(VmConfig {
         vm_id: node_to_change.vm_id,
         node: cluster.node.clone(),
         cores,
-        memory,
+        memory: u64::from(memory),
     })?;
 
     common::vm::stop_vm(&proxmox_client, &cluster.node, node_to_change.vm_id)?;

@@ -1,11 +1,11 @@
 import {
-    ActionLogEntry, ChangeNodeResourcesRequest,
+    ChangeNodeResourcesRequest,
     Cluster,
     ClusterHeader,
     ClusterNode,
     ClusterNodeStatus,
     ClusterNodeVmStatus,
-    ClusterRequest
+    ClusterRequest, LogEntry
 } from "@/api/model";
 import axios from "axios";
 
@@ -49,10 +49,10 @@ export namespace clusters {
         return axios.get("/api/v1/clusters/generate").then(e => e.data);
     }
 
-    export function logsForCluster(name: string): Promise<ActionLogEntry[]> {
+    export function logsForCluster(name: string): Promise<LogEntry[]> {
         return axios.get(`/api/v1/clusters/${name}/logs`).then(e => e.data);
     }
-    export function clearLogsForCluster(name: string): Promise<ActionLogEntry[]> {
+    export function clearLogsForCluster(name: string): Promise<LogEntry[]> {
         return axios.delete(`/api/v1/clusters/${name}/logs`).then(e => e.data);
     }
 

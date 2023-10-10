@@ -141,7 +141,7 @@ impl Operator {
         cluster_name: String,
         node_name: String,
         cores: u16,
-        memory: u64,
+        memory: u32,
     ) -> crate::Result<()> {
         info!("Start changing node resources");
         let mut cluster = self
@@ -271,7 +271,7 @@ impl Operator {
 
                     let memory = i.nodes.iter().map(|i| i.memory).reduce(|a, b| a + b);
 
-                    let node_count = u64::try_from(i.nodes.len()).unwrap_or(0);
+                    let node_count = u32::try_from(i.nodes.len()).unwrap_or(0);
 
                     ClusterHeader {
                         name: i.cluster_name.clone(),

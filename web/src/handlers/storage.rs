@@ -21,15 +21,19 @@ pub async fn storage(
             .storage(&node, Some(storage_content_type))?;
         Ok::<Vec<proxmox_client::model::Storage>, HandlerError>(result)
     })
-    .await??;
+        .await??;
+
+    let to_mb = |v: Option<u64>| -> Option<u32> {
+        v.map(|v| u32::try_from(v / 1024 / 1024).unwrap_or(u32::MAX))
+    };
 
     let result: Vec<AvailableStorage> = result
         .into_iter()
         .map(|i| AvailableStorage {
             storage: i.storage,
-            avail: i.avail,
-            used: i.used,
-            total: i.total,
+            avail: to_mb(i.avail),
+            used: to_mb(i.used),
+            total: to_mb(i.total),
         })
         .collect();
 

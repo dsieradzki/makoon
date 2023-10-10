@@ -1,24 +1,6 @@
-use proxmox_client::model::VmStatus;
 use serde::{Deserialize, Serialize};
 use typeshare::typeshare;
 
-#[typeshare]
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
-pub struct HelmAppStatus {
-    pub id: String,
-    pub status: String,
-}
-
-#[typeshare]
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
-pub struct NodeStatus {
-    #[serde(rename = "vmid")]
-    pub vm_id: i32,
-    pub vm_status: String,
-    pub k8s_status: String,
-}
 
 #[typeshare]
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -28,6 +10,24 @@ pub struct LoginRequest {
     pub port: u16,
     pub username: String,
     pub password: String,
+}
+
+#[typeshare]
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize, Debug)]
+pub enum VmStatus {
+    #[serde(rename = "running")]
+    Running,
+    #[serde(rename = "stopped")]
+    Stopped,
+}
+
+impl From<&proxmox_client::model::VmStatus> for VmStatus {
+    fn from(value: &proxmox_client::model::VmStatus) -> Self {
+        match value {
+            proxmox_client::model::VmStatus::Running => VmStatus::Running,
+            proxmox_client::model::VmStatus::Stopped => VmStatus::Stopped
+        }
+    }
 }
 
 #[typeshare]
@@ -44,9 +44,12 @@ pub struct ClusterNodeVmStatus {
 #[serde(rename_all = "camelCase")]
 pub struct AvailableStorage {
     pub storage: String,
-    pub avail: Option<u64>,
-    pub used: Option<u64>,
-    pub total: Option<u64>,
+    #[doc = "Unit: MiB"]
+    pub avail: Option<u32>,
+    #[doc = "Unit: MiB"]
+    pub used: Option<u32>,
+    #[doc = "Unit: MiB"]
+    pub total: Option<u32>,
 }
 
 #[typeshare]
@@ -62,7 +65,8 @@ pub struct AvailableNetwork {
 #[serde(rename_all = "camelCase")]
 pub struct ChangeNodeResourcesRequest {
     pub cores: u16,
-    pub memory: u64,
+    #[doc = "Unit: MiB"]
+    pub memory: u32,
 }
 
 #[typeshare]

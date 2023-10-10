@@ -27,7 +27,7 @@ pub(crate) mod vm {
             node: cluster.node.clone(),
             name: format!("{}-{}", cluster.cluster_name, node.name),
             cores: node.cores,
-            memory: node.memory,
+            memory: u64::from(node.memory),
             os_type: OsType::L26,
             net: HashMap::from([(
                 "net0".to_owned(),
@@ -324,7 +324,7 @@ pub(crate) mod vm {
                     "echo '{} {}' | sudo tee -a /etc/cloud/templates/hosts.debian.tmpl",
                     ip, host
                 )
-                .as_str(),
+                    .as_str(),
             )?;
             ssh_client
                 .execute(format!("echo '{} {}' | sudo tee -a /etc/hosts", ip, host).as_str())?;
@@ -363,7 +363,7 @@ pub(crate) mod cluster {
                     .clone()
                     .unwrap_or("1.24/stable".to_owned())
             )
-            .as_str(),
+                .as_str(),
         )?;
         Ok(())
     }
