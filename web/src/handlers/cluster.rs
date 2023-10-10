@@ -135,7 +135,7 @@ pub async fn generate_default_cluster_configuration(
             core::DefaultClusterConfigurationGenerator::new(proxmox_client.operations(access));
         Ok::<core::model::ClusterRequest, HandlerError>(generator.generate()?)
     })
-    .await??;
+        .await??;
 
     Ok(HttpResponse::Ok().json(result))
 }
@@ -173,7 +173,7 @@ pub async fn clear_logs_for_cluster(
         operator.clear_logs_for_cluster(&name)?;
         Ok::<(), HandlerError>(())
     })
-    .await??;
+        .await??;
 
     Ok(HttpResponse::Ok())
 }
@@ -192,8 +192,8 @@ pub async fn cluster_vm_status(
         let result = operator.get_cluster(&name)?;
         Ok::<Option<core::model::Cluster>, HandlerError>(result)
     })
-    .await??
-    .ok_or(HandlerError::NotFound("Cluster not found".to_string()))?;
+        .await??
+        .ok_or(HandlerError::NotFound("Cluster not found".to_string()))?;
 
     let vms = web::block(move || {
         let result = proxmox_client
@@ -201,7 +201,7 @@ pub async fn cluster_vm_status(
             .virtual_machines(&cluster.node, None)?;
         Ok::<Vec<VirtualMachine>, HandlerError>(result)
     })
-    .await??;
+        .await??;
 
     let cluster_vm_ids = cluster.nodes.iter().map(|i| i.vm_id).collect::<Vec<u32>>();
 
@@ -210,7 +210,7 @@ pub async fn cluster_vm_status(
         .filter(|i| cluster_vm_ids.contains(&i.vm_id))
         .map(|i| ClusterNodeVmStatus {
             vm_id: i.vm_id,
-            status: i.status.clone(),
+            status: crate::handlers::model::VmStatus::from(&i.status),
         })
         .collect::<Vec<ClusterNodeVmStatus>>();
 

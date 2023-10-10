@@ -65,7 +65,8 @@ pub struct ClusterNode {
     pub vm_id: u32,
     pub name: String,
     pub cores: u16,
-    pub memory: u64,
+    #[doc="Unit: MiB"]
+    pub memory: u32,
     pub ip_address: String,
     pub storage_pool: String,
     pub node_type: ClusterNodeType,
@@ -164,8 +165,8 @@ pub struct Cluster {
     pub node_password: String,
     pub helm_apps: Vec<HelmApp>,
     pub cluster_resources: Vec<ClusterResource>,
-    #[doc = "Disk size id GB"]
-    pub disk_size: u64,
+    #[doc = "Disk size id GiB"]
+    pub disk_size: u32,
     pub nodes: Vec<ClusterNode>,
     pub network: Network,
     pub status: ClusterStatus,
@@ -185,7 +186,8 @@ pub struct ClusterRequest {
     pub node_password: String,
     pub helm_apps: Vec<HelmApp>,
     pub cluster_resources: Vec<ClusterResource>,
-    pub disk_size: u64,
+    #[doc = "Unit: GiB"]
+    pub disk_size: u32,
     pub nodes: Vec<ClusterNode>,
     pub network: Network,
 }
@@ -197,8 +199,10 @@ pub struct ClusterHeader {
     pub name: String,
     pub nodes_count: u16,
     pub cores_sum: u16,
-    pub memory_sum: u64,
-    pub disk_size_sum: u64,
+    #[doc = "Unit: MiB"]
+    pub memory_sum: u32,
+    #[doc = "Unit: GiB"]
+    pub disk_size_sum: u32,
     pub status: ClusterStatus,
 }
 

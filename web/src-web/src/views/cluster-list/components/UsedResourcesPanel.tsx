@@ -22,10 +22,10 @@ const UsedResourcesPanel = () => {
                 <div className="text-3xl flex items-center">
                     {clustersListStore.ramSum}
                     <div className="relative" style={{top: "-10px", left: "5px"}}>
-                        <div className="absolute text-sm">mb</div>
+                        <div className="absolute text-sm">MiB</div>
                     </div>
                 </div>
-                <div className="text-sm">RAM</div>
+                <div className="text-sm">MEMORY</div>
             </div>
 
             <span className="border-r-2 border-bg rounded-full mx-8 w-[0px]"></span>
@@ -34,7 +34,7 @@ const UsedResourcesPanel = () => {
                 <div className="text-3xl flex items-center">
                     {clustersListStore.disksSizeSum}
                     <div className="relative" style={{top: "-10px", left: "5px"}}>
-                        <div className="absolute text-sm">gb</div>
+                        <div className="absolute text-sm">GiB</div>
                     </div>
                 </div>
                 <div className="text-sm">STORAGE</div>

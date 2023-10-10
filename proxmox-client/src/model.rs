@@ -430,7 +430,7 @@ pub struct CreateVirtualMachine {
     #[doc = "The number of cores per socket."]
     pub cores: u16,
 
-    #[doc = "Amount of RAM for the VM in MB. This is the maximum available memory when you use the balloon device."]
+    #[doc = "Amount of RAM for the VM in MiB. This is the maximum available memory when you use the balloon device."]
     pub memory: u64,
 
     /// Specify guest operating system. This is used to enable special
@@ -546,7 +546,7 @@ pub struct VmConfig {
     #[doc = "The number of cores per socket."]
     pub cores: u16,
 
-    #[doc = "Amount of RAM for the VM in MB. This is the maximum available memory when you use the balloon device."]
+    #[doc = "Amount of RAM for the VM in MiB. This is the maximum available memory when you use the balloon device."]
     pub memory: u64,
 }
 

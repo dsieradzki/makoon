@@ -14,7 +14,7 @@ build: web.install web.generate-models web.build app.build.release
 .PHONY:
 .ONESHELL:
 web.generate-models:
-	typeshare ./src --lang=typescript -c ./typeshare.toml --output-file=src-web/src/api/model.ts
+	typeshare ../ --lang=typescript -c ./typeshare.toml --output-file=src-web/src/api/model.ts
 
 .PHONY:
 .ONESHELL:

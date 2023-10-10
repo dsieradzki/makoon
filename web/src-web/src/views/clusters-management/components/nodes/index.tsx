@@ -45,7 +45,7 @@ const Nodes = () => {
                     </div>
                     <div className="mb-2">
                         <span className="italic mr-2">Disk size:</span><span
-                        className="font-bold">{clusterManagementStore.cluster.diskSize} GB</span>
+                        className="font-bold">{clusterManagementStore.cluster.diskSize} GiB</span>
                     </div>
                 </div>
                 <span className="border-r-2 border-bg rounded-full mx-8 w-[0px]"></span>
@@ -85,10 +85,10 @@ const Nodes = () => {
                     <div className="text-3xl flex items-center">
                         {clusterManagementStore.ramSum}
                         <div className="relative" style={{top: "-10px", left: "5px"}}>
-                            <div className="absolute text-sm">mb</div>
+                            <div className="absolute text-sm">MiB</div>
                         </div>
                     </div>
-                    <div className="text-sm">RAM</div>
+                    <div className="text-sm">MEMORY</div>
                 </div>
 
                 <span className="border-r-2 border-bg rounded-full mx-8 w-[0px]"></span>
@@ -97,7 +97,7 @@ const Nodes = () => {
                     <div className="text-3xl flex items-center">
                         {clusterManagementStore.disksSizeSum}
                         <div className="relative" style={{top: "-10px", left: "5px"}}>
-                            <div className="absolute text-sm">gb</div>
+                            <div className="absolute text-sm">GiB</div>
                         </div>
                     </div>
                     <div className="text-sm">STORAGE</div>

@@ -221,7 +221,7 @@ const EditNodeDialog = (props: Props) => {
                     <FormError error={formik.errors.cores} touched={formik.touched.cores}/>
                 </div>
                 <div className="mt-3">
-                    <div className="text-stone-400 required">Memory (MB)</div>
+                    <div className="text-stone-400 required">Memory (MiB)</div>
                     <InputNumber name="memory"
                                  value={formik.values.memory}
                                  onChange={v => {

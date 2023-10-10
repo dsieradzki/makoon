@@ -1,19 +1,14 @@
-export function toHumanReadableSize(valInBytes?: number): String {
-    if (!valInBytes) {
-        return `0 KB`
-    }
-    let val = valInBytes / 1024;
-    if (val < 1024) {
-        return `${toFixed(val)} KB`
+export function toHumanReadableSize(valInMiB?: number): String {
+    if (!valInMiB) {
+        return `0 MiB`
     }
 
-    val = val / 1024;
-    if (val < 1024) {
-        return `${toFixed(val)} MB`
+    if (valInMiB < 1024) {
+        return `${toFixed(valInMiB)} MiB`
     }
 
-    val = val / 1024;
-    return `${toFixed(val)} GB`;
+    let val = valInMiB / 1024;
+    return `${toFixed(val)} GiB`;
 }
 
 function toFixed(val: number): String {

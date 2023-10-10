@@ -36,7 +36,7 @@ const NodesTable = (props: Props) => {
                     }}></Column>
             <Column field="vmId" header="VM Id"/>
             <Column field="cores" header="CPU" body={(r) => r.cores + " cores"}/>
-            <Column field="memory" header="Memory" body={(r) => r.memory + " MB"}/>
+            <Column field="memory" header="Memory" body={(r) => r.memory + " MiB"}/>
             <Column field="ipAddress" header="IP Address"/>
             <Column field="storagePool" header="Storage"/>
             <Column field="vmStatus" header="VM"

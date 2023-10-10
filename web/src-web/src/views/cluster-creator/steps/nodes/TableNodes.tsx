@@ -22,7 +22,7 @@ const TableNodes = (props: Props) => {
             <Column field="name" header="Node name" className="font-semibold" body={(r) => props.clusterName + "-" + r.name}></Column>
             <Column field="vmId" header="VM Id"></Column>
             <Column field="cores" header="CPU" body={(r) => r.cores + " cores"}></Column>
-            <Column field="memory" header="Memory" body={(r) => r.memory + " MB"}></Column>
+            <Column field="memory" header="Memory" body={(r) => r.memory + " MiB"}></Column>
             <Column field="ipAddress" header="IP Address" body={(r) => <div>
                 <span>{r.ipAddress}</span>
                 <p className="ml-2 pi pi-exclamation-triangle text-warning"

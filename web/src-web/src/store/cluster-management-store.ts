@@ -3,7 +3,7 @@ import {makeAutoObservable, runInAction} from "mobx";
 import {apiCall} from "@/utils/api";
 import {wrapWithProcessingIndicator} from "@/store/processing-indicator-store";
 import {
-    ActionLogEntry,
+    LogEntry,
     AppStatus,
     AppStatusType,
     Cluster,
@@ -52,7 +52,7 @@ class ClusterManagementStore {
     helmAppsStatus: AppStatus[] = [];
     cluster: Cluster = {clusterName: ""} as Cluster
 
-    logs: ActionLogEntry[] = [];
+    logs: LogEntry[] = [];
 
 
     constructor() {

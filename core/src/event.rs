@@ -25,6 +25,7 @@ pub enum Event {
         cluster_name: String,
         node_name: String,
         cores: u16,
-        memory: u64,
+        #[doc = "Unit: MiB"]
+        memory: u32,
     },
 }

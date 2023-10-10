@@ -62,7 +62,7 @@ const Apps = () => {
                        emptyMessage="No apps found"
                        selection={clusterManagementStore.helmAppsWithStatus.find((i) => i.id == selectedAppId)}
                        onSelectionChange={(e) => {
-                           setSelectedAppId((e.value as HelmApp).id);
+                           setSelectedAppId((e.value as HelmApp).id || null);
                            setShowHelmAppDialog(true);
                        }}
 
