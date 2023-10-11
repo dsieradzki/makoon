@@ -1,3 +1,12 @@
+## [0.16.1](https://github.com/dsieradzki/makoon/compare/v0.16.0...v0.16.1) (2023-10-11)
+
+
+### Bug Fixes
+
+* Fix units, refactoring ([1dbca78](https://github.com/dsieradzki/makoon/commit/1dbca7837b9af09857832ce2e4f7a1a061b73a47))
+
+
+
 # [0.16.0](https://github.com/dsieradzki/makoon/compare/v0.15.0...v0.16.0) (2023-10-09)
 
 
@@ -41,15 +50,6 @@
 ### Features
 
 * Add and delete nodes from existing cluster ([e005bda](https://github.com/dsieradzki/makoon/commit/e005bda95ad9e58d94563909ea32a136414a1868))
-
-
-
-# [0.12.0](https://github.com/dsieradzki/makoon/compare/v0.11.0...v0.12.0) (2023-04-11)
-
-
-### Features
-
-* Migration to Makoon - initial commit ([255549a](https://github.com/dsieradzki/makoon/commit/255549a945a880c7bf7ab531baac65b5049d4ec0))
 
 
 
