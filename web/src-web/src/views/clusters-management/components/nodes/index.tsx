@@ -16,7 +16,7 @@ const Nodes = () => {
         await clusterManagementStore.updateClusterKubeStatuses();
     });
 
-    useInterval(async ()=>{
+    useInterval(async () => {
         await clusterManagementStore.updateClusterNodeVmStatuses();
         await clusterManagementStore.updateClusterKubeStatuses();
         await clusterManagementStore.updateNodesIfThereIsAnyLock();
@@ -126,8 +126,11 @@ const Nodes = () => {
             <NodesTable clusterName={clusterManagementStore.cluster.clusterName}
                         nodes={clusterManagementStore.masterNodesWithStatus}
                         selectedNode={selectedNode}
-                        onSelectNode={setSelectedNode}
-            />
+                        onSelectNode={(id) => {
+                            if (!locked) {
+                                setSelectedNode(id);
+                            }
+                        }}/>
 
 
         </Panel>
@@ -145,7 +148,11 @@ const Nodes = () => {
             <NodesTable clusterName={clusterManagementStore.cluster.clusterName}
                         nodes={clusterManagementStore.workerNodesWithStatus}
                         selectedNode={selectedNode}
-                        onSelectNode={setSelectedNode}/>
+                        onSelectNode={(id) => {
+                            if (!locked) {
+                                setSelectedNode(id);
+                            }
+                        }}/>
         </Panel>
     </>;
 }

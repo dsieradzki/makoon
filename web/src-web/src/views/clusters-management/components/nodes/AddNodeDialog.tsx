@@ -17,6 +17,7 @@ import StorageDropdownOption from "@/components/StorageDropdownOption";
 import {Button} from "primereact/button";
 import Section from "@/components/Section";
 import {observer} from "mobx-react-lite";
+import {schemaAddNode} from "@/views/cluster-creator/steps/nodes/CreatorNodeDialog";
 
 type Props = {
     setVisible: (s: boolean) => void;
@@ -32,21 +33,6 @@ interface NodeFormModel {
     storagePool: string
 }
 
-const schema = Yup.object().shape({
-    name: Yup.string()
-        .required()
-        .strict()
-        .trim()
-        .max(128)
-        .matches(hostnameStart, {message: "Name can start with characters: a-z, A-Z, 0-9"})
-        .matches(hostnameMain, {message: "Name can contain characters: a-z, A-Z, 0-9, -"})
-        .matches(hostnameEnd, {message: "Name can end with characters: a-z, A-Z, 0-9"}),
-    vmId: Yup.number().min(100).required(),
-    cores: Yup.number().min(1).required(),
-    memory: Yup.number().positive().required(),
-    ipAddress: Yup.string().min(7).required(),
-    storagePool: Yup.string().required()
-})
 const AddNodeDialog = (props: Props) => {
     const [storages, setStorages] = useState<AvailableStorage[]>([])
 
@@ -68,7 +54,7 @@ const AddNodeDialog = (props: Props) => {
         } as ClusterNode);
     const formik = useFormik({
         validateOnMount: true,
-        validationSchema: schema,
+        validationSchema: schemaAddNode,
         initialValues: {
             vmId: generatedNextNode.vmId,
             name: generatedNextNode.name,

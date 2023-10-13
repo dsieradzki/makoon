@@ -43,10 +43,10 @@ const SettingsStep = (props: StepProps, ref: any) => {
 
 
     const schema = Yup.object().shape({
-        node: Yup.string().required().strict().trim(),
-        osImage: Yup.string().required().strict().trim(),
-        osImageStorage: Yup.string().required().strict().trim(),
-        kubeVersion: Yup.string().required().strict().trim()
+        node: Yup.string().required("Proxmox node is required").strict().trim(),
+        osImage: Yup.string().required("OS image is required").strict().trim(),
+        osImageStorage: Yup.string().required("Storage for OS image is required").strict().trim(),
+        kubeVersion: Yup.string().required("MicroK8S version is required").strict().trim()
     });
     const formik = useFormik<SettingsModel>({
         validateOnMount: true,

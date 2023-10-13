@@ -33,20 +33,31 @@ interface NodeFormModel {
     storagePool: string
 }
 
-const schema = Yup.object().shape({
+export const schemaAddNode = Yup.object().shape({
     name: Yup.string()
-        .required()
+        .required("Node name is required")
         .strict()
         .trim()
-        .max(128)
+        .max(128, "Name length must be at most 128 characters")
         .matches(hostnameStart, {message: "Name can start with characters: a-z, A-Z, 0-9"})
         .matches(hostnameMain, {message: "Name can contain characters: a-z, A-Z, 0-9, -"})
         .matches(hostnameEnd, {message: "Name can end with characters: a-z, A-Z, 0-9"}),
-    vmId: Yup.number().min(100).required(),
-    cores: Yup.number().min(1).required(),
-    memory: Yup.number().positive().required(),
-    ipAddress: Yup.string().min(7).required(),
-    storagePool: Yup.string().required()
+    vmId: Yup.number()
+        .min(100, "VM id must be greater than or equal to 100")
+        .max(4294967296, "VM id must be lower or equal to 4 294 967 296")
+        .required("VM id is required"),
+    cores: Yup.number()
+        .min(1, "At least one core is required")
+        .max(4096, "You can allocate maximum 4096 cores")
+        .required("Cores are required"),
+    memory: Yup.number()
+        .positive("Memory size has to be at least 1 MiB")
+        .required("Memory size is required"),
+    ipAddress: Yup.string()
+        .min(7, "IP address has to have at least 7 characters")
+        .required("IP address is required"),
+    storagePool: Yup.string()
+        .required("Storage pool is required")
 })
 const AddNodeDialog = (props: Props) => {
 
@@ -68,7 +79,7 @@ const AddNodeDialog = (props: Props) => {
 
     const formik = useFormik({
         validateOnMount: true,
-        validationSchema: schema,
+        validationSchema: schemaAddNode,
         initialValues: {
             vmId: storedNode.get()?.vmId,
             name: storedNode.get()?.name,

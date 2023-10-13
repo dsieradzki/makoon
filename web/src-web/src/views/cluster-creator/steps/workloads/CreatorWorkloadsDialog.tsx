@@ -11,9 +11,9 @@ import {observer} from "mobx-react-lite";
 import {ClusterCreatorStoreContext} from "@/views/cluster-creator/context";
 
 
-const schema = Yup.object({
-    name: Yup.string().required().strict().trim(),
-    content: Yup.string().required()
+export const schemaAddWorkload = Yup.object({
+    name: Yup.string().required("Workload name is required").strict().trim(),
+    content: Yup.string().required("Workload content is required").strict().trim()
 })
 
 type Props = {
@@ -45,7 +45,7 @@ const CreatorWorkloadsDialog = (props: Props) => {
         enableReinitialize: true,
         validateOnMount: true,
         initialValues: initialValues,
-        validationSchema: schema,
+        validationSchema: schemaAddWorkload,
         onSubmit: async (values) => {
             if (props.selectedWorkloadId) {
                 creatorStore.updateCustomK8SResources(props.selectedWorkloadId, values);
@@ -113,12 +113,15 @@ const CreatorWorkloadsDialog = (props: Props) => {
                 </div>
                 <div className="grow flex flex-col min-w-[300px] min-h-[300px]">
                     <div className="mr-1 required">Content:</div>
-                    <InputTextarea className="grow font-monospace"
-                                   readOnly={formik.isSubmitting}
-                                   value={formik.values.content}
-                                   onChange={(e) => {
-                                       formik.setFieldValue("content", e.target.value)
-                                   }}/>
+                    <InputTextarea
+                        name="content"
+                        className="grow font-monospace"
+                        readOnly={formik.isSubmitting}
+                        value={formik.values.content}
+                        onBlur={formik.handleBlur}
+                        onChange={(e) => {
+                            formik.setFieldValue("content", e.target.value);
+                        }}/>
                     <FormError error={formik.errors.content}
                                touched={formik.touched.content}/>
                 </div>
