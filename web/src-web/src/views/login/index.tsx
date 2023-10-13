@@ -11,6 +11,8 @@ import {Button} from "primereact/button";
 import {FormikHelpers} from "formik/dist/types";
 import api from "@/api/api";
 import applicationStore from "@/store/application-store";
+import {InputSwitch} from "primereact/inputswitch";
+import {useOnFirstMount} from "@/utils/hooks";
 
 type FormValues = {
     host: string
@@ -19,22 +21,28 @@ type FormValues = {
 }
 
 const schema = Yup.object().shape({
-    host: Yup.string().required(),
-    username: Yup.string().required(),
-    password: Yup.string().required()
+    host: Yup.string().required("Host is required"),
+    username: Yup.string().required("Username is required"),
+    password: Yup.string().required("Password is required")
 });
 
 const initialValues: FormValues = {host: "", username: "", password: ""}
-
+const KEY_PROXMOX_IP = "PROXMOX_IP";
 const Login = () => {
     const [loginError, setLoginError] = useState(false)
     const navigate = useNavigate()
+    const [rememberIp, setRememberIp] = useState(false);
 
     const formik = useFormik<FormValues>({
         validateOnMount: true,
         initialValues: initialValues,
         validationSchema: schema,
         onSubmit: async (values: FormValues, formikHelpers: FormikHelpers<any>) => {
+            if (rememberIp) {
+                localStorage.setItem(KEY_PROXMOX_IP, values.host);
+            } else {
+                localStorage.removeItem(KEY_PROXMOX_IP);
+            }
             const status = await api.auth.login({
                 host: values.host,
                 port: 8006,
@@ -57,6 +65,14 @@ const Login = () => {
             formikHelpers.setSubmitting(false);
         }
     })
+
+    useOnFirstMount(async () => {
+        const rememberedIp = localStorage.getItem(KEY_PROXMOX_IP)
+        if (rememberedIp) {
+            setRememberIp(true);
+            await formik.setFieldValue("host", rememberedIp);
+        }
+    });
     return <LogoContainer>
         <form onSubmit={formik.handleSubmit} className="flex flex-col items-center">
             <div className="w-full max-w-[400px]">
@@ -73,6 +89,10 @@ const Login = () => {
                     <div className="ml-1">:8006</div>
                 </div>
                 <FormError error={formik.errors.host} touched={formik.touched.host}/>
+                <div className="flex items-center">
+                    <InputSwitch checked={rememberIp} onChange={(e) => setRememberIp(e.value ?? false)}/>
+                    <span className="ml-2 text-sm">Remember IP</span>
+                </div>
             </div>
 
             <div className="mt-4 w-full max-w-[400px]">
@@ -88,7 +108,7 @@ const Login = () => {
                     <div className="ml-1">@pam</div>
                 </div>
                 {/*<div className="text-sm italic text-stone-400">*/}
-                {/*    Hint: For security reasons, Makoon should have dedicated user in Proxmox to be able manage only own VM's.*/}
+                {/*    Hint: For security reasons, Makoon should have dedicated user in Proxmox to be able to manage only own VM's.*/}
                 {/*</div>*/}
                 <FormError error={formik.errors.username} touched={formik.touched.username}/>
             </div>
@@ -119,7 +139,7 @@ const Login = () => {
             <div className="mt-2">
                 <Button type="submit" disabled={!formik.isValid}>
                     {formik.isSubmitting && <i className="pi pi-spin pi-spinner text-base mr-2"></i>}
-                    Login to Proxmox
+                    Sign in
                 </Button>
             </div>
         </form>
