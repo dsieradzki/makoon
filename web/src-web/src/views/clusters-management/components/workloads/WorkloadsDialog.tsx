@@ -15,12 +15,8 @@ import * as Yup from "yup";
 import {InputTextarea} from "primereact/inputtextarea";
 import {observer} from "mobx-react-lite";
 import {AxiosError} from "axios";
+import {schemaAddWorkload} from "@/views/cluster-creator/steps/workloads/CreatorWorkloadsDialog";
 
-
-const schema = Yup.object({
-    name: Yup.string().required().strict().trim(),
-    content: Yup.string().required()
-})
 
 type Props = {
     onClose: () => void;
@@ -51,7 +47,7 @@ const WorkloadsDialog = (props: Props) => {
         enableReinitialize: true,
         validateOnMount: true,
         initialValues: initialValues,
-        validationSchema: schema,
+        validationSchema: schemaAddWorkload,
         onSubmit: async (values) => {
             if (initialValues.id) {
                 await clusterManagementStore.updateK8sResources(values);
@@ -174,9 +170,11 @@ const WorkloadsDialog = (props: Props) => {
                 </div>
                 <div className="grow flex flex-col min-w-[300px] min-h-[300px]">
                     <div className="mr-1 required">Content:</div>
-                    <InputTextarea className="grow font-monospace"
+                    <InputTextarea name="content"
+                                   className="grow font-monospace"
                                    readOnly={formik.isSubmitting || anyOperationInProgress}
                                    value={formik.values.content}
+                                   onBlur={formik.handleBlur}
                                    onChange={(e) => {
                                        formik.setFieldValue("content", e.target.value)
                                    }}/>

@@ -48,7 +48,7 @@ const ClusterStep = (props: StepProps, ref: any) => {
     }
     const schema = Yup.object().shape({
         clusterName: Yup.string()
-            .required()
+            .required("Cluster name is required")
             .strict()
             .trim()
             .max(128)
@@ -64,14 +64,14 @@ const ClusterStep = (props: StepProps, ref: any) => {
                 },
                 exclusive: false
             }),
-        nodeUsername: Yup.string().required().strict().trim(),
-        nodePassword: Yup.string().required().strict().trim(),
-        diskSize: Yup.number().required(),
+        nodeUsername: Yup.string().required("Username is required").strict().trim(),
+        nodePassword: Yup.string().required("Password is required").strict().trim(),
+        diskSize: Yup.number().required("Disk size is required"),
         network: Yup.object().shape({
-            bridge: Yup.string().required(),
-            subnetMask: Yup.number().required(),
-            gateway: Yup.string().required().strict().trim(),
-            dns: Yup.string().required().strict().trim(),
+            bridge: Yup.string().required("Bridge is required"),
+            subnetMask: Yup.number().required("Subnet mask is required"),
+            gateway: Yup.string().required("Gateway address is required").strict().trim(),
+            dns: Yup.string().required("DNS address is required").strict().trim(),
         })
     });
 

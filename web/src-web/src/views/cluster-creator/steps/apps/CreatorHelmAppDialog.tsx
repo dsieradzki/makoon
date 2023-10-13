@@ -11,12 +11,12 @@ import {InputTextarea} from "primereact/inputtextarea";
 import {ClusterCreatorStoreContext} from "@/views/cluster-creator/context";
 
 
-const schema = Yup.object({
-    releaseName: Yup.string().required().trim(),
-    chartName: Yup.string().required().trim(),
+export const schemaAddHelmApp = Yup.object({
+    releaseName: Yup.string().required("Release name is required").trim(),
+    chartName: Yup.string().required("Chart name is required").trim(),
     chartVersion: Yup.string().trim(),
-    repository: Yup.string().required().trim(),
-    namespace: Yup.string().required().trim(),
+    repository: Yup.string().required("Repository is required").trim(),
+    namespace: Yup.string().required("Namespace is required").trim(),
     values: Yup.string()
 })
 type Props = {
@@ -65,7 +65,7 @@ const CreatorHelmAppDialog = (props: Props) => {
         validateOnMount: true,
         enableReinitialize: true,
         initialValues: initialValues,
-        validationSchema: schema,
+        validationSchema: schemaAddHelmApp,
         onSubmit: async (values) => {
             if (props.selectedAppId) {
                 creatorStore.updateHelmApp(props.selectedAppId, values);

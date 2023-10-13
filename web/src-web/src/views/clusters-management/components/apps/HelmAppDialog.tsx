@@ -14,16 +14,9 @@ import FormError from "@/components/FormError";
 import * as Yup from "yup";
 import {InputTextarea} from "primereact/inputtextarea";
 import {AxiosError} from "axios";
+import {schemaAddHelmApp} from "@/views/cluster-creator/steps/apps/CreatorHelmAppDialog";
 
 
-const schema = Yup.object({
-    releaseName: Yup.string().required().trim(),
-    chartName: Yup.string().required().trim(),
-    chartVersion: Yup.string().trim(),
-    repository: Yup.string().required().trim(),
-    namespace: Yup.string().required().trim(),
-    values: Yup.string()
-})
 type Props = {
     onClose: () => void;
     onSubmit: (id: string) => void;
@@ -81,7 +74,7 @@ const HelmAppDialog = (props: Props) => {
         validateOnMount: true,
         enableReinitialize: true,
         initialValues: initialValues,
-        validationSchema: schema,
+        validationSchema: schemaAddHelmApp,
         onSubmit: async (values) => {
             if (!initialValues.id) {
                 const id = await clusterManagementStore.addHelmChart(values)
