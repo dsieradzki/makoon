@@ -28,10 +28,13 @@ const schema = Yup.object().shape({
 
 const initialValues: FormValues = {host: "", username: "", password: ""}
 const KEY_PROXMOX_IP = "PROXMOX_IP";
+const KEY_PROXMOX_USERNAME = "PROXMOX_USERNAME";
+
 const Login = () => {
     const [loginError, setLoginError] = useState(false)
     const navigate = useNavigate()
     const [rememberIp, setRememberIp] = useState(false);
+    const [rememberUsername, setRememberUsername] = useState(false);
 
     const formik = useFormik<FormValues>({
         validateOnMount: true,
@@ -43,6 +46,12 @@ const Login = () => {
             } else {
                 localStorage.removeItem(KEY_PROXMOX_IP);
             }
+            if (rememberUsername) {
+                localStorage.setItem(KEY_PROXMOX_USERNAME, values.username);
+            } else {
+                localStorage.removeItem(KEY_PROXMOX_USERNAME);
+            }
+
             const status = await api.auth.login({
                 host: values.host,
                 port: 8006,
@@ -72,6 +81,12 @@ const Login = () => {
             setRememberIp(true);
             await formik.setFieldValue("host", rememberedIp);
         }
+
+        const rememberedUsername = localStorage.getItem(KEY_PROXMOX_USERNAME);
+        if (rememberedUsername) {
+            setRememberUsername(true);
+            await formik.setFieldValue("username", rememberedUsername);
+        }
     });
     return <LogoContainer>
         <form onSubmit={formik.handleSubmit} className="flex flex-col items-center">
@@ -88,14 +103,14 @@ const Login = () => {
                                placeholder="192.168.1.10"></InputText>
                     <div className="ml-1">:8006</div>
                 </div>
-                <FormError error={formik.errors.host} touched={formik.touched.host}/>
-                <div className="flex items-center">
+                <div className="flex items-center mt-2 mb-1">
                     <InputSwitch checked={rememberIp} onChange={(e) => setRememberIp(e.value ?? false)}/>
                     <span className="ml-2 text-sm">Remember IP</span>
                 </div>
+                <FormError error={formik.errors.host} touched={formik.touched.host}/>
             </div>
 
-            <div className="mt-4 w-full max-w-[400px]">
+            <div className="mt-3 w-full max-w-[400px]">
                 <div className="text-lg">Proxmox username:</div>
                 <div className="flex items-center">
                     <InputText
@@ -104,12 +119,17 @@ const Login = () => {
                         value={formik.values.username}
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
-                        className="w-[330px]" placeholder="root"></InputText>
+                        className="w-[330px]" placeholder="makoon"></InputText>
                     <div className="ml-1">@pam</div>
                 </div>
                 {/*<div className="text-sm italic text-stone-400">*/}
                 {/*    Hint: For security reasons, Makoon should have dedicated user in Proxmox to be able to manage only own VM's.*/}
                 {/*</div>*/}
+
+                <div className="flex items-center mt-2 mb-1">
+                    <InputSwitch checked={rememberUsername} onChange={(e) => setRememberUsername(e.value ?? false)}/>
+                    <span className="ml-2 text-sm">Remember username</span>
+                </div>
                 <FormError error={formik.errors.username} touched={formik.touched.username}/>
             </div>
 
