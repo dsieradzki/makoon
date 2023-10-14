@@ -31,76 +31,83 @@ const Nodes = () => {
         {addNodeDialog}
         <Panel title="Details" icon="pi-server" className="mb-8">
             <div className="flex justify-evenly">
-                <div className="flex flex-col justify-center">
-                    <div className="mb-2">
-                        <span className="italic mr-2">Username:</span><span
-                        className="font-bold">{clusterManagementStore.cluster.nodeUsername}</span>
-                    </div>
+                <div className="grow flex justify-evenly flex-col md:flex-row">
+                    <div className="flex flex-col justify-center">
+                        <div className="mb-2">
+                            <span className="italic mr-2">Username:</span><span
+                            className="font-bold">{clusterManagementStore.cluster.nodeUsername}</span>
+                        </div>
 
-                    <div className="mb-2">
-                        <span className="italic mr-2">Password:</span><span
-                        className="font-bold">
+                        <div className="mb-2">
+                            <span className="italic mr-2">Password:</span><span
+                            className="font-bold">
                                     <HiddenPassword password={clusterManagementStore.cluster.nodePassword}/>
                                 </span>
-                    </div>
-                    <div className="mb-2">
-                        <span className="italic mr-2">Disk size:</span><span
-                        className="font-bold">{clusterManagementStore.cluster.diskSize} GiB</span>
-                    </div>
-                </div>
-                <span className="border-r-2 border-bg rounded-full mx-8 w-[0px]"></span>
-                <div className="flex flex-col justify-center py-4">
-                    <div className="mb-2">
-                        <span className="italic mr-2">Network bridge:</span><span
-                        className="font-bold">{clusterManagementStore.cluster.network?.bridge}</span>
-                    </div>
-                    <div className="mb-2">
-                        <span className="italic mr-2">Subnet mask:</span><span
-                        className="font-bold">{clusterManagementStore.cluster.network?.subnetMask}</span>
-                    </div>
-                    <div className="mb-2">
-                        <span className="italic mr-2">Gateway:</span><span
-                        className="font-bold">{clusterManagementStore.cluster.network?.gateway}</span>
-                    </div>
-                    <div>
-                        <span className="italic mr-2">DNS server:</span><span
-                        className="font-bold">{clusterManagementStore.cluster.network?.dns}</span>
-                    </div>
-                </div>
+                        </div>
+                        <div className="mb-2">
+                            <span className="italic mr-2">Disk size:</span><span
+                            className="font-bold">{clusterManagementStore.cluster.diskSize} GiB</span>
+                        </div>
 
-                <span className="border-r-2 border-bg rounded-full mx-8 w-[0px]"></span>
-                <div className="m-4 flex flex-col items-center justify-center">
-                    <div className="text-3xl flex items-center">
-                        {clusterManagementStore.cpuSum}
-                        <div className="relative" style={{top: "-10px", left: "5px"}}>
-                            <div className="absolute text-sm">cores</div>
+                        <div className="mb-2">
+                            <span className="italic mr-2">MicroK8S version:</span><span
+                            className="font-bold">{clusterManagementStore.cluster.kubeVersion}</span>
                         </div>
                     </div>
-                    <div className="text-sm">CPU</div>
-                </div>
-
-                <span className="border-r-2 border-bg rounded-full mx-8 w-[0px]"></span>
-
-                <div className="m-4 flex flex-col items-center justify-center">
-                    <div className="text-3xl flex items-center">
-                        {clusterManagementStore.ramSum}
-                        <div className="relative" style={{top: "-10px", left: "5px"}}>
-                            <div className="absolute text-sm">MiB</div>
+                    <span className="border-r-2 border-bg rounded-full w-[0px] hidden md:block"></span>
+                    <div className="flex flex-col justify-center py-4">
+                        <div className="mb-2">
+                            <span className="italic mr-2">Network bridge:</span><span
+                            className="font-bold">{clusterManagementStore.cluster.network?.bridge}</span>
+                        </div>
+                        <div className="mb-2">
+                            <span className="italic mr-2">Subnet mask:</span><span
+                            className="font-bold">{clusterManagementStore.cluster.network?.subnetMask}</span>
+                        </div>
+                        <div className="mb-2">
+                            <span className="italic mr-2">Gateway:</span><span
+                            className="font-bold">{clusterManagementStore.cluster.network?.gateway}</span>
+                        </div>
+                        <div>
+                            <span className="italic mr-2">DNS server:</span><span
+                            className="font-bold">{clusterManagementStore.cluster.network?.dns}</span>
                         </div>
                     </div>
-                    <div className="text-sm">MEMORY</div>
                 </div>
 
-                <span className="border-r-2 border-bg rounded-full mx-8 w-[0px]"></span>
-
-                <div className="m-4 flex flex-col items-center justify-center">
-                    <div className="text-3xl flex items-center">
-                        {clusterManagementStore.disksSizeSum}
-                        <div className="relative" style={{top: "-10px", left: "5px"}}>
-                            <div className="absolute text-sm">GiB</div>
+                <span className="border-r-2 border-bg rounded-full w-[0px] hidden md:block"></span>
+                <div className="grow flex flex-col 2xl:flex-row items-center justify-center 2xl:justify-evenly">
+                    <div className="m-4 flex flex-col items-center justify-center">
+                        <div className="text-3xl flex items-center">
+                            {clusterManagementStore.cpuSum}
+                            <div className="relative" style={{top: "-10px", left: "5px"}}>
+                                <div className="absolute text-sm">cores</div>
+                            </div>
                         </div>
+                        <div className="text-sm">CPU</div>
                     </div>
-                    <div className="text-sm">STORAGE</div>
+
+
+                    <div className="m-4 flex flex-col items-center justify-center">
+                        <div className="text-3xl flex items-center">
+                            {clusterManagementStore.ramSum}
+                            <div className="relative" style={{top: "-10px", left: "5px"}}>
+                                <div className="absolute text-sm">MiB</div>
+                            </div>
+                        </div>
+                        <div className="text-sm">MEMORY</div>
+                    </div>
+
+
+                    <div className="m-4 flex flex-col items-center justify-center">
+                        <div className="text-3xl flex items-center">
+                            {clusterManagementStore.disksSizeSum}
+                            <div className="relative" style={{top: "-10px", left: "5px"}}>
+                                <div className="absolute text-sm">GiB</div>
+                            </div>
+                        </div>
+                        <div className="text-sm">STORAGE</div>
+                    </div>
                 </div>
             </div>
         </Panel>
@@ -122,7 +129,7 @@ const Nodes = () => {
                         }}/>
             </Panel.Title>}
             icon="pi-server"
-            className="mb-4 grow min-h-0">
+            className="mb-4 grow min-h-[170px]">
             <NodesTable clusterName={clusterManagementStore.cluster.clusterName}
                         nodes={clusterManagementStore.masterNodesWithStatus}
                         selectedNode={selectedNode}
@@ -144,7 +151,7 @@ const Nodes = () => {
                         }}/>
             </Panel.Title>}
             icon="pi-server"
-            className="grow min-h-0">
+            className="grow min-h-[170px]">
             <NodesTable clusterName={clusterManagementStore.cluster.clusterName}
                         nodes={clusterManagementStore.workerNodesWithStatus}
                         selectedNode={selectedNode}
