@@ -1,3 +1,19 @@
+# [0.17.0](https://github.com/dsieradzki/makoon/compare/v0.16.1...v0.17.0) (2023-10-16)
+
+
+### Bug Fixes
+
+* Better UI layout ([d72067d](https://github.com/dsieradzki/makoon/commit/d72067d689b0e1dde8db819f0c1506f5d12126ed))
+* Validation messages ([7c95915](https://github.com/dsieradzki/makoon/commit/7c959152513b78c733a2c017eba9810d2b6f8c73))
+
+
+### Features
+
+* Remember IP during login ([25e397a](https://github.com/dsieradzki/makoon/commit/25e397a5e807cb6daf8a875170c1aa7c44aec7ba))
+* Remember username during login ([fea8e1e](https://github.com/dsieradzki/makoon/commit/fea8e1eb290503adcbcacc139ac83d977b6e4111))
+
+
+
 ## [0.16.1](https://github.com/dsieradzki/makoon/compare/v0.16.0...v0.16.1) (2023-10-11)
 
 
@@ -36,20 +52,6 @@
 ### Features
 
 * Change node resources ([c0d3c7e](https://github.com/dsieradzki/makoon/commit/c0d3c7e177e44f0a9546ac3b688aaeff8c44d615))
-
-
-
-# [0.13.0](https://github.com/dsieradzki/makoon/compare/v0.12.0...v0.13.0) (2023-04-23)
-
-
-### Bug Fixes
-
-* Remove default apps in cluster creator ([6e21bea](https://github.com/dsieradzki/makoon/commit/6e21beaa37e015f167ea96f604e846ffc5df65c6))
-
-
-### Features
-
-* Add and delete nodes from existing cluster ([e005bda](https://github.com/dsieradzki/makoon/commit/e005bda95ad9e58d94563909ea32a136414a1868))
 
 
 
