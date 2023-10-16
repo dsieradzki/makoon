@@ -13,14 +13,14 @@ type MenuItemProps = {
 }
 const MenuItem = (props: MenuItemProps) => {
     return props.active
-        ? <NavLink to={props.to} className="bg-white rounded-xl flex items-center justify-start p-3 text-primary-darker">
-            <i className={`pi ml-4 mr-5 text-primary ${props.icon}`}></i>
-            <div className="font-semibold">{props.name}</div>
+        ? <NavLink to={props.to} className="bg-white rounded-xl flex items-center justify-center md:justify-start p-3 text-primary-darker">
+            <i className={`pi ml-4 mr-4 text-primary ${props.icon}`} title={props.name}></i>
+            <div className="font-semibold hidden md:block">{props.name}</div>
         </NavLink>
 
-        : <NavLink to={props.to} className="text-white flex items-center justify-start p-3 mt-3">
-            <i className={`pi ml-4 mr-5 ${props.icon}`}></i>
-            <div>{props.name}</div>
+        : <NavLink to={props.to} className="text-white flex items-center justify-center md:justify-start p-3 mt-3">
+            <i className={`pi ml-4 mr-4 ${props.icon}`} title={props.name}></i>
+            <div className="hidden md:block">{props.name}</div>
         </NavLink>
 }
 
@@ -32,10 +32,10 @@ const MainMenu = () => {
         setHostIp(await api.auth.getLoggedInHostIp());
     });
 
-    return <div className="h-full min-w-[250px] p-3 rounded-2xl shadow shadow-blue-300 flex flex-col bg-primary z-10">
+    return <div className="h-full md:min-w-[250px] p-3 rounded-2xl shadow shadow-blue-300 flex flex-col bg-primary z-10">
         <div className="mt-3 mb-8 flex justify-center items-center font-bold">
-            <img className="mr-2" src={logo} width={50} height={50}/>
-            <div className="text-white">Makoon</div>
+            <img className="md:mr-2" title="Makoon" src={logo} width={50} height={50}/>
+            <div className="text-white hidden md:block">Makoon</div>
         </div>
         <div className="grow min-h-0 overflow-x-hidden overflow-y-auto">
             <MenuItem name="Clusters" to="/list" active icon="pi-th-large"/>
@@ -44,9 +44,11 @@ const MainMenu = () => {
             {/*<MenuItem name="Settings" to="/list" icon="pi-cog"/>*/}
 
             <div className="text-white flex items-center justify-start p-3 mt-3">
-                <a href={`https://${hostIp}:8006`} target="_blank" className="flex items-center">
+                <a href={`https://${hostIp}:8006`}
+                   title="Proxmox console"
+                   target="_blank" className="flex items-center">
                     <i className="pi pi-external-link ml-4 mr-5"></i>
-                    <div className="underline">Proxmox</div>
+                    <div className="underline hidden md:block">Proxmox</div>
                 </a>
             </div>
         </div>

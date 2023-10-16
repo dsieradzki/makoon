@@ -19,9 +19,9 @@ const LOADING_INDICATOR_DELETE_CLUSTER = "DELETE_CLUSTER";
 const SubMenu = (props: { icon: string, name: string, to: string }) => {
     return <NavLink to={props.to} className={({isActive}) => {
         return `mt-1 flex items-center py-2 pl-4 pr-2 rounded-xl ${isActive ? "bg-primary text-primary-text" : "text-text"}`
-    }}>
-        <i className={`pi ${props.icon}`}></i>
-        <span className="ml-3">{props.name}</span>
+    }} title={props.name}>
+        <i className={`pi mr-2 ${props.icon}`}></i>
+        <span className="ml-1 hidden md:block">{props.name}</span>
     </NavLink>
 }
 
@@ -29,16 +29,19 @@ const SubMenuLinkButton = (props: { icon: string, name: string, onClick: () => v
     return <div className={`flex items-center mt-4 pl-4 ${!props.disabled ? props.classNameText ?? "text-text" : "text-surface-300"}`}
                 onClick={() => {
                     !props.disabled && props.onClick();
-                }}>
-        <i className={`pi ${props.icon}`}></i>
-        <span className="ml-3 hover:underline hover:cursor-pointer">{props.name}</span>
+                }}
+                title={props.name}>
+        <i className={`pi mr-3 ${props.icon}`}></i>
+        <span className="hover:underline hover:cursor-pointer hidden md:block">{props.name}</span>
     </div>
 }
 
 const SubMenuLink = (props: { icon: string, name: string, href: string, classNameText?: string }) => {
-    return <a href={props.href} className={`flex items-center mt-4 pl-4 ${props.classNameText ?? "text-text"}`}>
+    return <a href={props.href} className={`flex items-center whitespace-nowrap mt-4 pl-4 ${props.classNameText ?? "text-text"}`}
+              title={props.name}
+    >
         <i className={`mr-3 pi ${props.icon}`}></i>
-        {props.name}
+        <span className="hidden md:block">{props.name}</span>
     </a>
 }
 const ClusterManagement = () => {
@@ -70,7 +73,7 @@ const ClusterManagement = () => {
     }
     return <MainContainer>
         <div className="-ml-12 h-full flex">
-            <div className="h-full bg-white rounded-r-2xl min-w-[300px] py-8 pl-8 pr-4 flex flex-col text-md">
+            <div className="h-full bg-white rounded-r-2xl py-8 pl-8 pr-4 flex flex-col text-md">
                 <SubMenu icon="pi-server" name="Nodes" to={"nodes"}/>
                 <SubMenu icon="pi-desktop" name="Helm apps" to={"apps"}/>
                 <SubMenu icon="pi-desktop" name="Workloads" to={"workloads"}/>

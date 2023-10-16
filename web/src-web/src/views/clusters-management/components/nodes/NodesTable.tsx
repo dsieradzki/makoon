@@ -21,7 +21,11 @@ const NodesTable = (props: Props) => {
                    dataKey="vmId"
                    selection={props.nodes.find((i) => i.vmId.toString() == props.selectedNode)}
                    onSelectionChange={(e) => props.onSelectNode((e.value as ClusterNode).vmId)}
-                   tableStyle={{minWidth: '50rem'}} selectionMode="single" scrollable scrollHeight="flex">
+                   tableStyle={{minWidth: '50rem'}}
+                   selectionMode="single"
+                   scrollable
+                   responsiveLayout="scroll"
+                   scrollHeight="flex">
 
             <Column field="name" header="Node name" className="font-semibold"
                     body={(r) => {
