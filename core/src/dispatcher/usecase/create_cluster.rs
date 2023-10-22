@@ -43,15 +43,15 @@ pub(crate) fn execute(
     join_nodes_to_cluster(repo.clone(), &cluster)?;
     add_kubeconfig_to_project(repo.clone(), &mut cluster)?;
     enable_microk8s_addons(repo.clone(), &cluster)?;
-    install_helm_apps(repo.clone(), &cluster)?;
-    install_cluster_resources(repo.clone(), &cluster)?;
+    deploy_helm_apps(repo.clone(), &cluster)?;
+    deploy_workloads(repo.clone(), &cluster)?;
     Ok(())
 }
 
-fn install_cluster_resources(repo: Arc<Repository>, cluster: &Cluster) -> Result<(), String> {
+fn deploy_workloads(repo: Arc<Repository>, cluster: &Cluster) -> Result<(), String> {
     repo.save_log(LogEntry::info(
         &cluster.cluster_name,
-        "Install Cluster resources".to_string(),
+        "Install Workloads".to_string(),
     ))?;
 
     let master_node = cluster
@@ -72,14 +72,14 @@ fn install_cluster_resources(repo: Arc<Repository>, cluster: &Cluster) -> Result
     for resource in cluster.cluster_resources.iter() {
         repo.save_log(LogEntry::info(
             &cluster.cluster_name,
-            format!("Apply cluster resource: [{}]", resource.name),
+            format!("Install workload: [{}]", resource.name),
         ))?;
-        common::apps::install_cluster_resource(&ssh_client, resource)?;
+        common::apps::install_workload(&ssh_client, resource)?;
     }
     Ok(())
 }
 
-fn install_helm_apps(repo: Arc<Repository>, cluster: &Cluster) -> Result<(), String> {
+fn deploy_helm_apps(repo: Arc<Repository>, cluster: &Cluster) -> Result<(), String> {
     repo.save_log(LogEntry::info(
         &cluster.cluster_name,
         "Install Helm apps".to_string(),

@@ -35,7 +35,7 @@ const ClusterListPanel = () => {
             <Column field="coresSum" header="CPU" body={(r) => r.coresSum + " cores"}></Column>
             <Column field="memorySum" header="Memory" body={(r) => r.memorySum + " MiB"}></Column>
             <Column field="diskSizeSum" header="Storage" body={(r) => r.diskSizeSum + " GiB"}></Column>
-            <Column field="status" header="Status" body={(s) => <ClusterStatus status={s.status}/>}></Column>
+            <Column field="status" header="Status" body={(s) => <ClusterStatus status={s.status.state}/>}></Column>
         </DataTable>
     </Panel>
 }

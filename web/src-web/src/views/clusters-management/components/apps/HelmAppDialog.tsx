@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {observer} from "mobx-react-lite";
 import {Button} from "primereact/button";
 import {Dialog} from "primereact/dialog";
-import {AppStatusType, ClusterStatus, HelmApp} from "@/api/model";
+import {AppStatusType, ClusterState, ClusterStatus, HelmApp} from "@/api/model";
 import clusterManagementStore, {
     LOADING_INDICATOR_DELETE_HELM_CHART,
     LOADING_INDICATOR_UNINSTALL_HELM_CHART
@@ -101,7 +101,7 @@ const HelmAppDialog = (props: Props) => {
     const anyOperationInProgress = processingIndicatorStore.status(LOADING_INDICATOR_UNINSTALL_HELM_CHART)
         || processingIndicatorStore.status(LOADING_INDICATOR_DELETE_HELM_CHART)
         || formik.isSubmitting
-        || clusterManagementStore.cluster.status != ClusterStatus.Sync
+        || clusterManagementStore.cluster.status?.state != ClusterState.Sync
 
     return (
         <Dialog header={props.selectedAppId ? "Edit application" : "New application"}

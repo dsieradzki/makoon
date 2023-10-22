@@ -1,6 +1,6 @@
 use std::fmt::{Debug, Display, Formatter};
 use crate::model::{Cluster, LogEntry};
-use crate::repository_json::JsonRepository;
+use crate::db::repository_json::JsonRepository;
 
 
 #[derive(Clone, Debug)]

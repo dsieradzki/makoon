@@ -4,7 +4,7 @@ import HiddenPassword from "@/components/HiddenPassword";
 import {observer} from "mobx-react-lite";
 import {useInterval, useOnFirstMount} from "@/utils/hooks";
 import {Button} from "primereact/button";
-import {ClusterNodeType, ClusterStatus} from "@/api/model";
+import {ClusterNodeType, ClusterState, ClusterStatus} from "@/api/model";
 import clusterManagementStore from "@/store/cluster-management-store";
 import AddNodeDialog from "@/views/clusters-management/components/nodes/AddNodeDialog";
 import NodesTable from "@/views/clusters-management/components/nodes/NodesTable";
@@ -22,7 +22,7 @@ const Nodes = () => {
         await clusterManagementStore.updateNodesIfThereIsAnyLock();
     });
 
-    const locked = clusterManagementStore.cluster.status != ClusterStatus.Sync;
+    const locked = clusterManagementStore.cluster.status?.state != ClusterState.Sync;
     const [showAddNodeDialog, setShowAddNodeDialog] = useState(false);
     const [addNoteType, setAddNodeType] = useState<ClusterNodeType>(ClusterNodeType.Master);
     const addNodeDialog = showAddNodeDialog ? <AddNodeDialog nodeType={addNoteType} setVisible={setShowAddNodeDialog}/> : null;

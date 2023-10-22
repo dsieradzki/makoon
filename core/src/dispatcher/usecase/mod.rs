@@ -4,6 +4,6 @@ mod common;
 pub mod create_cluster;
 pub mod delete_cluster;
 pub mod delete_node_from_cluster;
-pub use common::apps::install_cluster_resource;
+pub use common::apps::install_workload;
 pub use common::apps::install_helm_app;
 pub use common::apps::HELM_CMD;

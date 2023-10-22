@@ -2,7 +2,7 @@ use std::sync::Arc;
 use log::info;
 use crate::dispatcher::usecase;
 use crate::event::Event;
-use crate::model::{ClusterStatus, LogEntry};
+use crate::model::{ClusterState, ClusterStatus, LogEntry};
 use crate::Repository;
 
 
@@ -27,7 +27,7 @@ impl Dispatcher {
                 access,
                 cluster_name,
             } => {
-                update_cluster_status(&self.repo, cluster_name.clone(), ClusterStatus::Creating)?;
+                update_cluster_status(&self.repo, cluster_name.clone(), ClusterState::Creating)?;
                 match usecase::create_cluster::execute(
                     self.proxmox_client.clone(),
                     self.repo.clone(),
@@ -38,7 +38,7 @@ impl Dispatcher {
                         update_cluster_status(
                             &self.repo,
                             cluster_name.clone(),
-                            ClusterStatus::Sync,
+                            ClusterState::Sync,
                         )?;
                         self.repo.save_log(LogEntry::info(
                             &cluster_name,
@@ -51,7 +51,7 @@ impl Dispatcher {
                         update_cluster_status(
                             &self.repo,
                             cluster_name.clone(),
-                            ClusterStatus::Error,
+                            ClusterState::Error,
                         )?;
                         self.repo
                             .save_log(LogEntry::error(&cluster_name, e.clone()))?;
@@ -77,7 +77,7 @@ impl Dispatcher {
                         update_cluster_status(
                             &self.repo,
                             cluster_name.clone(),
-                            ClusterStatus::Error,
+                            ClusterState::Error,
                         )?;
                         self.repo
                             .save_log(LogEntry::error(&cluster_name, e.clone()))?;
@@ -115,7 +115,7 @@ impl Dispatcher {
                             .ok_or(format!("Cannot find node [{}]", node_name))?;
 
                         self.repo.save_cluster(cluster)?;
-                        update_cluster_status(&self.repo, cluster_name, ClusterStatus::Sync)?;
+                        update_cluster_status(&self.repo, cluster_name, ClusterState::Sync)?;
                         info!("Cluster node has been created");
                         Ok(())
                     }
@@ -123,7 +123,7 @@ impl Dispatcher {
                         update_cluster_status(
                             &self.repo,
                             cluster_name.clone(),
-                            ClusterStatus::Error,
+                            ClusterState::Error,
                         )?;
                         self.repo
                             .save_log(LogEntry::error(&cluster_name, e.clone()))?;
@@ -151,7 +151,7 @@ impl Dispatcher {
                         update_cluster_status(
                             &self.repo,
                             cluster_name.clone(),
-                            ClusterStatus::Sync,
+                            ClusterState::Sync,
                         )?;
                         info!(
                             "Cluster node [{}-{}] has been deleted",
@@ -163,7 +163,7 @@ impl Dispatcher {
                         update_cluster_status(
                             &self.repo,
                             cluster_name.clone(),
-                            ClusterStatus::Error,
+                            ClusterState::Error,
                         )?;
                         self.repo
                             .save_log(LogEntry::error(&cluster_name, e.clone()))?;
@@ -198,7 +198,7 @@ impl Dispatcher {
                         update_cluster_status(
                             &self.repo,
                             cluster_name.clone(),
-                            ClusterStatus::Sync,
+                            ClusterState::Sync,
                         )?;
 
                         let mut cluster = self
@@ -223,7 +223,7 @@ impl Dispatcher {
                         update_cluster_status(
                             &self.repo,
                             cluster_name.clone(),
-                            ClusterStatus::Error,
+                            ClusterState::Error,
                         )?;
                         self.repo
                             .save_log(LogEntry::error(&cluster_name, e.clone()))?;
@@ -238,10 +238,10 @@ impl Dispatcher {
 fn update_cluster_status(
     repo: &Repository,
     name: String,
-    status: ClusterStatus,
+    state: ClusterState,
 ) -> Result<(), String> {
     let mut cluster = repo.get_cluster(&name)?.ok_or("Cannot find cluster")?;
-    cluster.status = status;
+    cluster.status = ClusterStatus::from(state);
     repo.save_cluster(cluster)?;
     Ok(())
 }

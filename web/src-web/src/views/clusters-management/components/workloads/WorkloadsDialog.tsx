@@ -7,7 +7,7 @@ import clusterManagementStore, {
     LOADING_INDICATOR_INSTALL_K8S_RESOURCE,
     LOADING_INDICATOR_UNINSTALL_K8S_RESOURCE
 } from "@/store/cluster-management-store";
-import {ClusterResource, ClusterStatus} from "@/api/model";
+import {ClusterResource, ClusterState, ClusterStatus} from "@/api/model";
 import {useFormik} from "formik";
 import {InputText} from "primereact/inputtext";
 import FormError from "@/components/FormError";
@@ -97,7 +97,7 @@ const WorkloadsDialog = (props: Props) => {
         || processingIndicatorStore.status(LOADING_INDICATOR_UNINSTALL_K8S_RESOURCE)
         || processingIndicatorStore.status(LOADING_INDICATOR_DELETE_K8S_RESOURCE)
         || formik.isSubmitting
-        || clusterManagementStore.cluster.status != ClusterStatus.Sync
+        || clusterManagementStore.cluster.status?.state != ClusterState.Sync
 
     return (
         <Dialog header={props.selectedWorkloadId ? "Edit workload" : "New workload"}

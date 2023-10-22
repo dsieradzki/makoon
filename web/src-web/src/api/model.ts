@@ -54,6 +54,20 @@ export interface KeyPair {
 	publicKey: string;
 }
 
+export enum ClusterState {
+	Pending = "pending",
+	Creating = "creating",
+	Sync = "sync",
+	OutOfSync = "outOfSync",
+	Destroying = "destroying",
+	Error = "error",
+}
+
+export interface ClusterStatus {
+	state: ClusterState;
+	lastUpdate: Date;
+}
+
 export enum ActionLogLevel {
 	Info = "info",
 	Error = "error",
@@ -64,15 +78,6 @@ export interface LogEntry {
 	clusterName: string;
 	message: string;
 	level: ActionLogLevel;
-}
-
-export enum ClusterStatus {
-	Pending = "pending",
-	Creating = "creating",
-	Sync = "sync",
-	OutOfSync = "outOfSync",
-	Destroying = "destroying",
-	Error = "error",
 }
 
 export interface Cluster {

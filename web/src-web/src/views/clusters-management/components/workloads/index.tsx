@@ -1,6 +1,6 @@
 import Panel from "@/components/Panel";
 import {DataTable} from "primereact/datatable";
-import {ClusterResource, ClusterStatus} from "@/api/model";
+import {ClusterResource, ClusterState, ClusterStatus} from "@/api/model";
 import {Column} from "primereact/column";
 import React, {useState} from "react";
 import {observer} from "mobx-react-lite";
@@ -10,7 +10,7 @@ import WorkloadDialog from "@/views/clusters-management/components/workloads/Wor
 
 const Workloads = () => {
 
-    const locked = clusterManagementStore.cluster.status != ClusterStatus.Sync;
+    const locked = clusterManagementStore.cluster.status?.state != ClusterState.Sync;
 
     const [showWorkloadDialog, setShowWorkloadDialog] = useState(false);
     const [selectedWorkloadId, setSelectedWorkloadId] = useState<string | null>(null);

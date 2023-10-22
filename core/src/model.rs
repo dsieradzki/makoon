@@ -4,6 +4,7 @@ use std::str::FromStr;
 use chrono::{NaiveDateTime, Utc};
 use serde::{Deserialize, Serialize};
 use typeshare::typeshare;
+use crate::model::ClusterState::{Creating, Destroying, Pending};
 
 #[typeshare]
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -65,7 +66,7 @@ pub struct ClusterNode {
     pub vm_id: u32,
     pub name: String,
     pub cores: u16,
-    #[doc="Unit: MiB"]
+    #[doc = "Unit: MiB"]
     pub memory: u32,
     pub ip_address: String,
     pub storage_pool: String,
@@ -94,7 +95,7 @@ pub struct KeyPair {
 #[typeshare]
 #[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Default)]
 #[serde(rename_all = "camelCase")]
-pub enum ClusterStatus {
+pub enum ClusterState {
     #[default]
     Pending,
     Creating,
@@ -102,6 +103,29 @@ pub enum ClusterStatus {
     OutOfSync,
     Destroying,
     Error,
+}
+
+impl ClusterState {
+    pub fn in_progress_state(s: &ClusterState) -> bool {
+        *s == Pending || *s == Creating || *s == Destroying
+    }
+}
+
+#[typeshare]
+#[derive(Clone, Eq, PartialEq, Serialize, Deserialize, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct ClusterStatus {
+    pub state: ClusterState,
+    pub last_update: NaiveDateTime,
+}
+
+impl From<ClusterState> for ClusterStatus {
+    fn from(value: ClusterState) -> Self {
+        ClusterStatus {
+            state: value,
+            last_update: Utc::now().naive_local(),
+        }
+    }
 }
 
 #[typeshare]

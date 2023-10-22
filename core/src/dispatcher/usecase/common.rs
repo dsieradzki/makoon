@@ -504,7 +504,7 @@ pub(crate) mod apps {
         Ok(())
     }
 
-    pub fn install_cluster_resource(
+    pub fn install_workload(
         ssh_client: &ssh_client::Client,
         resource: &ClusterResource,
     ) -> Result<(), String> {

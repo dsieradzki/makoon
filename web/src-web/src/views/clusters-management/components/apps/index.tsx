@@ -5,7 +5,7 @@ import {DataTable} from "primereact/datatable";
 import {Column} from "primereact/column";
 import {observer} from "mobx-react-lite";
 import HelmAppStatus from "@/views/clusters-management/components/apps/HelmAppStatus";
-import {ClusterStatus, HelmApp} from "@/api/model";
+import {ClusterState, ClusterStatus, HelmApp} from "@/api/model";
 import {Button} from "primereact/button";
 import clusterManagementStore, {
     HelmAppWithStatus,
@@ -18,7 +18,7 @@ import {replace} from "formik";
 
 const Apps = () => {
 
-    const locked = clusterManagementStore.cluster.status != ClusterStatus.Sync;
+    const locked = clusterManagementStore.cluster.status?.state != ClusterState.Sync;
 
     useOnFirstMount(async () => {
         await clusterManagementStore.updateAppsStatus();

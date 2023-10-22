@@ -1,6 +1,6 @@
 use std::fmt::{Display, Formatter};
 use std::sync::mpsc::SendError;
-use crate::repository;
+use crate::db::repository;
 
 
 #[derive(Debug)]

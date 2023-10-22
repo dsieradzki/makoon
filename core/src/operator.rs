@@ -3,14 +3,16 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc::{Receiver, SyncSender};
 use std::sync::{mpsc, Arc};
 use std::time::Duration;
-use log::{error, info};
+use chrono::Utc;
+use log::{debug, error, info};
 
 use proxmox_client::model::AccessData;
 use crate::event::Event;
 use crate::{Dispatcher, Error, Repository};
 use crate::dispatcher::HELM_CMD;
-use crate::model::{AppStatus, AppStatusType, Cluster, ClusterHeader, ClusterNode, ClusterNodeLock, ClusterNodeStatus, ClusterNodeType, ClusterRequest, ClusterResource, ClusterStatus, HelmApp, kube, KubeStatus, LogEntry};
+use crate::model::{AppStatus, AppStatusType, Cluster, ClusterHeader, ClusterNode, ClusterNodeLock, ClusterNodeStatus, ClusterNodeType, ClusterRequest, ClusterResource, ClusterState, ClusterStatus, HelmApp, kube, KubeStatus, LogEntry};
 use crate::model::helm::InstalledRelease;
+use crate::scheduler::Scheduler;
 
 
 pub struct Config {
@@ -30,6 +32,8 @@ pub struct Operator {
     tx: SyncSender<Event>,
     shutdown: Arc<AtomicBool>,
     repository: Arc<Repository>,
+    #[allow(dead_code)] // automatically start and stops on drop
+    scheduler: Scheduler,
 }
 
 impl Drop for Operator {
@@ -43,12 +47,44 @@ impl Drop for Operator {
     }
 }
 
+fn handle_timeout_operations(repository: Arc<Repository>) -> impl Fn() {
+    move || {
+        debug!("Task - handle timeout operation on cluster");
+        let now = Utc::now().naive_local();
+        let timeout = chrono::Duration::hours(24);
+
+        repository.
+            get_clusters()
+            .unwrap_or_else(|e| {
+                error!("Cannot load clusters {}", e);
+                vec![]
+            })
+            .iter()
+            .filter(|i| ClusterState::in_progress_state(&i.status.state))
+            .filter(|i| i.status.last_update + timeout > now)
+            .map(|i| {
+                let mut r = i.clone();
+                r.status = ClusterStatus::from(ClusterState::Error);
+                r
+            })
+            .for_each(|i| {
+                repository.save_log(LogEntry::error(&i.cluster_name, "Operation timeout")).unwrap();
+                match repository.save_cluster(i) {
+                    Ok(()) => info!("Clusters were saved"),
+                    Err(e) => error!("Cannot save cluster {}", e)
+                }
+            });
+    }
+}
+
 impl Operator {
     pub fn new(config: Config, dispatcher: Dispatcher, repository: Arc<Repository>) -> Self {
         let (tx, rx): (SyncSender<Event>, Receiver<Event>) = mpsc::sync_channel(10);
         let shutdown = Arc::new(AtomicBool::from(false));
-
+        let scheduler = Scheduler::default();
+        scheduler.add_task(handle_timeout_operations(repository.clone()));
         Operator {
+            scheduler,
             repository,
             shutdown: shutdown.clone(),
             tx,
@@ -123,7 +159,7 @@ impl Operator {
             disk_size: cluster_request.disk_size,
             nodes: cluster_request.nodes,
             network: cluster_request.network,
-            status: ClusterStatus::Pending,
+            status: ClusterStatus::from(ClusterState::Pending),
         };
         self.repository.save_cluster(cluster)?;
 
@@ -207,7 +243,7 @@ impl Operator {
             .repository
             .get_cluster(&cluster_name)?
             .ok_or(Error::Generic("Cannot get cluster".to_string()))?;
-        cluster.status = ClusterStatus::Destroying;
+        cluster.status = ClusterStatus::from(ClusterState::Destroying);
         self.repository.save_cluster(cluster)?;
         self.repository.save_log(LogEntry::info(
             &cluster_name,
@@ -320,8 +356,7 @@ impl Operator {
             .is_err()
         {
             return Ok(result);
-        } else {
-        };
+        } else {};
         let nodes_status =
             ssh_client.execute("sudo microk8s kubectl get nodes -o json --request-timeout='5s'");
         let nodes_status = match nodes_status {
@@ -618,7 +653,7 @@ impl Operator {
             &cluster.ssh_key.public_key,
         )?;
 
-        crate::dispatcher::install_cluster_resource(&ssh_client, res)?;
+        crate::dispatcher::install_workload(&ssh_client, res)?;
         Ok(())
     }
     pub fn uninstall_cluster_workload(&self, cluster_name: &str, res_id: &str) -> crate::Result<()> {

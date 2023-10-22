@@ -11,7 +11,7 @@ import {Dialog} from "primereact/dialog";
 import processingIndicatorStore from "@/store/processing-indicator-store";
 import {apiCall} from "@/utils/api";
 import api from "@/api/api";
-import {ClusterStatus} from "@/api/model";
+import {ClusterState, ClusterStatus} from "@/api/model";
 import clusterManagementStore from "@/store/cluster-management-store";
 
 const LOADING_INDICATOR_DELETE_CLUSTER = "DELETE_CLUSTER";
@@ -48,8 +48,8 @@ const ClusterManagement = () => {
     const navigate = useNavigate();
     let {clusterName} = useParams();
 
-    const locked = clusterManagementStore.cluster.status != ClusterStatus.Sync
-        && clusterManagementStore.cluster.status != ClusterStatus.Error
+    const locked = clusterManagementStore.cluster.status?.state != ClusterState.Sync
+        && clusterManagementStore.cluster.status?.state != ClusterState.Error
 
     useOnFirstMount(async () => {
         if (clusterName) {

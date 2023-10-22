@@ -1,7 +1,7 @@
 import {Dialog} from "primereact/dialog";
 import React, {useEffect, useState} from "react";
 import * as Yup from "yup";
-import {AvailableStorage, ClusterStatus} from "@/api/model";
+import {AvailableStorage, ClusterState, ClusterStatus} from "@/api/model";
 import {useOnFirstMount} from "@/utils/hooks";
 import {apiCall} from "@/utils/api";
 import api from "@/api/api";
@@ -75,7 +75,7 @@ const EditNodeDialog = (props: Props) => {
 
 
     const nodeBlocked = computed(() => {
-        return (!!stored?.lock) || clusterManagementStore.cluster.status != ClusterStatus.Sync;
+        return (!!stored?.lock) || clusterManagementStore.cluster.status?.state != ClusterState.Sync;
     });
 
     const cannotDelete = computed(() => {

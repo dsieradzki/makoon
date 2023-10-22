@@ -5,7 +5,7 @@ use log::{error, warn};
 
 use serde::{Deserialize, Serialize};
 use crate::model::{Cluster, LogEntry};
-use crate::repository::Error;
+use crate::db::repository::Error;
 
 
 pub struct JsonRepository {
@@ -21,7 +21,7 @@ pub(crate) struct DbData {
 }
 
 impl JsonRepository {
-    pub fn new(path: &str) -> crate::repository::Result<Self> {
+    pub fn new(path: &str) -> crate::db::repository::Result<Self> {
         let repo = JsonRepository {
             path: format!("{}.json", path),
             mutex: Arc::new(Mutex::new(0)),
@@ -50,7 +50,7 @@ impl JsonRepository {
         };
         Ok(repo)
     }
-    fn save(&self, data: DbData) -> crate::repository::Result<()> {
+    fn save(&self, data: DbData) -> crate::db::repository::Result<()> {
         let mutex = self.mutex.clone();
         let mutex = mutex.lock().unwrap();
 
@@ -69,7 +69,7 @@ impl JsonRepository {
         drop(mutex);
         return result;
     }
-    fn load(&self) -> crate::repository::Result<DbData> {
+    fn load(&self) -> crate::db::repository::Result<DbData> {
         let mutex = self.mutex.clone();
         let mutex = mutex.lock().unwrap();
 
@@ -80,16 +80,16 @@ impl JsonRepository {
         Ok(result)
     }
 
-    pub fn get_clusters(&self) -> crate::repository::Result<Vec<Cluster>> {
+    pub fn get_clusters(&self) -> crate::db::repository::Result<Vec<Cluster>> {
         self.load().map(|v| v.clusters)
     }
 
-    pub fn get_cluster(&self, name: &str) -> crate::repository::Result<Option<Cluster>> {
+    pub fn get_cluster(&self, name: &str) -> crate::db::repository::Result<Option<Cluster>> {
         let clusters = self.get_clusters()?;
         Ok(clusters.into_iter().find(|i| i.cluster_name == name))
     }
 
-    pub fn delete_cluster(&self, name: &str) -> crate::repository::Result<()> {
+    pub fn delete_cluster(&self, name: &str) -> crate::db::repository::Result<()> {
         let mut data = self.load()?;
 
         data.clusters.retain(|e| e.cluster_name != name);
@@ -98,7 +98,7 @@ impl JsonRepository {
         self.save(data)
     }
 
-    pub fn save_cluster(&self, cluster_to_save: Cluster) -> crate::repository::Result<()> {
+    pub fn save_cluster(&self, cluster_to_save: Cluster) -> crate::db::repository::Result<()> {
         let mut data = self.load()?;
 
         let to_update = data
@@ -125,7 +125,7 @@ impl JsonRepository {
         self.save(data)
     }
 
-    pub fn logs(&self, cluster_name: &str) -> crate::repository::Result<Vec<LogEntry>> {
+    pub fn logs(&self, cluster_name: &str) -> crate::db::repository::Result<Vec<LogEntry>> {
         let data = self.load()?;
         let mut result: Vec<LogEntry> = data
             .action_log
@@ -136,12 +136,12 @@ impl JsonRepository {
         Ok(result)
     }
 
-    pub fn save_log(&self, entry: LogEntry) -> crate::repository::Result<()> {
+    pub fn save_log(&self, entry: LogEntry) -> crate::db::repository::Result<()> {
         let mut data = self.load()?;
         data.action_log.push(entry);
         self.save(data)
     }
-    pub fn delete_logs(&self, cluster_name: &str) -> crate::repository::Result<()> {
+    pub fn delete_logs(&self, cluster_name: &str) -> crate::db::repository::Result<()> {
         let mut data = self.load()?;
         data.action_log.retain(|i| i.cluster_name != cluster_name);
         self.save(data)?;
