@@ -484,8 +484,13 @@ pub(crate) mod apps {
             .upgrade_or_install()
             .create_namespace()
             .namespace(&app.namespace)
-            .name(&app.release_name)
-            .chart(&app.chart_name, &app.chart_name);
+            .name(&app.release_name);
+
+        if app.repository.is_empty() {
+            command_builder = command_builder.chart(&app.chart_name);
+        } else {
+            command_builder = command_builder.chart_with_repo(&app.chart_name, &app.chart_name);
+        }
 
         if !app.values.is_empty() {
             command_builder =
