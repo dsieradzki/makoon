@@ -1,3 +1,12 @@
+## [0.17.1](https://github.com/dsieradzki/makoon/compare/v0.17.0...v0.17.1) (2024-02-14)
+
+
+### Bug Fixes
+
+* Remove repository requirement to support oci helm charts ([4d8d6c0](https://github.com/dsieradzki/makoon/commit/4d8d6c041a50ba78bc796ecce31e9770a749cdc0))
+
+
+
 # [0.17.0](https://github.com/dsieradzki/makoon/compare/v0.16.1...v0.17.0) (2023-10-16)
 
 
@@ -38,20 +47,6 @@
 ### Features
 
 * New UI ([7a45039](https://github.com/dsieradzki/makoon/commit/7a4503970657057344a34fa7cacd243661189f89))
-
-
-
-# [0.14.0](https://github.com/dsieradzki/makoon/compare/v0.13.0...v0.14.0) (2023-05-08)
-
-
-### Bug Fixes
-
-* Small code refactoring ([35f862f](https://github.com/dsieradzki/makoon/commit/35f862fcacf037d2be1d6c38c4447fdcb4d17326))
-
-
-### Features
-
-* Change node resources ([c0d3c7e](https://github.com/dsieradzki/makoon/commit/c0d3c7e177e44f0a9546ac3b688aaeff8c44d615))
 
 
 
