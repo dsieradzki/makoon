@@ -82,7 +82,12 @@ impl InstallCommand {
         res.parts.push(name.to_string());
         res
     }
-    pub fn chart(self, repo: &str, name: &str) -> Self {
+    pub fn chart(self, name: &str) -> Self {
+        let mut res = self;
+        res.parts.push(name.to_string());
+        res
+    }
+    pub fn chart_with_repo(self, repo: &str, name: &str) -> Self {
         let mut res = self;
         res.parts.push(format!("{}/{}", repo, name));
         res
