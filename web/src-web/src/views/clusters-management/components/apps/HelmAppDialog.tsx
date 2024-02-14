@@ -178,7 +178,7 @@ const HelmAppDialog = (props: Props) => {
             <form onSubmit={formik.handleSubmit} className="w-full h-full flex px-10 pt-10">
                 <div>
                     <div className="flex flex-col mb-2">
-                        <div className="mr-1 required">Repository:</div>
+                        <div className="mr-1">Repository:</div>
                         <div className="">
                             <InputText
                                 name="repository"
