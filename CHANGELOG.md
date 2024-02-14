@@ -1,3 +1,12 @@
+## [0.17.2](https://github.com/dsieradzki/makoon/compare/v0.17.1...v0.17.2) (2024-02-14)
+
+
+### Bug Fixes
+
+* Remove repository requirement to support oci helm charts ([350a485](https://github.com/dsieradzki/makoon/commit/350a4855acc0349fad9c98230b8f2f3615205c3f))
+
+
+
 ## [0.17.1](https://github.com/dsieradzki/makoon/compare/v0.17.0...v0.17.1) (2024-02-14)
 
 
@@ -38,15 +47,6 @@
 ### Features
 
 * Refactoring, added e2e tests, change os image to lts, added newer microk8s versions ([54cdc99](https://github.com/dsieradzki/makoon/commit/54cdc999829bda55c1c2cd65d288428c1eeb5ca7))
-
-
-
-# [0.15.0](https://github.com/dsieradzki/makoon/compare/v0.14.0...v0.15.0) (2023-08-25)
-
-
-### Features
-
-* New UI ([7a45039](https://github.com/dsieradzki/makoon/commit/7a4503970657057344a34fa7cacd243661189f89))
 
 
 
