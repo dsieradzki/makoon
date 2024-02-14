@@ -461,15 +461,16 @@ pub(crate) mod apps {
     pub fn install_helm_app(ssh_client: &ssh_client::Client, app: &HelmApp) -> Result<(), String> {
         let values_file_name = app.release_name.trim().replace(" ", "_");
 
-        ssh_client.execute(
-            &helm_client::new(HELM_CMD)
-                .sudo()
-                .repo()
-                .add(&app.chart_name, &app.repository)
-                .build(),
-        )?;
-
-        ssh_client.execute(&helm_client::new(HELM_CMD).sudo().repo().update().build())?;
+        if !app.repository.is_empty() {
+            ssh_client.execute(
+                &helm_client::new(HELM_CMD)
+                    .sudo()
+                    .repo()
+                    .add(&app.chart_name, &app.repository)
+                    .build(),
+            )?;
+            ssh_client.execute(&helm_client::new(HELM_CMD).sudo().repo().update().build())?;
+        }
 
         if !app.values.is_empty() {
             ssh_client.upload_file(
