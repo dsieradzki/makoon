@@ -15,7 +15,7 @@ export const schemaAddHelmApp = Yup.object({
     releaseName: Yup.string().required("Release name is required").trim(),
     chartName: Yup.string().required("Chart name is required").trim(),
     chartVersion: Yup.string().trim(),
-    repository: Yup.string().required("Repository is required").trim(),
+    repository: Yup.string().trim(),
     namespace: Yup.string().required("Namespace is required").trim(),
     values: Yup.string()
 })
@@ -110,7 +110,7 @@ const CreatorHelmAppDialog = (props: Props) => {
             <form onSubmit={formik.handleSubmit} className="w-full h-full flex px-10 pt-10">
                 <div>
                     <div className="flex flex-col mb-2">
-                        <div className="mr-1 required">Repository:</div>
+                        <div className="mr-1">Repository:</div>
                         <div className="">
                             <InputText
                                 name="repository"
