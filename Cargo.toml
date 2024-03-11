@@ -6,5 +6,6 @@ members = [
     "web",
     "proxmox-client",
     "helm-client",
-    "ssh-client"
+    "ssh-client",
+    "cli"
 ]
