@@ -14,7 +14,6 @@ use env_logger::Env;
 use mime_guess::from_path;
 use rust_embed::RustEmbed;
 
-
 use crate::handlers::actix::inject;
 
 mod handlers;

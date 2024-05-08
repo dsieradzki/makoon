@@ -269,7 +269,7 @@ pub struct LxcContainer {
 
     #[doc = "The (unique) ID of the VM."]
     #[serde(rename = "vmid")]
-    pub vm_id: String,
+    pub vm_id: u32,
 
     #[doc = "Maximum usable CPUs."]
     #[serde(skip_serializing_if = "Option::is_none")]

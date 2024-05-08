@@ -26,7 +26,7 @@ resources without the need for complicated bash scripts, terraform or ansible.
 
 ### Additional information
 
-* Proxmox 7.2-7 or later (previous versions were not tested)
+* Tested with Proxmox: 8.2.2
 * Supported MicroK8s versions:
     * 1.28/stable
     * 1.27/stable
