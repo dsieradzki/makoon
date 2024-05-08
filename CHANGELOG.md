@@ -1,3 +1,12 @@
+## [0.17.4](https://github.com/dsieradzki/makoon/compare/v0.17.3...v0.17.4) (2024-05-08)
+
+
+### Bug Fixes
+
+* Support Proxmox 8.2 ([#78](https://github.com/dsieradzki/makoon/issues/78)) ([22dce6f](https://github.com/dsieradzki/makoon/commit/22dce6f0c7a28d0ff865c1f76031fc7ac578e558))
+
+
+
 ## [0.17.3](https://github.com/dsieradzki/makoon/compare/v0.17.2...v0.17.3) (2024-02-14)
 
 
@@ -38,15 +47,6 @@
 
 * Remember IP during login ([25e397a](https://github.com/dsieradzki/makoon/commit/25e397a5e807cb6daf8a875170c1aa7c44aec7ba))
 * Remember username during login ([fea8e1e](https://github.com/dsieradzki/makoon/commit/fea8e1eb290503adcbcacc139ac83d977b6e4111))
-
-
-
-## [0.16.1](https://github.com/dsieradzki/makoon/compare/v0.16.0...v0.16.1) (2023-10-11)
-
-
-### Bug Fixes
-
-* Fix units, refactoring ([1dbca78](https://github.com/dsieradzki/makoon/commit/1dbca7837b9af09857832ce2e4f7a1a061b73a47))
 
 
 
