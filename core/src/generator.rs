@@ -1,11 +1,10 @@
-use std::string::ToString;
 use log::info;
+use std::string::ToString;
 
+use crate::model::{ClusterNode, ClusterNodeType, ClusterRequest, KeyPair, Network};
+use crate::Error;
 use proxmox_client::model::{NetworkType, StorageContentType};
 use proxmox_client::ClientOperations;
-use crate::Error;
-use crate::model::{ClusterNode, ClusterNodeType, ClusterRequest, KeyPair, Network};
-
 
 const EMPTY: String = String::new();
 
@@ -68,11 +67,18 @@ impl DefaultClusterConfigurationGenerator {
 }
 
 fn get_default_os_image() -> String {
-    crate::supported::os_images().values().next().unwrap().to_string()
+    crate::supported::os_images()
+        .values()
+        .next()
+        .unwrap()
+        .to_string()
 }
 
 fn get_default_kube_version() -> String {
-    crate::supported::kube_versions().first().unwrap().to_string()
+    crate::supported::kube_versions()
+        .first()
+        .unwrap()
+        .to_string()
 }
 
 fn get_default_start_vm_id(proxmox_client: &ClientOperations, node: &str) -> crate::Result<u32> {
@@ -81,12 +87,12 @@ fn get_default_start_vm_id(proxmox_client: &ClientOperations, node: &str) -> cra
         .iter()
         .map(|i| i.vm_id)
         .collect();
+
     used_vm_ids.extend(
         proxmox_client
             .lxc_containers(node)?
             .iter()
-            .map(|i| &i.vm_id)
-            .map(|i| i.parse::<u32>().unwrap_or_default())
+            .map(|i| i.vm_id)
             .collect::<Vec<u32>>(),
     );
 
@@ -133,7 +139,10 @@ fn get_default_iso_storage(proxmox_client: &ClientOperations, node: &str) -> cra
         .ok_or(Error::ResourceNotFound)
 }
 
-fn get_default_disk_storage(proxmox_client: &ClientOperations, node: &str) -> crate::Result<String> {
+fn get_default_disk_storage(
+    proxmox_client: &ClientOperations,
+    node: &str,
+) -> crate::Result<String> {
     let result = proxmox_client.storage(node, Some(StorageContentType::Images))?;
     result
         .get(0)

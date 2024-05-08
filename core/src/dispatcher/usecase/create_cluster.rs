@@ -1,16 +1,15 @@
+use log::info;
 use std::collections::HashMap;
 use std::sync::Arc;
-use log::info;
 
 use openssl::rsa::Rsa;
 use pem::{encode, Pem};
 
-use proxmox_client::model::AccessData;
-use proxmox_client::{Client, ClientOperations};
 use crate::dispatcher::usecase::common;
 use crate::model::{Cluster, ClusterNode, ClusterNodeType, KeyPair, LogEntry};
 use crate::Repository;
-
+use proxmox_client::model::AccessData;
+use proxmox_client::{Client, ClientOperations};
 
 pub(crate) fn execute(
     proxmox_client: Arc<Client>,
@@ -295,8 +294,7 @@ pub(crate) fn create_vms(
         proxmox_client
             .lxc_containers(&cluster.node)?
             .iter()
-            .map(|i| &i.vm_id)
-            .map(|i| i.parse::<u32>().unwrap_or_default())
+            .map(|i| i.vm_id)
             .collect::<Vec<u32>>(),
     );
 
