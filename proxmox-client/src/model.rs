@@ -681,6 +681,13 @@ impl ParamBuilder {
         self
     }
 
+    pub fn add_optional_param(&mut self, key: &str, val: Option<String>) -> &mut Self {
+        if let Some(v) = val {
+            self.params.push(format!("{}{}{}", key, self.sep, v))
+        }
+        self
+    }
+
     pub fn add_param_with_separator(&mut self, key: &str, val: &str, sep: &str) -> &mut Self {
         self.params.push(format!("{}{}{}", key, sep, val));
         self

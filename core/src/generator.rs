@@ -48,6 +48,7 @@ impl DefaultClusterConfigurationGenerator {
                 cores: 2,
                 memory: 2048,
                 ip_address: "".to_string(),
+                vlan: Option::None,
                 storage_pool: default_disk_storage,
                 node_type: ClusterNodeType::Master,
                 lock: None,

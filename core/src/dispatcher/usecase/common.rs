@@ -1,18 +1,17 @@
 pub(crate) mod vm {
+    use log::{error, info};
     use std::collections::HashMap;
     use std::path::Path;
     use std::sync::Arc;
-    use log::{error, info};
 
+    use crate::dispatcher::utils::retry;
+    use crate::model::{Cluster, ClusterNode, LogEntry};
+    use crate::Repository;
     use proxmox_client::model::{
         CreateVirtualMachine, DownloadImage, DownloadImageContentType, OsType, ParamBuilder,
         ResizeDisk, ScsiHw, StorageContent, VmStatus,
     };
     use proxmox_client::{to_url_encoded, ClientOperations};
-    use crate::dispatcher::utils::retry;
-    use crate::model::{Cluster, ClusterNode, LogEntry};
-    use crate::Repository;
-
 
     pub(crate) fn create(
         proxmox_client: &ClientOperations,
@@ -34,6 +33,7 @@ pub(crate) mod vm {
                 ParamBuilder::default()
                     .add_param("model", "virtio")
                     .add_param("bridge", &cluster.network.bridge)
+                    .add_optional_param("tag", node.vlan.map(|v| v.to_string()))
                     .build(),
             )]),
             scsihw: Some(ScsiHw::VirtioScsiPci),
@@ -324,7 +324,7 @@ pub(crate) mod vm {
                     "echo '{} {}' | sudo tee -a /etc/cloud/templates/hosts.debian.tmpl",
                     ip, host
                 )
-                    .as_str(),
+                .as_str(),
             )?;
             ssh_client
                 .execute(format!("echo '{} {}' | sudo tee -a /etc/hosts", ip, host).as_str())?;
@@ -334,10 +334,10 @@ pub(crate) mod vm {
 }
 
 pub(crate) mod cluster {
-    use serde::{Deserialize, Serialize};
-    use std::sync::Arc;
     use crate::model::{Cluster, ClusterNode, ClusterNodeType, LogEntry};
     use crate::Repository;
+    use serde::{Deserialize, Serialize};
+    use std::sync::Arc;
 
     pub(crate) fn install_kubernetes(
         repo: Arc<Repository>,
@@ -363,7 +363,7 @@ pub(crate) mod cluster {
                     .clone()
                     .unwrap_or("1.24/stable".to_owned())
             )
-                .as_str(),
+            .as_str(),
         )?;
         Ok(())
     }
@@ -456,7 +456,6 @@ pub(crate) mod apps {
     use crate::model::{ClusterResource, HelmApp};
 
     pub const HELM_CMD: &str = "microk8s.helm3";
-
 
     pub fn install_helm_app(ssh_client: &ssh_client::Client, app: &HelmApp) -> Result<(), String> {
         let values_file_name = app.release_name.trim().replace(" ", "_");

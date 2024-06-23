@@ -65,9 +65,10 @@ pub struct ClusterNode {
     pub vm_id: u32,
     pub name: String,
     pub cores: u16,
-    #[doc="Unit: MiB"]
+    #[doc = "Unit: MiB"]
     pub memory: u32,
     pub ip_address: String,
+    pub vlan: Option<u16>,
     pub storage_pool: String,
     pub node_type: ClusterNodeType,
     pub lock: Option<ClusterNodeLock>,
@@ -124,8 +125,8 @@ pub struct LogEntry {
 
 impl LogEntry {
     pub fn info<T>(cluster_name: &str, message: T) -> Self
-        where
-            T: ToString,
+    where
+        T: ToString,
     {
         LogEntry {
             date: Utc::now().naive_local(),
@@ -135,8 +136,8 @@ impl LogEntry {
         }
     }
     pub fn error<T>(cluster_name: &str, message: T) -> Self
-        where
-            T: ToString,
+    where
+        T: ToString,
     {
         LogEntry {
             date: Utc::now().naive_local(),
@@ -265,9 +266,8 @@ impl FromStr for KubeStatus {
 }
 
 pub mod helm {
-    use serde::{Deserialize, Serialize};
     use crate::model::AppStatusType;
-
+    use serde::{Deserialize, Serialize};
 
     #[derive(Clone, Debug, Deserialize, Serialize)]
     pub struct InstalledRelease {

@@ -1,0 +1,39 @@
+apiVersion: makoon/v1beta
+kind: Machine
+metadata:
+  name: vm1 
+  labels:
+    type: worker
+spec:
+  resources:
+    cpu: 2
+    memory: 1023
+  network:
+    ip: 192.168.1.101
+    mask: 255.255.0.0
+    dns: 192.168.1.1
+    gateway: 192.168.1.1
+  os:
+    user:
+      name: makoon
+      password: makoon
+      ssy:
+        pub: sfds
+        key: dsafas
+  storage:
+    size: 10000
+
+vendor:
+  network:
+    bridge: vmbr0
+  storage:
+    pool: local-lvm
+
+---
+apiVersion: makoon/v1
+kind: Cluster
+metadata:
+  name: sample-cluster
+spec:
+  machine: vm1
+  
